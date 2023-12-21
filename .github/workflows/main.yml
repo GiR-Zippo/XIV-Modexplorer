@@ -1,0 +1,78 @@
+name: .NET Build
+
+on:
+  push:
+    branches: 
+      - main
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: true
+
+      - name: Check Current Version in AssemblyInfo.cs
+        id: get-version
+        env:
+          POWERSHELL_TELEMETRY_OPTOUT: 1
+        run: |
+            $assemblyFile = "XIVModExplorer/Properties/AssemblyInfo.cs"
+            $RegularExpression = [regex] '[^\/]*(AssemblyVersion\(\"(.*)\"\))'
+            $fileContent = Get-Content $assemblyFile
+            foreach($content in $fileContent)
+            {
+                $match = [System.Text.RegularExpressions.Regex]::Match($content, $RegularExpression)
+                if($match.Success) {
+                    $version = $match.groups[2].value
+                    Write-Output "version=$($version)" >> $Env:GITHUB_OUTPUT
+                }
+            }
+      - name: Create Release
+        id: create-new-release
+        uses: actions/create-release@latest
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{steps.get-version.outputs.version}}
+          release_name: Release ${{steps.get-version.outputs.version}}
+          body: |
+            ${{ steps.Changelog.outputs.changelog }}
+          draft: false
+          prerelease: false
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v1
+
+      - name: Setup NuGet
+        uses: NuGet/setup-nuget@v1.0.5
+      
+      - name: setup-msbuild
+        uses: microsoft/setup-msbuild@v1.1
+
+      - name: Restore Packages
+        run: nuget restore XIVModExplorer.sln
+
+      - name: Build solution
+        run: msbuild XIVModExplorer.sln -t:rebuild -property:Configuration=Release -property:Platform="x64"
+
+      - name: CleanUp
+        run: |
+            Remove-Item -Path ./XIVModExplorer/bin/x64/Release/Magick.Native-Q16-arm64.dll
+            Remove-Item -Path ./XIVModExplorer/bin/x64/Release/Magick.Native-Q16-x86.dll
+            Remove-Item -Path ./XIVModExplorer/bin/x64/Release/XIVModExplorer.pdb
+
+      - name: Compress the Project
+        run: Compress-Archive -Path ./XIVModExplorer/bin/x64/Release/* -Destination ./XIVModExplorer/bin/x64/Release/latest.zip
+      
+      - name: Upload Release Asset
+        id: upload-release-asset 
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{steps.create-new-release.outputs.upload_url }}
+          asset_path: ./XIVModExplorer/bin/x64/Release/latest.zip
+          asset_name: latest.zip
+          asset_content_type: application/zip
