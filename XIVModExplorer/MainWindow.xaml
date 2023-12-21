@@ -1,0 +1,103 @@
+﻿<Window x:Class="TreeViewFileExplorer.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:TreeViewFileExplorer"
+        xmlns:Control="clr-namespace:XIVModExplorer.UserCtrl"
+        xmlns:markdownviewer="clr-namespace:MarkdownViewer;assembly=MarkdownViewer"
+        mc:Ignorable="d"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ResizeMode="CanResizeWithGrip"
+        Title="XIV-ModExplorer" Height="640" Width="900">
+
+    <Grid >
+        <Grid.RowDefinitions>
+            <RowDefinition Height="28"/>
+            <RowDefinition Height="40"/>
+            <RowDefinition Height="5"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="25"/>
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="300"/>
+            <ColumnDefinition Width="*"/>
+        </Grid.ColumnDefinitions>
+
+        <Grid Grid.Row="0" Grid.ColumnSpan="2" Background="Transparent" Height="28" VerticalAlignment="Top" MouseDown="OnTitleBarMouseDown">
+            <TextBlock x:Name="TitleText" Grid.Column="1" Text="XIV-ModExplorer" VerticalAlignment="Center" Margin="8, 0, 0, 0" Opacity="0.25" Foreground="White"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Margin="3,0,3,0" Width="28" Height="28" Padding="8" Background="Transparent" BorderThickness="0" Click="OnCloseClick">
+                    <fa:IconBlock Icon="Times" Opacity="0.5" FontSize="12" Foreground="{DynamicResource MaterialDesignBody}"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <Menu Grid.Row="1" Grid.ColumnSpan="2">
+            <MenuItem Header="File">
+                <MenuItem Header="To Archive" Click="File_Compress_Click"/>
+                <MenuItem Header="Collect Data from Url" Click="File_Scrape_Click"/>
+            </MenuItem>
+            <MenuItem Header="Download">
+                <CheckBox Content="Archive" x:Name="DLArchive"/>
+                <CheckBox Content="Remove Directory" x:Name="DLRDir"/>
+                <MenuItem Header="Download" Click="DownloadMenu_Click"/>
+            </MenuItem>
+            <MenuItem Header="Penumbra">
+                <MenuItem Header="Backup Mod" Click="BackupPenumbraModMenu_Click" />
+            </MenuItem>
+            <MenuItem Header="Settings">
+                <CheckBox Content="Use Cache Database" Checked="CheckBox_Checked" Unchecked="CheckBox_Checked" x:Name="UseDatabase"/>
+                <MenuItem Header="Set PenumbraModPath" Click="SetPenumbraMenu_Click"/>
+                <MenuItem Header="Set Mod Archive Path" Click="SetModArchiveMenu_Click"/>
+            </MenuItem>
+
+        </Menu>
+        <Label x:Name="SelectedDir" Grid.Row="4" Grid.ColumnSpan="2"/>
+        <Control:TreeViewFileExplorer Grid.Row="3" Grid.Column="0" x:Name="FileTree">
+            <Control:TreeViewFileExplorer.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="Compress" Click="ContextMenu_Compress_Click"/>
+                    <MenuItem Header="Scrape Data" Click="ContextMenu_Scrape_Click" />
+                    <MenuItem Header="Scrape and Compress" Click="ContextMenu_ScrapeCompress_Click" />
+                    <MenuItem Header="Download here" Click="ContextMenu_Download_Click" />
+                    <MenuItem/>
+                    <MenuItem Header="Edit Metadata" Click="EditMetadata_Click"/>
+                    <MenuItem/>
+                    <MenuItem Header="Delete" Click="ContextMenu_Delete_Click" />
+                </ContextMenu>
+            </Control:TreeViewFileExplorer.ContextMenu>
+        </Control:TreeViewFileExplorer>
+
+        <Grid Grid.Row="3" Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="12"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="0.5*"/>
+            </Grid.RowDefinitions>
+            <Label x:Name="ModName" VerticalAlignment="Top" Foreground="Red" FontWeight="Bold" FontSize="20" HorizontalAlignment="Center" Margin="0,-10"/>
+            <Label x:Name="ModUrl" Grid.Row ="1" VerticalAlignment="Top" FontWeight="Bold" FontSize="12" HorizontalAlignment="Center" Margin="0,-14" MouseDoubleClick="ModUrl_MouseDoubleClick"/>
+            <Image Grid.Row ="2" x:Name="Img" Width="Auto"/>
+            <Grid Grid.Row="2">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+                <Button Grid.Column="0" Width="30" Height="Auto" Click="Prev_Click" Opacity="0.1"/>
+                <Button Grid.Column="2" Width="30" Height="Auto" Click="Next_Click" Opacity="0.1"/>
+            </Grid>
+            <ScrollViewer Grid.Row="3"  Name="MarkdownScroll">
+                <markdownviewer:MarkdownBox Grid.Row ="1" x:Name="MarkdownContent"/>
+            </ScrollViewer>
+            <ScrollViewer Grid.Row="3"  Name="NormalTextScroll" Visibility="Hidden">
+                <TextBlock   x:Name="Description" />
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>

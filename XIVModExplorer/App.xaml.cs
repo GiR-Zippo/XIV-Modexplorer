@@ -1,0 +1,67 @@
+﻿/*
+* Copyright(c) 2023 GiR-Zippo
+* Licensed under the Mozilla Public License Version 2.0. See https://github.com/GiR-Zippo/XIV-Modexplorer/blob/main/LICENSE for full license information.
+*/
+
+using System;
+using System.Linq;
+using System.Runtime.InteropServices;
+using System.Windows;
+using XIVModExplorer.Scraping;
+
+namespace XIVModExplorer
+{
+    /// <summary>
+    /// Interaction logic for App.xaml
+    /// </summary>
+    public partial class App : Application
+    {
+        [DllImport("Kernel32.dll")]
+        public static extern bool AttachConsole(int processId);
+
+        private void Test(string[] arguments)
+        {
+            string luaFile = "";
+            string sampleFile = "";
+            foreach (var s in arguments)
+            {
+                if (s.StartsWith("lua="))
+                    luaFile = s.Replace("lua=", "");
+                if (s.StartsWith("sample="))
+                    sampleFile = s.Replace("sample=", "");
+            }
+            if (luaFile == "" || sampleFile == "")
+                return;
+
+            LuaScraper l = new LuaScraper();
+            l.Test(luaFile, sampleFile);
+            l.Dispose();
+        }
+
+
+        protected override void OnStartup(StartupEventArgs e)
+        {
+            AttachConsole(-1);
+            string[] arguments = Environment.GetCommandLineArgs();
+            if (arguments.Count() >1)
+            {
+                Test(arguments);
+                Environment.Exit(1);
+            }
+
+            Configuration.ReadConfig();
+            string archivePath = Configuration.GetValue("ModArchivePath");
+            if (archivePath != null)
+                if (Configuration.GetBoolValue("UseDatabase"))
+                    Database.Database.Initialize(archivePath+"Database.db");
+            base.OnStartup(e);
+        }
+
+        protected override void OnExit(ExitEventArgs e)
+        {
+            base.OnExit(e);
+            if (Configuration.GetBoolValue("UseDatabase"))
+                Database.Database.Instance.Dispose();
+        }
+    }
+}

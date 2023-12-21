@@ -1,0 +1,105 @@
+﻿<Window x:Class="XIVModExplorer.Database.Metadata"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:local="clr-namespace:XIVModExplorer.Database"
+        mc:Ignorable="d"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        Title="Metadata" Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+        <TabControl Grid.Row="0" TabStripPlacement="Left">
+            <TabItem Header="Description">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" FontSize="20" Content="Mod-Name:"/>
+                        <TextBox Grid.Column="1" FontSize="20" Text="" x:Name="ModName"/>
+                    </Grid>
+                    <Grid Grid.Row="1">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Label Grid.Column="0" FontSize="12" Content="Url:"/>
+                        <TextBox Grid.Column="1" FontSize="12" Text="" x:Name="ModUrl"/>
+                    </Grid>
+
+                    <ScrollViewer Grid.Row="2" Margin="0,10" Name="NormalTextScroll">
+                        <TextBlock   x:Name="Description" />
+                    </ScrollViewer>
+                    <TextBox Grid.Row="3" FontSize="12" Text="" x:Name="Filename"/>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Types">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
+
+                    <CheckBox Grid.Row="1" Grid.Column="0" Content="Weapon" x:Name="C_Weapon"/>
+                    <CheckBox Grid.Row="1" Grid.Column="1" Content="Head" x:Name="C_Head"/>
+                    <CheckBox Grid.Row="1" Grid.Column="2" Content="Top" x:Name="C_Top"/>
+                    <CheckBox Grid.Row="1" Grid.Column="3" Content="Hands" x:Name="C_Hands"/>
+
+                    <CheckBox Grid.Row="2" Grid.Column="0" Content="Bottom" x:Name="C_Bottom"/>
+                    <CheckBox Grid.Row="2" Grid.Column="1" Content="Shoe" x:Name="C_Shoe"/>
+                    <CheckBox Grid.Row="2" Grid.Column="2" Content="Ear" x:Name="C_Ear"/>
+                    <CheckBox Grid.Row="2" Grid.Column="3" Content="Neck" x:Name="C_Neck"/>
+
+                    <CheckBox Grid.Row="3" Grid.Column="0" Content="Wrist" x:Name="C_Wrist"/>
+                    <CheckBox Grid.Row="3" Grid.Column="1" Content="Finger" x:Name="C_Finger"/>
+
+                </Grid>
+            </TabItem>
+            <TabItem Header="Pictures">
+                <ListBox x:Name="imageListBox" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal"/>
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+                    <ListBox.ItemTemplate>
+                        <DataTemplate>
+                            <Image Source="{Binding}" MaxWidth="105" MaxHeight="105" Margin="2" PreviewMouseUp="Image_PreviewMouseUp"/>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </TabItem>
+        </TabControl>
+        <Grid Grid.Row="1" >
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            <Button Grid.Column="0" Content="Save" Click="Save_Click" Width="100" HorizontalAlignment="Left"/>
+            <Button Grid.Column="2" Content="Reread" Click="Reread_Click" Width="100" HorizontalAlignment="Left"/>
+        </Grid>
+        
+    </Grid>
+</Window>
