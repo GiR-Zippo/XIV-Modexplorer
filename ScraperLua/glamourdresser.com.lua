@@ -1,12 +1,24 @@
 -- Glamourdresser.com
 
+-- required output vars
 Images = {}
+ModName = "";
 Download = "";
 Content = "";
 
 local lines = {}
 
 -- Internal functions.
+function GetModName()
+    local des = false;
+    for _, line in pairs(lines) do
+        if string.find(line, '<h2 class=[,"]o%-blog%-post__title[,"]>') then
+            ModName = split(line, '>')[2]
+            ModName = split(ModName,"<")[1]
+        end
+    end
+end
+
 function GetPictures()
     local picdata = false;
     local data = "";
@@ -58,7 +70,7 @@ function main()
     for _, line in pairs(split(HtmlData, "\n")) do
         table.insert(lines, line)
     end
-
+    GetModName();
     GetPictures();
     GetContent();
     GetDownload();

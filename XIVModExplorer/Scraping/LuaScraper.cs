@@ -27,6 +27,7 @@ namespace XIVModExplorer.Scraping
             return tbl;
         } // func Split	
 
+        public string ModName { get; set; } = "";
         public List<string> Pictures { get; set; } = new List<string>();
         public string Content { get; set; } = "";
         public string DownloadLink { get; set; } = "";
@@ -48,6 +49,7 @@ namespace XIVModExplorer.Scraping
                 {
                     var chunk = lua.CompileChunk(text, "test.lua", new LuaCompileOptions() { DebugEngine = LuaStackTraceDebugger.Default });
                     env.dochunk(chunk);
+                    ModName = env.ModName;
                     Content = env.Content;
                     DownloadLink = env.Download;
                     foreach (var x in env.Images as LuaTable)
@@ -79,7 +81,8 @@ namespace XIVModExplorer.Scraping
                     var chunk = lua.CompileChunk(text, "test.lua", new LuaCompileOptions() { DebugEngine = LuaStackTraceDebugger.Default });
                     // execute the chunk                    
                     env.dochunk(chunk);
-
+                    Console.WriteLine("------------- ModName -------------");
+                    Console.WriteLine(env.ModName);
                     Console.WriteLine("---------- Found content ----------");
                     Console.WriteLine(env.Content); // Access a variable in C#
                     Console.WriteLine("------- Found download link -------");

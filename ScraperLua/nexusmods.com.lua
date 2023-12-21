@@ -1,7 +1,9 @@
 -- Nexusmods.com
 -- I'm only able to get the pics and content atm
 
+-- required output vars
 Images = {}
+ModName = "";
 Download = "";
 Content = "";
 

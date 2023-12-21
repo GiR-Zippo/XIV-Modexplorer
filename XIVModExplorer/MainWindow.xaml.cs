@@ -48,8 +48,6 @@ namespace TreeViewFileExplorer
             FileTree.OnRightClicked += RightSelected;
             FileTree.OnDirClicked += DirSelected;
             FileTree.OnArchiveClicked += ArchivePreview;
-            //URL_ImgFind.DownloadMod("https://www.glamourdresser.com/mods/shiromaru-with-lala-chew-toy", "D:\\tmp\\tmp");
-            //URL_ImgFind.ScrapeURLforData("https://www.nexusmods.com/finalfantasy14/mods/2083", "D:\\tmp\\tmp");
         }
 
         #region Events

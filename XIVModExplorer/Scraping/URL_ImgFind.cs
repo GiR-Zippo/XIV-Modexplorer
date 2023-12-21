@@ -25,6 +25,7 @@ namespace XIVModExplorer.Scraping
     public static class URL_ImgFind
     {
         private static List<string> _images = new List<string>();
+        private static string _modname { get; set; } = "";
         private static string _description { get; set; } = "";
         private static string _downloadUrl { get; set; } = "";
         private static string _externalSite { get; set; } = ""; //in case the mod refs to patreon, coomer...
@@ -32,6 +33,7 @@ namespace XIVModExplorer.Scraping
         public static bool DownloadMod(string url, string path, bool archive = false, bool deldir = false)
         {
             _images.Clear();
+            _modname = ""; //used when no filename is avail
             _description = "";
             _downloadUrl = "";
             _externalSite = "";
@@ -159,6 +161,8 @@ namespace XIVModExplorer.Scraping
                 readKofi(lines);
             else if (url.Contains("unvaulted.coomer.party"))
                 readUnvaulted(lines);
+            else if (url.Contains("beta.aetherlink.app"))
+                readAetherlink(html);
             else
             {
                 string host = hostname.Replace("www.", "");
@@ -172,6 +176,7 @@ namespace XIVModExplorer.Scraping
                 LuaScraper l = new LuaScraper();
                 if (!l.Execute(x, html))
                     return false;
+                _modname = l.ModName;
                 _images = l.Pictures;
                 _description = l.Content;
                 _downloadUrl = l.DownloadLink;
@@ -340,9 +345,31 @@ namespace XIVModExplorer.Scraping
             //Get download
             foreach (var line in lines)
             {
-                if (line.Contains("<a class=\"elementor-button elementor-button-link") && line.Contains("https://cdn.unvaulted.party/download/"))
+                if (line.Contains("<a class=\"elementor-button elementor-button-link") && 
+                    (line.Contains("https://cdn.unvaulted.party/download/") || line.Contains("gofile.io")))
                     _downloadUrl = line.Split(new string[] { "href=\"" }, StringSplitOptions.RemoveEmptyEntries)[1].Split('"')[0];
             }
+        }
+
+        /// <summary>
+        /// read from aetherlink
+        /// </summary>
+        /// <param name="lines"></param>
+        private static void readAetherlink(string html)
+        {
+            string[] term = { "<script id=\"__NEXT_DATA__\" type=\"application/json\">" };
+            var xx = html.Split(term, StringSplitOptions.RemoveEmptyEntries)[1].Replace("</script></body></html>", "");
+            TextReader dr = new StringReader(xx);
+            using (JsonTextReader reader = new JsonTextReader(dr))
+            {
+                JObject o2 = (JObject)JToken.ReadFrom(reader);
+                _modname = o2["props"]["pageProps"]["mod"]["meta"]["name"]["short"].Value<string>();
+                _description = o2["props"]["pageProps"]["mod"]["meta"]["description"]["html"].Value<string>();
+                _downloadUrl = o2["props"]["pageProps"]["downloads"][0]["url"].Value<string>();
+                foreach (var d in o2["props"]["pageProps"]["slides"])
+                    _images.Add(d["url"].Value<string>());
+            }
+            dr.Close();
         }
         #endregion
 
@@ -366,7 +393,14 @@ namespace XIVModExplorer.Scraping
             if (!String.IsNullOrEmpty(wc.ResponseHeaders["Content-Disposition"]))
                 fileName = wc.ResponseHeaders["Content-Disposition"].Substring(wc.ResponseHeaders["Content-Disposition"].IndexOf("filename=") + 9).Replace("\"", "").Split(';')[0];
             else
-                fileName = downloadUrl.Split('/').Last();
+            {
+                //set filename by modname if no dl fn defined
+                if (_modname != "")
+                    fileName = _modname+"."+downloadUrl.Split('/').Last().Split('.').Last();
+                else
+                    fileName = downloadUrl.Split('/').Last();
+            }
+               
             fileName = ReplaceInvalidChars(Uri.UnescapeDataString(fileName)); //we are dealing with html, let's unescape
 
             //if we are dealing with plain html, just cancel
