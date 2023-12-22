@@ -1,9 +1,9 @@
 -- Glamourdresser.com
 
 -- required output vars
-Images = {}
+Images = {};
 ModName = "";
-Download = "";
+Downloads = {};
 Content = "";
 
 local lines = {}
@@ -58,8 +58,8 @@ function GetDownload()
     local des = false;
     for _, line in pairs(lines) do
         if string.find(line, '<a class=[,"]elementor%-button elementor%-button%-link elementor%-size%-lg[,"] href=[,"]') then
-            Download = split(line, 'href="')[2]
-            Download = split(Download, '"')[1]           
+            dl = split(line, 'href="')[2]
+            table.insert(Downloads, split(dl, '"')[1]);
         end
     end
 end

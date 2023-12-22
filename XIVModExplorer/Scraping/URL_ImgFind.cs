@@ -27,7 +27,7 @@ namespace XIVModExplorer.Scraping
         private static List<string> _images = new List<string>();
         private static string _modname { get; set; } = "";
         private static string _description { get; set; } = "";
-        private static string _downloadUrl { get; set; } = "";
+        private static List<string> _downloadUrl { get; set; } = new List<string>();
         private static string _externalSite { get; set; } = ""; //in case the mod refs to patreon, coomer...
 
         public static bool DownloadMod(string url, string path, bool archive = false, bool deldir = false)
@@ -35,7 +35,7 @@ namespace XIVModExplorer.Scraping
             _images.Clear();
             _modname = ""; //used when no filename is avail
             _description = "";
-            _downloadUrl = "";
+            _downloadUrl.Clear();
             _externalSite = "";
             string newPath = "";
 
@@ -44,7 +44,7 @@ namespace XIVModExplorer.Scraping
                 return false;
 
             //no download url, no download
-            if (_downloadUrl == "")
+            if (_downloadUrl.Count() == 0)
             {
                 MessageBox.Show("Can't download mod from:\r\n" + url, "Error");
                 return false;
@@ -54,18 +54,35 @@ namespace XIVModExplorer.Scraping
                 return DownloadMod(url, path, archive, deldir);
 
             //Check if it's a filehoster and try download
-            if (!isSameDomain(url, _downloadUrl))
+            if (!isSameDomain(url, _downloadUrl[0]))
                 if (_downloadUrl.Contains("drive.google"))
-                    newPath = downloadGoogleDrive(_downloadUrl, path);
+                    newPath = downloadGoogleDrive(_downloadUrl[0], path);
                 else if (_downloadUrl.Contains("mega.nz"))
-                    newPath = downloadMega(_downloadUrl, path);
+                    newPath = downloadMega(_downloadUrl[0], path);
                 else
-                    newPath = saveData(_downloadUrl, path);
+                    newPath = saveData(_downloadUrl[0], path);
             else
-                newPath = saveData(_downloadUrl, path);
+                newPath = saveData(_downloadUrl[0], path);
 
             if (newPath == "")
                 return false;
+
+            //Remove the first element
+            _downloadUrl.RemoveAt(0);
+
+            //save more downloadable files (wenn noch welche da sind)
+            Parallel.ForEach(_downloadUrl, new ParallelOptions { MaxDegreeOfParallelism = 2 }, (target, state, index) =>
+            {
+                if (!isSameDomain(url, target))
+                    if (_downloadUrl.Contains("drive.google"))
+                        downloadGoogleDrive(target, newPath, false);
+                    else if (_downloadUrl.Contains("mega.nz"))
+                        downloadMega(target, newPath, false);
+                    else
+                        saveData(target, newPath, false);
+                else
+                    saveData(target, newPath, false);
+            });
 
             //Save the images
             Parallel.ForEach(_images, new ParallelOptions { MaxDegreeOfParallelism = 2 }, (target, state, index) =>
@@ -107,7 +124,7 @@ namespace XIVModExplorer.Scraping
         {
             _images.Clear();
             _description = "";
-            _downloadUrl = "";
+            _downloadUrl.Clear();
             _externalSite = "";
             if (!ScanURLforData(url, path))
                 return false;
@@ -159,8 +176,6 @@ namespace XIVModExplorer.Scraping
                 readPatreon(html);
             else if (url.Contains("ko-fi.com"))
                 readKofi(lines);
-            else if (url.Contains("unvaulted.coomer.party"))
-                readUnvaulted(lines);
             else if (url.Contains("beta.aetherlink.app"))
                 readAetherlink(html);
             else
@@ -205,7 +220,7 @@ namespace XIVModExplorer.Scraping
                 {
                     var p = o2["props"]["pageProps"]["bootstrapEnvelope"]["bootstrap"]["post"]["included"][ix];
                     if (p["type"].Value<string>().ToString() == "attachment")
-                        _downloadUrl = p["attributes"]["url"].Value<string>();
+                        _downloadUrl.Add(p["attributes"]["url"].Value<string>());
                     if (p["type"].Value<string>().ToString() == "media")
                         _images.Add(p["attributes"]["image_urls"]["original"].Value<string>());
                     ix++;
@@ -240,7 +255,7 @@ namespace XIVModExplorer.Scraping
                     string patt = ": [ via <a href=\"";
                     string url = ("https://www.xivmodarchive.com" + line.Substring(line.IndexOf(patt) + patt.Length).Split('\"')[0]);
                     url = normalizeUrl(url);
-                    _downloadUrl = url;
+                    _downloadUrl.Add(url);
                 }
                 else if (line.Contains(": [ via <a href=\"") && line.Contains(">patreon.com</a> ]") && !line.Contains("</li>"))
                 {
@@ -254,14 +269,14 @@ namespace XIVModExplorer.Scraping
                     string patt = ": [ via <a href=\"";
                     string url = line.Substring(line.IndexOf(patt) + patt.Length).Split('\"')[0];
                     url = normalizeUrl(url);
-                    _downloadUrl = url;
+                    _downloadUrl.Add(url);
                 }
                 else if (line.Contains(": [ via <a href=\"") && line.Contains(">mega.nz</a> ]") && !line.Contains("</li>"))
                 {
                     string patt = ": [ via <a href=\"";
                     string url = line.Substring(line.IndexOf(patt) + patt.Length).Split('\"')[0];
                     url = normalizeUrl(url);
-                    _downloadUrl = url;
+                    _downloadUrl.Add(url);
                 }
             }
 
@@ -315,43 +330,6 @@ namespace XIVModExplorer.Scraping
         }
 
         /// <summary>
-        /// read from Unvaulted
-        /// </summary>
-        /// <param name="lines"></param>
-        private static void readUnvaulted(string[] lines)
-        {
-            //image
-            foreach (var line in lines)
-                if (line.Contains("<img fetchpriority=\"high\" width="))
-                    _images.Add(line.Split(new string[] { "src=\"" }, StringSplitOptions.RemoveEmptyEntries)[1].Split('"')[0]);
-
-            //description
-            bool readContent = false;
-            foreach (var line in lines)
-            {
-                if (line.Contains("</div>") && readContent)
-                    break;
-                if (readContent)
-                    _description += line;
-                if (line.Contains(".elementor-widget-text-editor .elementor-drop-cap-letter{display:inline-block}</style>"))
-                {
-                    string patt = ".elementor-widget-text-editor .elementor-drop-cap-letter{display:inline-block}</style>";
-                    string fin = line.Substring(line.IndexOf(patt) + patt.Length).Split('\"')[0];
-                    readContent = true;
-                    _description += fin;
-                }
-            }
-
-            //Get download
-            foreach (var line in lines)
-            {
-                if (line.Contains("<a class=\"elementor-button elementor-button-link") && 
-                    (line.Contains("https://cdn.unvaulted.party/download/") || line.Contains("gofile.io")))
-                    _downloadUrl = line.Split(new string[] { "href=\"" }, StringSplitOptions.RemoveEmptyEntries)[1].Split('"')[0];
-            }
-        }
-
-        /// <summary>
         /// read from aetherlink
         /// </summary>
         /// <param name="lines"></param>
@@ -365,7 +343,9 @@ namespace XIVModExplorer.Scraping
                 JObject o2 = (JObject)JToken.ReadFrom(reader);
                 _modname = o2["props"]["pageProps"]["mod"]["meta"]["name"]["short"].Value<string>();
                 _description = o2["props"]["pageProps"]["mod"]["meta"]["description"]["html"].Value<string>();
-                _downloadUrl = o2["props"]["pageProps"]["downloads"][0]["url"].Value<string>();
+
+                foreach (var d in o2["props"]["pageProps"]["downloads"])
+                    _downloadUrl.Add(d["url"].Value<string>());
                 foreach (var d in o2["props"]["pageProps"]["slides"])
                     _images.Add(d["url"].Value<string>());
             }
@@ -380,7 +360,7 @@ namespace XIVModExplorer.Scraping
         /// <param name="downloadUrl"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        private static string saveData(string downloadUrl, string path)
+        private static string saveData(string downloadUrl, string path, bool createDir = true)
         {
             string finalUrl = GetFinalRedirect(downloadUrl);
             if (!isSameDomain(finalUrl, downloadUrl))
@@ -416,11 +396,17 @@ namespace XIVModExplorer.Scraping
 
                 fileName += extension;
             }
-            string result = fileName.Substring(0, fileName.Length - extension.Length);
-            if (!Directory.Exists(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length)))
-                Directory.CreateDirectory(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length));
 
-            BinaryWriter binWriter = new BinaryWriter(File.Open(path + "\\" + result + "\\" + fileName, FileMode.Create));
+            string result = "";
+            //create a new direcory
+            if (createDir)
+            {
+                result = fileName.Substring(0, fileName.Length - extension.Length) + "\\";
+                if (!Directory.Exists(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length)))
+                    Directory.CreateDirectory(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length));
+            }
+
+            BinaryWriter binWriter = new BinaryWriter(File.Open(path + "\\" + result + fileName, FileMode.Create));
             binWriter.Write(data);
             binWriter.Close();
             binWriter.Dispose();
@@ -434,7 +420,7 @@ namespace XIVModExplorer.Scraping
         /// <param name="url"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        private static string downloadGoogleDrive(string url, string path)
+        private static string downloadGoogleDrive(string url, string path, bool createDir = true)
         {
             if (!url.Contains("file/d/"))
             {
@@ -467,14 +453,20 @@ namespace XIVModExplorer.Scraping
                 var html = sr.ReadToEnd();
                 var fileName = ReplaceInvalidChars(html.Split(new string[] { "uc-name-size" }, StringSplitOptions.RemoveEmptyEntries)[4].Split('>')[2].Split('<')[0]);
                 string extension = Path.GetExtension(fileName);
-                string folderName = fileName.Substring(0, fileName.Length - extension.Length);
-                if (!Directory.Exists(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length)))
-                    Directory.CreateDirectory(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length));
+
+                string folderName = "";
+                //create a new direcory
+                if (createDir)
+                {
+                    folderName = fileName.Substring(0, fileName.Length - extension.Length) + "\\";
+                    if (!Directory.Exists(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length)))
+                        Directory.CreateDirectory(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length));
+                }
                 sr.Close();
                 sr.DiscardBufferedData();
                 sr.Dispose();
                 DriveDownloader fileDownloader = new DriveDownloader();
-                fileDownloader.DownloadFile(urlAddress, path + "\\" + folderName + "\\" + fileName);
+                fileDownloader.DownloadFile(urlAddress, path + "\\" + fileName);
                 return path + "\\" + folderName;
             }
             //If this is a already a binary, save the stream
@@ -483,22 +475,27 @@ namespace XIVModExplorer.Scraping
                 string fileName = response.Headers["Content-Disposition"].Substring(response.Headers["Content-Disposition"].IndexOf("filename=") + 9).Replace("\"", "").Split(';')[0];
                 fileName = ReplaceInvalidChars(Uri.UnescapeDataString(fileName));
 
-                string extension = Path.GetExtension(fileName);
-                string result = fileName.Substring(0, fileName.Length - extension.Length);
-                if (!Directory.Exists(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length)))
-                    Directory.CreateDirectory(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length));
+                string folderName = "";
+                //create a new direcory
+                if (createDir)
+                {
+                    string extension = Path.GetExtension(fileName);
+                    folderName = fileName.Substring(0, fileName.Length - extension.Length);
+                    if (!Directory.Exists(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length)))
+                        Directory.CreateDirectory(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length));
+                }
 
-                BinaryWriter binWriter = new BinaryWriter(File.Open(path + "\\" + result + "\\" + fileName, FileMode.Create));
+                BinaryWriter binWriter = new BinaryWriter(File.Open(path + "\\" + folderName + fileName, FileMode.Create));
                 response.GetResponseStream().CopyTo(binWriter.BaseStream);
                 binWriter.Close();
                 binWriter.Dispose();
                 response.Dispose();
-                return path + "\\" + result;
+                return path + "\\" + folderName;
             }
             return "";
         }
 
-        public static string downloadMega(string url, string path)
+        public static string downloadMega(string url, string path, bool createDir = true)
         {
             CG.Web.MegaApiClient.MegaApiClient client = new CG.Web.MegaApiClient.MegaApiClient();
             client.LoginAnonymous();
@@ -507,12 +504,16 @@ namespace XIVModExplorer.Scraping
 
             CG.Web.MegaApiClient.INode node = client.GetNodeFromLink(fileLink);
 
-            string extension = Path.GetExtension(node.Name);
-            string result = node.Name.Substring(0, node.Name.Length - extension.Length);
-            if (!Directory.Exists(path + "\\" + node.Name.Substring(0, node.Name.Length - extension.Length)))
-                Directory.CreateDirectory(path + "\\" + node.Name.Substring(0, node.Name.Length - extension.Length));
+            string result = "";
+            if (createDir)
+            {
+                string extension = Path.GetExtension(node.Name);
+                result = node.Name.Substring(0, node.Name.Length - extension.Length)+"\\";
+                if (!Directory.Exists(path + "\\" + node.Name.Substring(0, node.Name.Length - extension.Length)))
+                    Directory.CreateDirectory(path + "\\" + node.Name.Substring(0, node.Name.Length - extension.Length));
+            }
 
-            client.DownloadFile(fileLink, path + "\\" + result + "\\" + node.Name);
+            client.DownloadFile(fileLink, path + "\\" + result + node.Name);
 
             client.Logout();
             return path + "\\" + result;

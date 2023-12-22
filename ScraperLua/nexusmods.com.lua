@@ -4,7 +4,7 @@
 -- required output vars
 Images = {}
 ModName = "";
-Download = "";
+Downloads = {}
 Content = "";
 
 local lines = {}

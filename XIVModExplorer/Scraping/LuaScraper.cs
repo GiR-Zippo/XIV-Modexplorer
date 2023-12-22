@@ -30,7 +30,7 @@ namespace XIVModExplorer.Scraping
         public string ModName { get; set; } = "";
         public List<string> Pictures { get; set; } = new List<string>();
         public string Content { get; set; } = "";
-        public string DownloadLink { get; set; } = "";
+        public List<string> DownloadLink { get; set; } = new List<string>();
 
         public LuaScraper()
         {
@@ -51,7 +51,8 @@ namespace XIVModExplorer.Scraping
                     env.dochunk(chunk);
                     ModName = env.ModName;
                     Content = env.Content;
-                    DownloadLink = env.Download;
+                    foreach (var x in env.Downloads as LuaTable)
+                        DownloadLink.Add((string)x.Value);
                     foreach (var x in env.Images as LuaTable)
                         Pictures.Add((string)x.Value);
                 }
@@ -86,7 +87,8 @@ namespace XIVModExplorer.Scraping
                     Console.WriteLine("---------- Found content ----------");
                     Console.WriteLine(env.Content); // Access a variable in C#
                     Console.WriteLine("------- Found download link -------");
-                    Console.WriteLine(env.Download);
+                    foreach (var x in env.Downloads as LuaTable)
+                        Console.WriteLine((string)x.Value);
                     Console.WriteLine("------- Found picture links -------");
                     foreach (var x in env.Images as LuaTable)
                         Console.WriteLine((string)x.Value);
