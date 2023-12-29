@@ -59,6 +59,8 @@ namespace XIVModExplorer.Scraping
                     newPath = downloadGoogleDrive(_downloadUrl[0], path);
                 else if (_downloadUrl.Contains("mega.nz"))
                     newPath = downloadMega(_downloadUrl[0], path);
+                else if (_downloadUrl[0].StartsWith("https://gofile.io"))
+                    newPath = downloadGoFileIo(_downloadUrl[0], path);
                 else
                     newPath = saveData(_downloadUrl[0], path);
             else
@@ -74,9 +76,9 @@ namespace XIVModExplorer.Scraping
             Parallel.ForEach(_downloadUrl, new ParallelOptions { MaxDegreeOfParallelism = 2 }, (target, state, index) =>
             {
                 if (!isSameDomain(url, target))
-                    if (_downloadUrl.Contains("drive.google"))
+                    if (target.Contains("drive.google"))
                         downloadGoogleDrive(target, newPath, false);
-                    else if (_downloadUrl.Contains("mega.nz"))
+                    else if (target.Contains("mega.nz"))
                         downloadMega(target, newPath, false);
                     else
                         saveData(target, newPath, false);
@@ -149,13 +151,13 @@ namespace XIVModExplorer.Scraping
                 request.UserAgent = @"Mozilla/5.0 (Windows NT 10.0; Win64; x64)";
                 //AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36";
                 request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
-                request.Proxy.Credentials = System.Net.CredentialCache.DefaultNetworkCredentials;
+                request.Proxy.Credentials = CredentialCache.DefaultNetworkCredentials;
                 request.AllowAutoRedirect = true;
                 request.MaximumAutomaticRedirections = 2;
                 hostname = request.RequestUri.DnsSafeHost.ToLower();
                 response = (HttpWebResponse)request.GetResponse();
             }
-            catch (System.Net.WebException e)
+            catch (WebException e)
             {
                 int StatusCode = (int)((HttpWebResponse)e.Response).StatusCode;
                 if (StatusCode == 302 || (int)StatusCode == 308)
@@ -368,8 +370,8 @@ namespace XIVModExplorer.Scraping
 
             WebClient wc = new WebClient();
             var data = wc.DownloadData(downloadUrl);
-            string fileName = "";
 
+            string fileName = "";
             if (!String.IsNullOrEmpty(wc.ResponseHeaders["Content-Disposition"]))
                 fileName = wc.ResponseHeaders["Content-Disposition"].Substring(wc.ResponseHeaders["Content-Disposition"].IndexOf("filename=") + 9).Replace("\"", "").Split(';')[0];
             else
@@ -414,6 +416,11 @@ namespace XIVModExplorer.Scraping
             return path + "\\" + result;
         }
 
+        private static string downloadGoFileIo(string url, string path, bool createDir = true)
+        {
+            DynamicSite ds = new DynamicSite(url);
+            return ds.DownloadGoFile(path, createDir);
+        }
         /// <summary>
         /// Downloads from GD, only file is supported now
         /// </summary>
@@ -631,6 +638,8 @@ namespace XIVModExplorer.Scraping
                         case HttpStatusCode.MovedPermanently:
                         case HttpStatusCode.RedirectKeepVerb:
                         case HttpStatusCode.RedirectMethod:
+                            foreach (var t in resp.Headers)
+                                Debug.WriteLine(t);
                             newUrl = resp.Headers["Location"];
                             if (newUrl == null)
                                 return url;

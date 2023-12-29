@@ -65,7 +65,6 @@ namespace XIVModExplorer.Scraping
             }
         }
 
-
         public void Test(string luafile, string html)
         {
             using (Lua lua = new Lua())

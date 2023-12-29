@@ -8,10 +8,21 @@ Content = "";
 
 local lines = {}
 
+function GetModName()
+    local des = false;
+    for _, line in pairs(lines) do
+        if string.find(line, 'og%:site_name[,"] content=[,"]') then
+            ModName = split(line, 'content=\"')[2];
+            ModName = split(ModName, ' - Unvaulted')[1];
+            print(ModName)
+        end
+    end
+end
+
 function GetPictures()
     for _, line in pairs(lines) do
-        if string.find(line, '<img fetchpriority=[,"]high[,"] width=') then
-            pic = split(line, 'src=\"')[2];
+        if string.find(line, '<meta property=[,"]og%:image[,"] content=[,"]') then
+            pic = split(line, 'content=\"')[2];
             pic = split(pic, '\"')[1];
             table.insert(Images, pic)
         end
@@ -57,6 +68,7 @@ function main()
         table.insert(lines, line)
     end
 
+    GetModName();
     GetPictures();
     GetContent();
     GetDownload();
