@@ -56,7 +56,11 @@ namespace XIVModExplorer.UserCtrl
 
         public void UpdateTreeView(string dir)
         {
+            if (dir == "")
+                return;
+
             var drives = DriveInfo.GetDrives();
+            treeView.Items.Clear();
             DriveInfo
                 .GetDrives()
                 .ToList()
@@ -65,7 +69,6 @@ namespace XIVModExplorer.UserCtrl
                     var fileSystemObject = new FileSystemObjectInfo(drive);
                     fileSystemObject.BeforeExplore += FileSystemObject_BeforeExplore;
                     fileSystemObject.AfterExplore += FileSystemObject_AfterExplore;
-                    treeView.Items.Clear();
                     treeView.Items.Add(fileSystemObject);
                 });
             PreSelect(dir);
@@ -82,8 +85,7 @@ namespace XIVModExplorer.UserCtrl
             PreSelect(driveFileSystemObjectInfo, path);
         }
 
-        private void PreSelect(FileSystemObjectInfo fileSystemObjectInfo,
-            string path)
+        private void PreSelect(FileSystemObjectInfo fileSystemObjectInfo, string path)
         {
             foreach (var childFileSystemObjectInfo in fileSystemObjectInfo.Children)
             {

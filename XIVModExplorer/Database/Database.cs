@@ -34,6 +34,7 @@ namespace XIVModExplorer.Database
         public byte[] picture { get; set; } = null;
         public string Url { get; set; } = "";
         public string Filename { get; set; } = "";
+        public byte[] HashSha1 { get; set; } = null;
     }
 
     public sealed class Database : IDisposable

@@ -3,23 +3,39 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
         xmlns:local="clr-namespace:XIVModExplorer.Database"
         mc:Ignorable="d"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
-        Title="Metadata" Height="450" Width="800">
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ResizeMode="CanResizeWithGrip"
+        Height="450" Width="800">
     <Grid>
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <TabControl Grid.Row="0" TabStripPlacement="Left">
+
+        <Grid Grid.Row="0" Background="Transparent" Height="28" VerticalAlignment="Top" MouseDown="OnTitleBarMouseDown">
+            <TextBlock x:Name="TitleText" Grid.Column="1" Text="Metadata" VerticalAlignment="Center" Margin="8, 0, 0, 0" Opacity="0.25" Foreground="White"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Margin="3,0,3,0" Width="28" Height="28" Padding="8" Background="Transparent" BorderThickness="0" Click="OnCloseClick">
+                    <fa:IconBlock Icon="Times" Opacity="0.5" FontSize="12" Foreground="{DynamicResource MaterialDesignBody}"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <TabControl Grid.Row="1" TabStripPlacement="Left">
             <TabItem Header="Description">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid Grid.Row="0">
@@ -42,7 +58,8 @@
                     <ScrollViewer Grid.Row="2" Margin="0,10" Name="NormalTextScroll">
                         <TextBlock   x:Name="Description" />
                     </ScrollViewer>
-                    <TextBox Grid.Row="3" FontSize="12" Text="" x:Name="Filename"/>
+                    <TextBox Grid.Row="3" FontSize="12" Text="" x:Name="Filename" IsEnabled="False"/>
+                    <TextBox Grid.Row="4" FontSize="12" Text="" x:Name="Hash"  IsEnabled="False"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Types">
@@ -91,13 +108,13 @@
                 </ListBox>
             </TabItem>
         </TabControl>
-        <Grid Grid.Row="1" >
+        <Grid Grid.Row="2" >
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" Content="Save" Click="Save_Click" Width="100" HorizontalAlignment="Left"/>
+            <Button Grid.Column="0" x:Name="Save_Button" Content="Save" Click="Save_Click" Width="100" HorizontalAlignment="Left"/>
             <Button Grid.Column="2" Content="Reread" Click="Reread_Click" Width="100" HorizontalAlignment="Left"/>
         </Grid>
         

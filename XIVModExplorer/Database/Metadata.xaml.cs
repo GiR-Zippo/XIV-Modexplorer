@@ -8,12 +8,40 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
+using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
 namespace XIVModExplorer.Database
 {
+    public static partial class Extentions
+    {
+        public static async Task<byte[]> ComputeHashAsync(this SHA1 sha1, Stream inputStream)
+        {
+            const int BufferSize = 4096;
+
+            sha1.Initialize();
+
+            var buffer = new byte[BufferSize];
+            var streamLength = inputStream.Length;
+            while (true)
+            {
+                var read = await inputStream.ReadAsync(buffer, 0, BufferSize).ConfigureAwait(false);
+                if (inputStream.Position == streamLength)
+                {
+                    sha1.TransformFinalBlock(buffer, 0, read);
+                    break;
+                }
+                sha1.TransformBlock(buffer, 0, read, default(byte[]), default(int));
+            }
+            return sha1.Hash;
+        }
+    }
+
     /// <summary>
     /// Interaktionslogik für Metadata.xaml
     /// </summary>
@@ -34,17 +62,34 @@ namespace XIVModExplorer.Database
                 this.Close();
                 return;
             }
+            InitializeComponent();
 
             this.Show();
             this.Visibility = Visibility.Visible;
 
-            InitializeComponent();
-
             modentry = Database.Instance.FindData(Configuration.GetRelativeModPath(filename));
             if (modentry ==null)
                 TryGetMetaDataFromArchive(filename);
+            if (modentry.HashSha1 == null)
+                RecalculateHash(filename);
+
             DisplayModInfo();
         }
+
+        #region WindowEvents
+        private void OnTitleBarMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        {
+            if (e.ChangedButton == MouseButton.Left)
+            {
+                this.DragMove();
+            }
+        }
+
+        private void OnCloseClick(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
+        #endregion
 
         private void TryGetMetaDataFromArchive(string archivename, bool reload = false)
         {
@@ -111,8 +156,14 @@ namespace XIVModExplorer.Database
             C_Neck.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.NECK) == (UInt16)Type.NECK;
             C_Wrist.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.ARM) == (UInt16)Type.ARM;
             C_Finger.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.FINGER) == (UInt16)Type.FINGER;
+
+            if (modentry.HashSha1 != null)
+                Hash.Text = GetHashString(modentry.HashSha1);
         }
 
+        /// <summary>
+        /// Save to db
+        /// </summary>
         private void Save_Click(object sender, RoutedEventArgs e)
         {
             modentry.ModName = ModName.Text;
@@ -132,6 +183,9 @@ namespace XIVModExplorer.Database
             Database.Instance.SaveData(modentry);
         }
 
+        /// <summary>
+        /// Reread the whole archive
+        /// </summary>
         private void Reread_Click(object sender, RoutedEventArgs e)
         {
             if (modentry == null)
@@ -139,6 +193,11 @@ namespace XIVModExplorer.Database
             TryGetMetaDataFromArchive(Configuration.GetAbsoluteModPath(modentry.Filename), true);
         }
 
+        /// <summary>
+        /// Set the preview image
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void Image_PreviewMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             var x = (sender as System.Windows.Controls.Image).Source as BitmapSource;
@@ -149,6 +208,38 @@ namespace XIVModExplorer.Database
                 jpegEncoder.Save(fx);
                 modentry.picture = fx.GetBuffer();
             }
+        }
+
+        /// <summary>
+        /// Calc the Sha1 from the file and save the col
+        /// </summary>
+        /// <param name="filename"></param>
+        private async void RecalculateHash(string filename)
+        {
+            Save_Button.IsEnabled = false; //disable the save button
+            string x = TitleText.Text;
+            TitleText.Text += " - Rebuilding Hash";
+            SHA1Managed managed = new SHA1Managed();
+            using (FileStream stream = File.OpenRead(filename))
+            {
+                modentry.HashSha1 = await Task.Run(() => managed.ComputeHashAsync(stream));
+                Database.Instance.SaveData(modentry);
+                Hash.Text = GetHashString(modentry.HashSha1);
+            }
+            Save_Button.IsEnabled = true;
+            TitleText.Text = TitleText.Text.Replace(" - Rebuilding Hash", "");
+        }
+
+        /// <summary>
+        /// Gets the Hash as string
+        /// </summary>
+        /// <param name="hash"></param>
+        private string GetHashString(byte[] hash)
+        {
+            StringBuilder formatted = new StringBuilder(2 * hash.Length);
+            foreach (byte b in hash)
+                formatted.AppendFormat("{0:X2}", b);
+            return formatted.ToString();
         }
     }
 }

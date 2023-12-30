@@ -50,6 +50,11 @@ namespace TreeViewFileExplorer
             FileTree.OnArchiveClicked += ArchivePreview;
         }
 
+        private void Refresh_PreviewMouseDown(object sender, MouseButtonEventArgs e)
+        {
+            FileTree.UpdateTreeView(selected_dir + "\\");
+        }
+
         #region Events
         private void RightSelected(object sender, string e)
         {
@@ -368,7 +373,7 @@ namespace TreeViewFileExplorer
             dlg.InputPath = "C:\\";
             if (dlg.ShowDialog(this) == true)
             {
-                Configuration.SetValue("ModArchivePath", dlg.ResultPath + "\\");
+                Configuration.SetValue("ModArchivePath", dlg.ResultPath);
                 FileTree.UpdateTreeView(Configuration.GetValue("ModArchivePath"));
                 Database.Initialize(Configuration.GetValue("ModArchivePath") + "Database.db");
             }

@@ -3,7 +3,6 @@
 * Licensed under the Mozilla Public License Version 2.0. See https://github.com/GiR-Zippo/XIV-Modexplorer/blob/main/LICENSE for full license information.
 */
 
-using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium;
 using System;
 using System.Collections.Generic;
@@ -50,7 +49,7 @@ namespace XIVModExplorer.Scraping
             {
                 var data = Download(link, cookies);
                 string fileName = Uri.UnescapeDataString(link).Split('/').Last();
-                string extension = System.IO.Path.GetExtension(fileName);
+                string extension = Path.GetExtension(fileName);
                 //create a new direcory
                 if (createDir && (result == ""))
                 {
