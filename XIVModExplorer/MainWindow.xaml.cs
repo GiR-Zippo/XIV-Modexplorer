@@ -49,9 +49,6 @@ namespace XIVModExplorer
             FileTree.OnRightClicked += RightSelected;
             FileTree.OnDirClicked += DirSelected;
             FileTree.OnArchiveClicked += ArchivePreview;
-            //URL_ImgFind.DownloadMod("https://unvaulted.coomer.party/mods/22481", "D:\\tmp\\tmp");
-            //URL_ImgFind.DownloadMod("https://unvaulted.coomer.party/mods/23201", "D:\\tmp\\tmp");
-            //URL_ImgFind.ScrapeURLforData("https://www.nexusmods.com/finalfantasy14/mods/2083", "D:\\tmp\\tmp");
         }
 
         #region Events
@@ -511,6 +508,11 @@ namespace XIVModExplorer
         }
         #endregion
 
+        /// <summary>
+        /// Compress folder to archive
+        /// </summary>
+        /// <param name="inputDirectory"></param>
+        /// <param name="outputDirectory"></param>
         private async void compressArchive(string inputDirectory, string outputDirectory)
         {
             if (outputDirectory == "")
