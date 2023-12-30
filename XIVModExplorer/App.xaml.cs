@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
+using XIVModExplorer.Caching;
 using XIVModExplorer.Scraping;
 
 namespace XIVModExplorer
@@ -53,7 +54,7 @@ namespace XIVModExplorer
             string archivePath = Configuration.GetValue("ModArchivePath");
             if (archivePath != null)
                 if (Configuration.GetBoolValue("UseDatabase"))
-                    Database.Database.Initialize(archivePath+"Database.db");
+                    Database.Initialize(archivePath+"Database.db");
             base.OnStartup(e);
         }
 
@@ -61,7 +62,7 @@ namespace XIVModExplorer
         {
             base.OnExit(e);
             if (Configuration.GetBoolValue("UseDatabase"))
-                Database.Database.Instance.Dispose();
+                Database.Instance.Dispose();
         }
     }
 }

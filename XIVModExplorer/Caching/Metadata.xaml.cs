@@ -16,7 +16,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 
-namespace XIVModExplorer.Database
+namespace XIVModExplorer.Caching
 {
     public static partial class Extentions
     {

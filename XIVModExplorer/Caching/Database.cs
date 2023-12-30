@@ -6,7 +6,7 @@
 using LiteDB;
 using System;
 
-namespace XIVModExplorer.Database
+namespace XIVModExplorer.Caching
 {
     public enum Type
     {

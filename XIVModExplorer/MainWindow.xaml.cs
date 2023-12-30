@@ -3,6 +3,7 @@
 * Licensed under the Mozilla Public License Version 2.0. See https://github.com/GiR-Zippo/XIV-Modexplorer/blob/main/LICENSE for full license information.
 */
 
+using ReverseMarkdown.Converters;
 using SharpCompress.Archives;
 using SharpCompress.Common;
 using System;
@@ -10,17 +11,17 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using System.Windows.Media;
 using System.Windows.Media.Imaging;
-using XIVModExplorer;
-using XIVModExplorer.Database;
+using XIVModExplorer.Caching;
+using XIVModExplorer.HelperWindows;
 using XIVModExplorer.Scraping;
 
-namespace TreeViewFileExplorer
+namespace XIVModExplorer
 {
     /// <summary>
     /// Interaction logic for MainWindow.xaml
@@ -48,11 +49,9 @@ namespace TreeViewFileExplorer
             FileTree.OnRightClicked += RightSelected;
             FileTree.OnDirClicked += DirSelected;
             FileTree.OnArchiveClicked += ArchivePreview;
-        }
-
-        private void Refresh_PreviewMouseDown(object sender, MouseButtonEventArgs e)
-        {
-            FileTree.UpdateTreeView(selected_dir + "\\");
+            //URL_ImgFind.DownloadMod("https://unvaulted.coomer.party/mods/22481", "D:\\tmp\\tmp");
+            //URL_ImgFind.DownloadMod("https://unvaulted.coomer.party/mods/23201", "D:\\tmp\\tmp");
+            //URL_ImgFind.ScrapeURLforData("https://www.nexusmods.com/finalfantasy14/mods/2083", "D:\\tmp\\tmp");
         }
 
         #region Events
@@ -226,20 +225,11 @@ namespace TreeViewFileExplorer
 
         }
 
-        private void SelectDatabase_Click(object sender, RoutedEventArgs e)
-        {
-            Database.Initialize("I:\\XIVModsArchive\\Database.db");
-        }
-
-        private void EditMetadata_Click(object sender, RoutedEventArgs e)
-        {
-            Metadata mdata = new Metadata(right_clicked_item);
-        }
-
-
         #region Picture controls
         private void Prev_Click(object sender, RoutedEventArgs e)
         {
+            if (pictures.Count() == 0)
+                return;
             SliderIndex--;
             if (SliderIndex < 0)
                 SliderIndex = pictures.Count() - 1;
@@ -270,20 +260,7 @@ namespace TreeViewFileExplorer
             var dlg = new FolderPicker();
             dlg.InputPath = @"C:\";
             if (dlg.ShowDialog(this) == true)
-            {
-                var dirName = new DirectoryInfo(dlg.ResultName).Name;
-                string result = new DirectoryInfo(dlg.ResultName).Parent.FullName;
-                Debug.WriteLine(dirName);
-                var archive = ArchiveFactory.Create(ArchiveType.Zip);
-                archive.AddAllFromDirectory(dlg.ResultName);
-
-                string g = selected_dir + "\\" + dirName + ".zip";
-                archive.SaveTo(g, CompressionType.Deflate);
-                archive.Dispose();
-                FileTree.UpdateTreeView(selected_dir + "\\");
-                MessageBox.Show("Finished");
-            }
-
+                compressArchive(dlg.ResultName, selected_dir);
         }
 
         /// <summary>
@@ -295,14 +272,14 @@ namespace TreeViewFileExplorer
             dlg.InputPath = @"C:\";
             if (dlg.ShowDialog(this) == true)
             {
-                InputBox input = new InputBox("URL");
+                InputBox input = new InputBox("Website Url:", "Input Url");
                 string data = input.ShowDialog();
                 if (data != "")
                 {
                     if (URL_ImgFind.ScrapeURLforData(data, dlg.ResultName))
-                        MessageBox.Show("Finished");
+                        MessageWindow.Show("Finished");
                     else
-                        MessageBox.Show("Error while fetching data.", "ERROR");
+                        MessageWindow.Show("Error while fetching data.", "ERROR");
                 }
             }
         }
@@ -316,17 +293,17 @@ namespace TreeViewFileExplorer
             dlg.InputPath = @"C:\";
             if (dlg.ShowDialog(this) == true)
             {
-                InputBox input = new InputBox("URL");
+                InputBox input = new InputBox("Website Url:", "Input Url");
                 string data = input.ShowDialog();
                 if (data != "")
                 {
                     if (URL_ImgFind.DownloadMod(data, dlg.ResultName, DLArchive.IsChecked.Value, DLRDir.IsChecked.Value))
                     {
                         FileTree.UpdateTreeView(selected_dir + "\\");
-                        MessageBox.Show("Finished");
+                        MessageWindow.Show("Finished");
                     }
                     else
-                        MessageBox.Show("Error while fetching data.", "ERROR");
+                        MessageWindow.Show("Error while fetching data.", "ERROR");
                 }
             }
         }
@@ -349,8 +326,19 @@ namespace TreeViewFileExplorer
                 archive.SaveTo(g, CompressionType.Deflate);
                 archive.Dispose();
                 FileTree.UpdateTreeView(selected_dir + "\\");
-                MessageBox.Show("Finished");
+                MessageWindow.Show("Finished");
             }
+        }
+
+        /// <summary>
+        /// Use Database (for previews)
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CacheBox_Checked(object sender, RoutedEventArgs e)
+        {
+            var c = sender as CheckBox;
+            Configuration.SetValue("UseDatabase", c.IsChecked.Value.ToString());
         }
 
         /// <summary>
@@ -388,15 +376,8 @@ namespace TreeViewFileExplorer
         /// <param name="e"></param>
         private void ContextMenu_Compress_Click(object sender, RoutedEventArgs e)
         {
-            var dirName = new DirectoryInfo(selected_dir).Name;
             string result = new DirectoryInfo(selected_dir).Parent.FullName;
-            var archive = ArchiveFactory.Create(ArchiveType.Zip);
-            archive.AddAllFromDirectory(selected_dir);
-
-            string g = result + "\\" + dirName + ".zip";
-            archive.SaveTo(g, CompressionType.Deflate);
-            FileTree.UpdateTreeView(selected_dir + "\\");
-            MessageBox.Show("Finished");
+            compressArchive(selected_dir, result);
         }
 
         /// <summary>
@@ -406,14 +387,14 @@ namespace TreeViewFileExplorer
         /// <param name="e"></param>
         private void ContextMenu_Scrape_Click(object sender, RoutedEventArgs e)
         {
-            InputBox input = new InputBox("URL");
+            InputBox input = new InputBox("Website Url:", "Input Url");
             string data = input.ShowDialog();
             if (data != "")
             {
                 if (URL_ImgFind.ScrapeURLforData(data, selected_dir))
-                    MessageBox.Show("Finished");
+                    MessageWindow.Show("Finished");
                 else
-                    MessageBox.Show("Error while fetching data.", "ERROR");
+                    MessageWindow.Show("Error while fetching data.", "ERROR");
             }
         }
 
@@ -424,7 +405,7 @@ namespace TreeViewFileExplorer
         /// <param name="e"></param>
         private void ContextMenu_ScrapeCompress_Click(object sender, RoutedEventArgs e)
         {
-            InputBox input = new InputBox("URL");
+            InputBox input = new InputBox("Website Url:", "Input Url");
             string data = input.ShowDialog();
             if (data != "")
             {
@@ -438,10 +419,10 @@ namespace TreeViewFileExplorer
                     string g = result + "\\" + dirName + ".zip";
                     archive.SaveTo(g, CompressionType.Deflate);
                     FileTree.UpdateTreeView(selected_dir + "\\");
-                    MessageBox.Show("Finished");
+                    MessageWindow.Show("Finished");
                 }
                 else
-                    MessageBox.Show("Error while fetching data.", "ERROR");
+                    MessageWindow.Show("Error while fetching data.", "ERROR");
             }
         }
 
@@ -452,19 +433,29 @@ namespace TreeViewFileExplorer
         /// <param name="e"></param>
         private void ContextMenu_Download_Click(object sender, RoutedEventArgs e)
         {
-            InputBox input = new InputBox("URL");
+            InputBox input = new InputBox("Website Url:", "Input Url");
             string data = input.ShowDialog();
             if (data != "")
             {
                 if (URL_ImgFind.DownloadMod(data, selected_dir, DLArchive.IsChecked.Value, DLRDir.IsChecked.Value))
                 {
                     FileTree.UpdateTreeView(selected_dir + "\\");
-                    MessageBox.Show("Finished");
+                    MessageWindow.Show("Finished");
                 }
                 else
-                    MessageBox.Show("Error while fetching data.", "ERROR");
+                    MessageWindow.Show("Error while fetching data.", "ERROR");
             }
 
+        }
+
+        /// <summary>
+        /// Opens the Meta edit
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void EditMetadata_Click(object sender, RoutedEventArgs e)
+        {
+            Metadata mdata = new Metadata(right_clicked_item);
         }
 
         /// <summary>
@@ -494,6 +485,7 @@ namespace TreeViewFileExplorer
 
         #endregion
 
+        #region Misc Controls
         private void OnTitleBarMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
@@ -510,199 +502,34 @@ namespace TreeViewFileExplorer
         private void ModUrl_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             string url = (string)ModUrl.Content;
-            System.Diagnostics.Process.Start(url);
+            Process.Start(url);
         }
 
-        private void CheckBox_Checked(object sender, RoutedEventArgs e)
+        private void Refresh_PreviewMouseDown(object sender, MouseButtonEventArgs e)
         {
-            var c = sender as CheckBox;
-            Configuration.SetValue("UseDatabase", c.IsChecked.Value.ToString());
+            FileTree.UpdateTreeView(selected_dir + "\\");
         }
-    }
+        #endregion
 
-    public class InputBox
-    {
-        Window Box = new Window();//window for the inputbox
-        FontFamily font = new FontFamily("Avenir");//font for the whole inputbox
-        int FontSize = 14;//fontsize for the input
-        StackPanel sp1 = new StackPanel();// items container
-        string title = "Dica s.l.";//title as heading
-        string boxcontent;//title
-        string defaulttext = "";//default textbox content
-        string errormessage = "Datos no válidos";//error messagebox content
-        string errortitle = "Error";//error messagebox heading title
-        string okbuttontext = "OK";//Ok button content
-        string CancelButtonText = "Cancelar";
-        Brush BoxBackgroundColor = Brushes.WhiteSmoke;// Window Background
-        Brush InputBackgroundColor = Brushes.Ivory;// Textbox Background
-        bool clickedOk = false;
-        TextBox input = new TextBox();
-        Button ok = new Button();
-        Button cancel = new Button();
-        bool inputreset = false;
-
-
-        public InputBox(string content)
+        private async void compressArchive(string inputDirectory, string outputDirectory)
         {
-            try
+            if (outputDirectory == "")
             {
-                boxcontent = content;
+                MessageWindow.Show("No output direcory selected");
+                return;
             }
-            catch { boxcontent = "Error!"; }
-            windowdef();
-        }
-
-        public InputBox(string content, string Htitle, string DefaultText)
-        {
-            try
+            await Task.Run(() =>
             {
-                boxcontent = content;
-            }
-            catch { boxcontent = "Error!"; }
-            try
-            {
-                title = Htitle;
-            }
-            catch
-            {
-                title = "Error!";
-            }
-            try
-            {
-                defaulttext = DefaultText;
-            }
-            catch
-            {
-                DefaultText = "Error!";
-            }
-            windowdef();
-        }
+                var dirName = new DirectoryInfo(inputDirectory).Name;
+                var archive = ArchiveFactory.Create(ArchiveType.Zip);
+                archive.AddAllFromDirectory(inputDirectory);
 
-        public InputBox(string content, string Htitle, string Font, int Fontsize)
-        {
-            try
-            {
-                boxcontent = content;
-            }
-            catch { boxcontent = "Error!"; }
-            try
-            {
-                font = new FontFamily(Font);
-            }
-            catch { font = new FontFamily("Tahoma"); }
-            try
-            {
-                title = Htitle;
-            }
-            catch
-            {
-                title = "Error!";
-            }
-            if (Fontsize >= 1)
-                FontSize = Fontsize;
-            windowdef();
-        }
-
-        private void windowdef()// window building - check only for window size
-        {
-            Box.Height = 100;// Box Height
-            Box.Width = 450;// Box Width
-            Box.Background = BoxBackgroundColor;
-            Box.Title = title;
-            Box.Content = sp1;
-            Box.Closing += Box_Closing;
-            Box.WindowStyle = WindowStyle.None;
-            Box.WindowStartupLocation = WindowStartupLocation.CenterScreen;
-
-            TextBlock content = new TextBlock();
-            content.TextWrapping = TextWrapping.Wrap;
-            content.Background = null;
-            content.HorizontalAlignment = HorizontalAlignment.Center;
-            content.Text = boxcontent;
-            content.FontFamily = font;
-            content.FontSize = FontSize;
-            sp1.Children.Add(content);
-
-            input.Background = InputBackgroundColor;
-            input.FontFamily = font;
-            input.FontSize = FontSize;
-            input.HorizontalAlignment = HorizontalAlignment.Center;
-            input.Text = defaulttext;
-            input.MinWidth = 200;
-            input.MouseEnter += input_MouseDown;
-            input.KeyDown += input_KeyDown;
-
-            sp1.Children.Add(input);
-
-            ok.Width = 70;
-            ok.Height = 30;
-            ok.Click += ok_Click;
-            ok.Content = okbuttontext;
-
-            cancel.Width = 70;
-            cancel.Height = 30;
-            cancel.Click += cancel_Click;
-            cancel.Content = CancelButtonText;
-
-            WrapPanel gboxContent = new WrapPanel();
-            gboxContent.HorizontalAlignment = HorizontalAlignment.Center;
-
-            sp1.Children.Add(gboxContent);
-            gboxContent.Children.Add(ok);
-            gboxContent.Children.Add(cancel);
-
-            input.Focus();
-        }
-
-        void Box_Closing(object sender, System.ComponentModel.CancelEventArgs e)
-        {
-            //validation
-        }
-
-        private void input_MouseDown(object sender, MouseEventArgs e)
-        {
-            if ((sender as TextBox).Text == defaulttext && inputreset == false)
-            {
-                (sender as TextBox).Text = null;
-                inputreset = true;
-            }
-        }
-
-        private void input_KeyDown(object sender, KeyEventArgs e)
-        {
-            if (e.Key == Key.Enter && clickedOk == false)
-            {
-                e.Handled = true;
-                ok_Click(input, null);
-            }
-
-            if (e.Key == Key.Escape)
-            {
-                cancel_Click(input, null);
-            }
-        }
-
-        void ok_Click(object sender, RoutedEventArgs e)
-        {
-            clickedOk = true;
-            if (input.Text == defaulttext || input.Text == "")
-                MessageBox.Show(errormessage, errortitle, MessageBoxButton.OK, MessageBoxImage.Error);
-            else
-            {
-                Box.Close();
-            }
-            clickedOk = false;
-        }
-
-        void cancel_Click(object sender, RoutedEventArgs e)
-        {
-            Box.Close();
-        }
-
-        public string ShowDialog()
-        {
-            Box.ShowDialog();
-            return input.Text;
+                string g = outputDirectory + "\\" + dirName + ".zip";
+                archive.SaveTo(g, CompressionType.Deflate);
+                archive.Dispose();
+            });
+            FileTree.UpdateTreeView(outputDirectory + "\\");
+            MessageWindow.Show("Finished compressing.");
         }
     }
 }

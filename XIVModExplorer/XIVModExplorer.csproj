@@ -282,10 +282,17 @@
       <SubType>Designer</SubType>
     </ApplicationDefinition>
     <Compile Include="Configuration.cs" />
-    <Compile Include="Database\Database.cs" />
-    <Compile Include="Database\Metadata.xaml.cs">
+    <Compile Include="Caching\Database.cs" />
+    <Compile Include="Caching\Metadata.xaml.cs">
       <DependentUpon>Metadata.xaml</DependentUpon>
     </Compile>
+    <Compile Include="HelperWindows\InputBox.xaml.cs">
+      <DependentUpon>InputBox.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="HelperWindows\MessageWindow.xaml.cs">
+      <DependentUpon>MessageWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Locale\LocalizationManagers.cs" />
     <Compile Include="Scraping\DriveDownloader.cs" />
     <Compile Include="FolderPicker.cs" />
     <Compile Include="Scraping\DynamicSite.cs" />
@@ -315,7 +322,15 @@
     <Compile Include="UserCtrl\TreeViewFileExplorer.xaml.cs">
       <DependentUpon>TreeViewFileExplorer.xaml</DependentUpon>
     </Compile>
-    <Page Include="Database\Metadata.xaml">
+    <Page Include="Caching\Metadata.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="HelperWindows\InputBox.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="HelperWindows\MessageWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
