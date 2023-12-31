@@ -171,8 +171,17 @@
   <data name="Menu_Settings_PenumbraPath" xml:space="preserve">
     <value>Penumbra-Pfad</value>
   </data>
+  <data name="Menu_Settings_RebuildDB" xml:space="preserve">
+    <value>Datenbank optimieren</value>
+  </data>
+  <data name="Metadata_Export_Json" xml:space="preserve">
+    <value>Exportiere als Json</value>
+  </data>
   <data name="Metadata_Reread" xml:space="preserve">
     <value>Archiv erneut lesen</value>
+  </data>
+  <data name="Metadata_SameHashFound" xml:space="preserve">
+    <value>Gleicher hash in der Datenbank, Pfad in der Datenbank updaten?</value>
   </data>
   <data name="Msg_Delete_Folder_Confirm" xml:space="preserve">
     <value>Ordner löschen?</value>
@@ -225,6 +234,18 @@
   <data name="Types_Wrist" xml:space="preserve">
     <value>Handgelenk</value>
   </data>
+  <data name="Type_Animation" xml:space="preserve">
+    <value>Animation</value>
+  </data>
+  <data name="Type_Minion" xml:space="preserve">
+    <value>Begleiter</value>
+  </data>
+  <data name="Type_Mount" xml:space="preserve">
+    <value>Reittier</value>
+  </data>
+  <data name="Type_Vfx" xml:space="preserve">
+    <value>VFX</value>
+  </data>
   <data name="Word_Description" xml:space="preserve">
     <value>Beschreibung</value>
   </data>
@@ -245,5 +266,8 @@
   </data>
   <data name="Word_Types" xml:space="preserve">
     <value>Art</value>
+  </data>
+  <data name="Word_Warning" xml:space="preserve">
+    <value>Warnung</value>
   </data>
 </root>

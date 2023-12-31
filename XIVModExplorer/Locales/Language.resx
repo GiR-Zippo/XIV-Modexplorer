@@ -171,8 +171,17 @@
   <data name="Menu_Settings_PenumbraPath" xml:space="preserve">
     <value>Set PenumbraModPath</value>
   </data>
+  <data name="Menu_Settings_RebuildDB" xml:space="preserve">
+    <value>Rebuild db</value>
+  </data>
+  <data name="Metadata_Export_Json" xml:space="preserve">
+    <value>Export as Json</value>
+  </data>
   <data name="Metadata_Reread" xml:space="preserve">
     <value>Reread from archive</value>
+  </data>
+  <data name="Metadata_SameHashFound" xml:space="preserve">
+    <value>Same hash found, update found mod-data?</value>
   </data>
   <data name="Msg_Delete_Folder_Confirm" xml:space="preserve">
     <value>Delete folder?</value>
@@ -225,6 +234,18 @@
   <data name="Types_Wrist" xml:space="preserve">
     <value>Wrist</value>
   </data>
+  <data name="Type_Animation" xml:space="preserve">
+    <value>Animation</value>
+  </data>
+  <data name="Type_Minion" xml:space="preserve">
+    <value>Minion</value>
+  </data>
+  <data name="Type_Mount" xml:space="preserve">
+    <value>Mount</value>
+  </data>
+  <data name="Type_Vfx" xml:space="preserve">
+    <value>VFX</value>
+  </data>
   <data name="Word_Description" xml:space="preserve">
     <value>Description</value>
   </data>
@@ -245,5 +266,8 @@
   </data>
   <data name="Word_Types" xml:space="preserve">
     <value>Types</value>
+  </data>
+  <data name="Word_Warning" xml:space="preserve">
+    <value>Warning</value>
   </data>
 </root>

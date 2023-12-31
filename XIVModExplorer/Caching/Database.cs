@@ -5,6 +5,7 @@
 
 using LiteDB;
 using System;
+using System.Linq;
 
 namespace XIVModExplorer.Caching
 {
@@ -22,6 +23,14 @@ namespace XIVModExplorer.Caching
         ARM     = 0b0000000100000000,
         FINGER  = 0b0000001000000000,
 
+        MINION  = 0b0000010000000000,
+        MOUNT   = 0b0000100000000000,
+
+        VFX     = 0b0001000000000000,
+      ANIMATION = 0b0010000000000000,
+        
+        MISC    = 0b0100000000000000,
+
         ONACC   = 0b1000000000000000    //ists ein mod-accessoire
     }
 
@@ -38,6 +47,8 @@ namespace XIVModExplorer.Caching
         public string Url { get; set; } = "";
         public string Filename { get; set; } = "";
         public byte[] HashSha1 { get; set; } = null;
+        public DateTime CreationDate { get; set; } = DateTime.MinValue;
+        public DateTime ModificationDate { get; set; } = DateTime.MinValue;
     }
 
     public sealed class Database : IDisposable
@@ -89,9 +100,25 @@ namespace XIVModExplorer.Caching
             return new Database(dbi);
         }
 
+        public void Optimize()
+        {
+            this.dbi.Checkpoint();
+            this.dbi.Rebuild();
+        }
+
         public ModEntry FindData(string filename)
         {
             return collection.FindOne(n=> n.Filename.Equals(filename));
+        }
+
+        public ModEntry DoesHashExists(byte[] hash)
+        {
+            foreach (var p in collection.Find(n => n.HashSha1 != null))
+            {
+                if (p.HashSha1.SequenceEqual(hash))
+                    return p;
+            }
+            return null;
         }
 
         public void SaveData(ModEntry me)

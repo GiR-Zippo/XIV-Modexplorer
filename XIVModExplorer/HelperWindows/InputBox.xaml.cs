@@ -23,6 +23,7 @@ namespace XIVModExplorer.HelperWindows
         public InputBox(string content="", string Htitle="", string DefaultText = "")
         {
             InitializeComponent();
+            input.Focus();
             try
             {
                 if (content != "")

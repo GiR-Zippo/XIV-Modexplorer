@@ -223,11 +223,38 @@ namespace XIVModExplorer.Locales {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Rebuild db ähnelt.
+        /// </summary>
+        public static string Menu_Settings_RebuildDB {
+            get {
+                return ResourceManager.GetString("Menu_Settings_RebuildDB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Export as Json ähnelt.
+        /// </summary>
+        public static string Metadata_Export_Json {
+            get {
+                return ResourceManager.GetString("Metadata_Export_Json", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Reread from archive ähnelt.
         /// </summary>
         public static string Metadata_Reread {
             get {
                 return ResourceManager.GetString("Metadata_Reread", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Same hash found, update found mod-data? ähnelt.
+        /// </summary>
+        public static string Metadata_SameHashFound {
+            get {
+                return ResourceManager.GetString("Metadata_SameHashFound", resourceCulture);
             }
         }
         
@@ -273,6 +300,42 @@ namespace XIVModExplorer.Locales {
         public static string Msg_No_Pic_Selected {
             get {
                 return ResourceManager.GetString("Msg_No_Pic_Selected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Animation ähnelt.
+        /// </summary>
+        public static string Type_Animation {
+            get {
+                return ResourceManager.GetString("Type_Animation", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Minion ähnelt.
+        /// </summary>
+        public static string Type_Minion {
+            get {
+                return ResourceManager.GetString("Type_Minion", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Mount ähnelt.
+        /// </summary>
+        public static string Type_Mount {
+            get {
+                return ResourceManager.GetString("Type_Mount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die VFX ähnelt.
+        /// </summary>
+        public static string Type_Vfx {
+            get {
+                return ResourceManager.GetString("Type_Vfx", resourceCulture);
             }
         }
         
@@ -444,6 +507,15 @@ namespace XIVModExplorer.Locales {
         public static string Word_Types {
             get {
                 return ResourceManager.GetString("Word_Types", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Warning ähnelt.
+        /// </summary>
+        public static string Word_Warning {
+            get {
+                return ResourceManager.GetString("Word_Warning", resourceCulture);
             }
         }
     }

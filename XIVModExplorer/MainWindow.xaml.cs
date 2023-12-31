@@ -339,6 +339,11 @@ namespace XIVModExplorer
             Configuration.SetValue("UseDatabase", c.IsChecked.Value.ToString());
         }
 
+        private void RebuildDBMenu_Click(object sender, RoutedEventArgs e)
+        {
+            Database.Instance.Optimize();
+        }
+
         /// <summary>
         /// Set the penumbra folder
         /// </summary>
@@ -543,5 +548,7 @@ namespace XIVModExplorer
                 TitleText.Text = TitleText.Text.Replace(status, "");
 
         }
+
+
     }
 }

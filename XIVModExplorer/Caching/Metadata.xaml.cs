@@ -3,6 +3,7 @@
 * Licensed under the Mozilla Public License Version 2.0. See https://github.com/GiR-Zippo/XIV-Modexplorer/blob/main/LICENSE for full license information.
 */
 
+using Newtonsoft.Json;
 using SharpCompress.Archives;
 using System;
 using System.Collections.Generic;
@@ -73,10 +74,11 @@ namespace XIVModExplorer.Caching
                 TryGetMetaDataFromArchive(filename);
             else
             {
-                if (modentry.HashSha1 == null)
+                //If we have no hash or the mod date has changed, recalc the hash
+                if (modentry.HashSha1 == null || ConvertToUnixTimestamp(modentry.ModificationDate) != ConvertToUnixTimestamp(File.GetLastWriteTime(filename)))
                     RecalculateHash(filename);
+                DisplayModInfo();
             }
-            DisplayModInfo();
         }
 
         #region WindowEvents
@@ -94,14 +96,42 @@ namespace XIVModExplorer.Caching
         }
         #endregion
 
-        private void TryGetMetaDataFromArchive(string filename, bool reload = false)
+        private async void TryGetMetaDataFromArchive(string filename, bool reload = false)
         {
             if (!reload)
+            {
                 modentry = new ModEntry();
+
+                Save_Button.IsEnabled = false; //disable the save button
+                TitleText.Text += " - Building Hash";
+                SHA1Managed managed = new SHA1Managed();
+                using (FileStream stream = File.OpenRead(filename))
+                {
+                    modentry.HashSha1 = await Task.Run(() => managed.ComputeHashAsync(stream));
+                    Hash.Text = GetHashString(modentry.HashSha1);
+                }
+                Save_Button.IsEnabled = true;
+                TitleText.Text = TitleText.Text.Replace(" - Building Hash", "");
+
+                var tEntry = Database.Instance.DoesHashExists(modentry.HashSha1);
+                if (tEntry != null)
+                {
+                    var result = MessageBox.Show(Locales.Language.Metadata_SameHashFound, Locales.Language.Word_Warning, MessageBoxButton.YesNo, MessageBoxImage.Question);
+                    if (result == MessageBoxResult.Yes)
+                    {
+                        modentry = tEntry;
+                        modentry.Filename = Configuration.GetRelativeModPath(filename);
+                        Database.Instance.SaveData(modentry);
+                        return;
+                    }
+                }                  
+            }
 
             var archive = ArchiveFactory.Open(filename);
             modentry.ModName = Path.GetFileNameWithoutExtension(filename);
             modentry.Filename = Configuration.GetRelativeModPath(filename);
+            modentry.CreationDate = File.GetCreationTime(filename);
+            modentry.ModificationDate = File.GetLastWriteTime(filename);
             pictures.Clear();
             foreach (var entry in archive.Entries)
             {
@@ -142,7 +172,7 @@ namespace XIVModExplorer.Caching
             }
             archive.Dispose();
             imageListBox.ItemsSource = pictures.Select(n => (BitmapSource)new ImageSourceConverter().ConvertFrom(n));
-            RecalculateHash(filename, false);
+            DisplayModInfo();
         }
 
         private void DisplayModInfo()
@@ -160,6 +190,10 @@ namespace XIVModExplorer.Caching
             C_Neck.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.NECK) == (UInt16)Type.NECK;
             C_Wrist.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.ARM) == (UInt16)Type.ARM;
             C_Finger.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.FINGER) == (UInt16)Type.FINGER;
+            C_Minion.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.MINION) == (UInt16)Type.MINION;
+            C_Mount.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.MOUNT) == (UInt16)Type.MOUNT;
+            C_Animation.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.ANIMATION) == (UInt16)Type.ANIMATION;
+            C_Vfx.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.VFX) == (UInt16)Type.VFX;
             C_ACCS.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.ONACC) == (UInt16)Type.ONACC;
 
             if (C_ACCS.IsChecked.Value)
@@ -203,6 +237,10 @@ namespace XIVModExplorer.Caching
                              (C_Neck.IsChecked.Value ? Type.NECK : Type.NONE) |
                              (C_Wrist.IsChecked.Value ? Type.ARM : Type.NONE) |
                              (C_Finger.IsChecked.Value ? Type.FINGER : Type.NONE) |
+                             (C_Minion.IsChecked.Value ? Type.MINION : Type.NONE) |
+                             (C_Finger.IsChecked.Value ? Type.MOUNT : Type.NONE) |
+                             (C_Animation.IsChecked.Value ? Type.ANIMATION : Type.NONE) |
+                             (C_Vfx.IsChecked.Value ? Type.VFX : Type.NONE) |
                              (C_ACCS.IsChecked.Value ? Type.ONACC : Type.NONE));
 
             if (C_ACCS.IsChecked.Value)
@@ -250,6 +288,19 @@ namespace XIVModExplorer.Caching
             }
         }
 
+
+        private void ExportButton_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new FolderPicker();
+            dlg.InputPath = @"C:\";
+            if (dlg.ShowDialog(this) == true)
+            {
+                string fname = Path.GetFileNameWithoutExtension(modentry.Filename);
+                string output = JsonConvert.SerializeObject(modentry);
+                File.WriteAllText(dlg.ResultPath+"\\"+ fname+".json", output);
+            }
+        }
+
         /// <summary>
         /// Calc the Sha1 from the file and save the col
         /// </summary>
@@ -262,8 +313,10 @@ namespace XIVModExplorer.Caching
             using (FileStream stream = File.OpenRead(filename))
             {
                 modentry.HashSha1 = await Task.Run(() => managed.ComputeHashAsync(stream));
+                modentry.ModificationDate = File.GetLastWriteTime(filename);
                 if (save)
                     Database.Instance.SaveData(modentry);
+
                 Hash.Text = GetHashString(modentry.HashSha1);
             }
             Save_Button.IsEnabled = true;
@@ -280,6 +333,13 @@ namespace XIVModExplorer.Caching
             foreach (byte b in hash)
                 formatted.AppendFormat("{0:X2}", b);
             return formatted.ToString();
+        }
+
+        public static double ConvertToUnixTimestamp(DateTime date)
+        {
+            DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
+            TimeSpan diff = date.ToUniversalTime() - origin;
+            return Math.Floor(diff.TotalSeconds);
         }
     }
 }
