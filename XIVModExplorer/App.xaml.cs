@@ -4,6 +4,7 @@
 */
 
 using System;
+using System.Globalization;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -50,6 +51,8 @@ namespace XIVModExplorer
                 Environment.Exit(1);
             }
 
+            ConfigureLanguage(System.Threading.Thread.CurrentThread.CurrentUICulture.ToString());
+
             Configuration.ReadConfig();
             string archivePath = Configuration.GetValue("ModArchivePath");
             if (archivePath != null)
@@ -63,6 +66,18 @@ namespace XIVModExplorer
             base.OnExit(e);
             if (Configuration.GetBoolValue("UseDatabase"))
                 Database.Instance.Dispose();
+        }
+
+        internal static void ConfigureLanguage(string langCode = null)
+        {
+            try
+            {
+                Locales.Language.Culture = new CultureInfo(langCode);
+            }
+            catch (Exception)
+            {
+                Locales.Language.Culture = CultureInfo.DefaultThreadCurrentUICulture;
+            }
         }
     }
 }

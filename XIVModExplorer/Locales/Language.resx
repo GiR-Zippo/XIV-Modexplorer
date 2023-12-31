@@ -46,7 +46,7 @@
     
     mimetype: application/x-microsoft.net.object.binary.base64
     value   : The object must be serialized with 
-            : System.Serialization.Formatters.Binary.BinaryFormatter
+            : System.Runtime.Serialization.Formatters.Binary.BinaryFormatter
             : and then encoded with base64 encoding.
     
     mimetype: application/x-microsoft.net.object.soap.base64
@@ -60,6 +60,7 @@
             : and then encoded with base64 encoding.
     -->
   <xsd:schema id="root" xmlns="" xmlns:xsd="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+    <xsd:import namespace="http://www.w3.org/XML/1998/namespace" />
     <xsd:element name="root" msdata:IsDataSet="true">
       <xsd:complexType>
         <xsd:choice maxOccurs="unbounded">
@@ -68,9 +69,10 @@
               <xsd:sequence>
                 <xsd:element name="value" type="xsd:string" minOccurs="0" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" />
+              <xsd:attribute name="name" use="required" type="xsd:string" />
               <xsd:attribute name="type" type="xsd:string" />
               <xsd:attribute name="mimetype" type="xsd:string" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="assembly">
@@ -85,9 +87,10 @@
                 <xsd:element name="value" type="xsd:string" minOccurs="0" msdata:Ordinal="1" />
                 <xsd:element name="comment" type="xsd:string" minOccurs="0" msdata:Ordinal="2" />
               </xsd:sequence>
-              <xsd:attribute name="name" type="xsd:string" msdata:Ordinal="1" />
+              <xsd:attribute name="name" type="xsd:string" use="required" msdata:Ordinal="1" />
               <xsd:attribute name="type" type="xsd:string" msdata:Ordinal="3" />
               <xsd:attribute name="mimetype" type="xsd:string" msdata:Ordinal="4" />
+              <xsd:attribute ref="xml:space" />
             </xsd:complexType>
           </xsd:element>
           <xsd:element name="resheader">
@@ -109,9 +112,138 @@
     <value>2.0</value>
   </resheader>
   <resheader name="reader">
-    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
   <resheader name="writer">
-    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
+    <value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value>
   </resheader>
+  <data name="Context_Menu_Compress" xml:space="preserve">
+    <value>Compress</value>
+  </data>
+  <data name="Context_Menu_Delete" xml:space="preserve">
+    <value>Delete</value>
+  </data>
+  <data name="Context_Menu_Download" xml:space="preserve">
+    <value>Download All</value>
+  </data>
+  <data name="Context_Menu_EditMeta" xml:space="preserve">
+    <value>Edit Metadata</value>
+  </data>
+  <data name="Context_Menu_Scrape" xml:space="preserve">
+    <value>Download Info</value>
+  </data>
+  <data name="Context_Menu_Scrape_Compress" xml:space="preserve">
+    <value>Download Info &amp; Compress</value>
+  </data>
+  <data name="Menu_Download" xml:space="preserve">
+    <value>Download</value>
+  </data>
+  <data name="Menu_Download_Archive" xml:space="preserve">
+    <value>Archive</value>
+  </data>
+  <data name="Menu_Download_Remove" xml:space="preserve">
+    <value>Remove Directory</value>
+  </data>
+  <data name="Menu_File" xml:space="preserve">
+    <value>File</value>
+  </data>
+  <data name="Menu_File_Collect" xml:space="preserve">
+    <value>Collect Data from Url</value>
+  </data>
+  <data name="Menu_File_To_Archive" xml:space="preserve">
+    <value>To Archive</value>
+  </data>
+  <data name="Menu_Penumbra" xml:space="preserve">
+    <value>Penumbra</value>
+  </data>
+  <data name="Menu_Penumbra_Backup_Mod" xml:space="preserve">
+    <value>Backup Mod</value>
+  </data>
+  <data name="Menu_Settings" xml:space="preserve">
+    <value>Settings</value>
+  </data>
+  <data name="Menu_Settings_Cache" xml:space="preserve">
+    <value>Use Cache</value>
+  </data>
+  <data name="Menu_Settings_ModPath" xml:space="preserve">
+    <value>Set Mod Archive Path</value>
+  </data>
+  <data name="Menu_Settings_PenumbraPath" xml:space="preserve">
+    <value>Set PenumbraModPath</value>
+  </data>
+  <data name="Metadata_Reread" xml:space="preserve">
+    <value>Reread from archive</value>
+  </data>
+  <data name="Msg_Delete_Folder_Confirm" xml:space="preserve">
+    <value>Delete folder?</value>
+  </data>
+  <data name="Msg_Error_Fetch" xml:space="preserve">
+    <value>Error while fetching data.</value>
+  </data>
+  <data name="Msg_Finished_Compressing" xml:space="preserve">
+    <value>Finished compressing.</value>
+  </data>
+  <data name="Msg_No_Output_Dir" xml:space="preserve">
+    <value>No output direcory selected, aborting!</value>
+  </data>
+  <data name="Msg_No_Pic_Selected" xml:space="preserve">
+    <value>No preview picture selected</value>
+  </data>
+  <data name="Types_Accessory" xml:space="preserve">
+    <value>Mod is an accessory</value>
+  </data>
+  <data name="Types_Bottom" xml:space="preserve">
+    <value>Bottom</value>
+  </data>
+  <data name="Types_Displays" xml:space="preserve">
+    <value>Displays:</value>
+  </data>
+  <data name="Types_Ear" xml:space="preserve">
+    <value>Ear</value>
+  </data>
+  <data name="Types_Finger" xml:space="preserve">
+    <value>Ring</value>
+  </data>
+  <data name="Types_Hands" xml:space="preserve">
+    <value>Hands</value>
+  </data>
+  <data name="Types_Head" xml:space="preserve">
+    <value>Head</value>
+  </data>
+  <data name="Types_Neck" xml:space="preserve">
+    <value>Neck</value>
+  </data>
+  <data name="Types_Shoe" xml:space="preserve">
+    <value>Shoe</value>
+  </data>
+  <data name="Types_Top" xml:space="preserve">
+    <value>Top</value>
+  </data>
+  <data name="Types_Weapon" xml:space="preserve">
+    <value>Weapon</value>
+  </data>
+  <data name="Types_Wrist" xml:space="preserve">
+    <value>Wrist</value>
+  </data>
+  <data name="Word_Description" xml:space="preserve">
+    <value>Description</value>
+  </data>
+  <data name="Word_Error" xml:space="preserve">
+    <value>Error</value>
+  </data>
+  <data name="Word_Finished" xml:space="preserve">
+    <value>Finished</value>
+  </data>
+  <data name="Word_Pictures" xml:space="preserve">
+    <value>Pictures</value>
+  </data>
+  <data name="Word_Replaces" xml:space="preserve">
+    <value>Replaces:</value>
+  </data>
+  <data name="Word_Save" xml:space="preserve">
+    <value>Save</value>
+  </data>
+  <data name="Word_Types" xml:space="preserve">
+    <value>Types</value>
+  </data>
 </root>

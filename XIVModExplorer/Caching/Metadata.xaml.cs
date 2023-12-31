@@ -15,6 +15,7 @@ using System.Windows;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using XIVModExplorer.HelperWindows;
 
 namespace XIVModExplorer.Caching
 {
@@ -68,11 +69,13 @@ namespace XIVModExplorer.Caching
             this.Visibility = Visibility.Visible;
 
             modentry = Database.Instance.FindData(Configuration.GetRelativeModPath(filename));
-            if (modentry ==null)
+            if (modentry == null)
                 TryGetMetaDataFromArchive(filename);
-            if (modentry.HashSha1 == null)
-                RecalculateHash(filename);
-
+            else
+            {
+                if (modentry.HashSha1 == null)
+                    RecalculateHash(filename);
+            }
             DisplayModInfo();
         }
 
@@ -91,14 +94,14 @@ namespace XIVModExplorer.Caching
         }
         #endregion
 
-        private void TryGetMetaDataFromArchive(string archivename, bool reload = false)
+        private void TryGetMetaDataFromArchive(string filename, bool reload = false)
         {
             if (!reload)
                 modentry = new ModEntry();
 
-            var archive = ArchiveFactory.Open(archivename);
-            modentry.ModName = Path.GetFileNameWithoutExtension(archivename);
-            modentry.Filename = Configuration.GetRelativeModPath(archivename);
+            var archive = ArchiveFactory.Open(filename);
+            modentry.ModName = Path.GetFileNameWithoutExtension(filename);
+            modentry.Filename = Configuration.GetRelativeModPath(filename);
             pictures.Clear();
             foreach (var entry in archive.Entries)
             {
@@ -139,6 +142,7 @@ namespace XIVModExplorer.Caching
             }
             archive.Dispose();
             imageListBox.ItemsSource = pictures.Select(n => (BitmapSource)new ImageSourceConverter().ConvertFrom(n));
+            RecalculateHash(filename, false);
         }
 
         private void DisplayModInfo()
@@ -156,6 +160,20 @@ namespace XIVModExplorer.Caching
             C_Neck.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.NECK) == (UInt16)Type.NECK;
             C_Wrist.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.ARM) == (UInt16)Type.ARM;
             C_Finger.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.FINGER) == (UInt16)Type.FINGER;
+            C_ACCS.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.ONACC) == (UInt16)Type.ONACC;
+
+            if (C_ACCS.IsChecked.Value)
+            {
+                CA_Weapon.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.WEAPON) == (UInt16)Type.WEAPON;
+                CA_Head.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.HEAD) == (UInt16)Type.HEAD;
+                CA_Top.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.TOP) == (UInt16)Type.TOP;
+                CA_Bottom.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.BOTTOM) == (UInt16)Type.BOTTOM;
+                CA_Shoe.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.SHOE) == (UInt16)Type.SHOE;
+                CA_Ear.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.EAR) == (UInt16)Type.EAR;
+                CA_Neck.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.NECK) == (UInt16)Type.NECK;
+                CA_Wrist.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.ARM) == (UInt16)Type.ARM;
+                CA_Finger.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.FINGER) == (UInt16)Type.FINGER;
+            }
 
             if (modentry.HashSha1 != null)
                 Hash.Text = GetHashString(modentry.HashSha1);
@@ -166,6 +184,12 @@ namespace XIVModExplorer.Caching
         /// </summary>
         private void Save_Click(object sender, RoutedEventArgs e)
         {
+            if (modentry.picture == null)
+            {
+                MessageWindow.Show(Locales.Language.Msg_No_Pic_Selected, Locales.Language.Word_Error);
+                return;
+            }
+
             modentry.ModName = ModName.Text;
             modentry.Description = Description.Text;
 
@@ -178,7 +202,23 @@ namespace XIVModExplorer.Caching
                              (C_Ear.IsChecked.Value ? Type.EAR : Type.NONE) |
                              (C_Neck.IsChecked.Value ? Type.NECK : Type.NONE) |
                              (C_Wrist.IsChecked.Value ? Type.ARM : Type.NONE) |
-                             (C_Finger.IsChecked.Value ? Type.FINGER : Type.NONE));
+                             (C_Finger.IsChecked.Value ? Type.FINGER : Type.NONE) |
+                             (C_ACCS.IsChecked.Value ? Type.ONACC : Type.NONE));
+
+            if (C_ACCS.IsChecked.Value)
+            {
+                modentry.AccModTypeFlag = (UInt16)((CA_Weapon.IsChecked.Value ? Type.WEAPON : Type.NONE) |
+                                 (CA_Head.IsChecked.Value ? Type.HEAD : Type.NONE) |
+                                 (CA_Top.IsChecked.Value ? Type.TOP : Type.NONE) |
+                                 (CA_Hands.IsChecked.Value ? Type.HANDS : Type.NONE) |
+                                 (CA_Bottom.IsChecked.Value ? Type.BOTTOM : Type.NONE) |
+                                 (CA_Shoe.IsChecked.Value ? Type.SHOE : Type.NONE) |
+                                 (CA_Ear.IsChecked.Value ? Type.EAR : Type.NONE) |
+                                 (CA_Neck.IsChecked.Value ? Type.NECK : Type.NONE) |
+                                 (CA_Wrist.IsChecked.Value ? Type.ARM : Type.NONE) |
+                                 (CA_Finger.IsChecked.Value ? Type.FINGER : Type.NONE));
+            }
+
             modentry.Url = ModUrl.Text;
             Database.Instance.SaveData(modentry);
         }
@@ -214,16 +254,16 @@ namespace XIVModExplorer.Caching
         /// Calc the Sha1 from the file and save the col
         /// </summary>
         /// <param name="filename"></param>
-        private async void RecalculateHash(string filename)
+        private async void RecalculateHash(string filename, bool save = true)
         {
             Save_Button.IsEnabled = false; //disable the save button
-            string x = TitleText.Text;
             TitleText.Text += " - Rebuilding Hash";
             SHA1Managed managed = new SHA1Managed();
             using (FileStream stream = File.OpenRead(filename))
             {
                 modentry.HashSha1 = await Task.Run(() => managed.ComputeHashAsync(stream));
-                Database.Instance.SaveData(modentry);
+                if (save)
+                    Database.Instance.SaveData(modentry);
                 Hash.Text = GetHashString(modentry.HashSha1);
             }
             Save_Button.IsEnabled = true;

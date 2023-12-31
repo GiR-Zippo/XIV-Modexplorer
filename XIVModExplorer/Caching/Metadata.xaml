@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+        xmlns:Loc="clr-namespace:XIVModExplorer.Locales"
         xmlns:local="clr-namespace:XIVModExplorer.Caching"
         mc:Ignorable="d"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -29,7 +30,7 @@
         </Grid>
 
         <TabControl Grid.Row="1" TabStripPlacement="Left">
-            <TabItem Header="Description">
+            <TabItem Header="{x:Static Loc:Language.Word_Description}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="Auto"/>
@@ -62,10 +63,20 @@
                     <TextBox Grid.Row="4" FontSize="12" Text="" x:Name="Hash"  IsEnabled="False"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Types">
+            <TabItem Header="{x:Static Loc:Language.Word_Types}">
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
@@ -78,22 +89,39 @@
                         <ColumnDefinition Width="Auto"/>
                     </Grid.ColumnDefinitions>
 
-                    <CheckBox Grid.Row="1" Grid.Column="0" Content="Weapon" x:Name="C_Weapon"/>
-                    <CheckBox Grid.Row="1" Grid.Column="1" Content="Head" x:Name="C_Head"/>
-                    <CheckBox Grid.Row="1" Grid.Column="2" Content="Top" x:Name="C_Top"/>
-                    <CheckBox Grid.Row="1" Grid.Column="3" Content="Hands" x:Name="C_Hands"/>
+                    <Label Grid.Row="1" Grid.ColumnSpan="3" Content="{x:Static Loc:Language.Word_Replaces}"/>
 
-                    <CheckBox Grid.Row="2" Grid.Column="0" Content="Bottom" x:Name="C_Bottom"/>
-                    <CheckBox Grid.Row="2" Grid.Column="1" Content="Shoe" x:Name="C_Shoe"/>
-                    <CheckBox Grid.Row="2" Grid.Column="2" Content="Ear" x:Name="C_Ear"/>
-                    <CheckBox Grid.Row="2" Grid.Column="3" Content="Neck" x:Name="C_Neck"/>
+                    <CheckBox Grid.Row="3" Grid.Column="0" Content="{x:Static Loc:Language.Types_Weapon}" x:Name="C_Weapon"/>
+                    <CheckBox Grid.Row="3" Grid.Column="1" Content="{x:Static Loc:Language.Types_Head}" x:Name="C_Head"/>
+                    <CheckBox Grid.Row="3" Grid.Column="2" Content="{x:Static Loc:Language.Types_Top}" x:Name="C_Top"/>
+                    <CheckBox Grid.Row="3" Grid.Column="3" Content="{x:Static Loc:Language.Types_Hands}" x:Name="C_Hands"/>
 
-                    <CheckBox Grid.Row="3" Grid.Column="0" Content="Wrist" x:Name="C_Wrist"/>
-                    <CheckBox Grid.Row="3" Grid.Column="1" Content="Finger" x:Name="C_Finger"/>
+                    <CheckBox Grid.Row="4" Grid.Column="0" Content="{x:Static Loc:Language.Types_Bottom}" x:Name="C_Bottom"/>
+                    <CheckBox Grid.Row="4" Grid.Column="1" Content="{x:Static Loc:Language.Types_Shoe}" x:Name="C_Shoe"/>
+                    <CheckBox Grid.Row="4" Grid.Column="2" Content="{x:Static Loc:Language.Types_Ear}" x:Name="C_Ear"/>
+                    <CheckBox Grid.Row="4" Grid.Column="3" Content="{x:Static Loc:Language.Types_Neck}" x:Name="C_Neck"/>
 
+                    <CheckBox Grid.Row="5" Grid.Column="0" Content="{x:Static Loc:Language.Types_Wrist}" x:Name="C_Wrist"/>
+                    <CheckBox Grid.Row="5" Grid.Column="1" Content="{x:Static Loc:Language.Types_Finger}" x:Name="C_Finger"/>
+
+                    <CheckBox Grid.Row="7" Grid.Column="0" Content="{x:Static Loc:Language.Types_Accessory}" x:Name="C_ACCS"/>
+                    <Label Grid.Row="9" Grid.ColumnSpan="4" Content="{x:Static Loc:Language.Types_Displays}"/>
+
+                    <CheckBox Grid.Row="11" Grid.Column="0" Content="{x:Static Loc:Language.Types_Weapon}" x:Name="CA_Weapon"/>
+                    <CheckBox Grid.Row="11" Grid.Column="1" Content="{x:Static Loc:Language.Types_Head}" x:Name="CA_Head"/>
+                    <CheckBox Grid.Row="11" Grid.Column="2" Content="{x:Static Loc:Language.Types_Top}" x:Name="CA_Top"/>
+                    <CheckBox Grid.Row="11" Grid.Column="3" Content="{x:Static Loc:Language.Types_Hands}" x:Name="CA_Hands"/>
+
+                    <CheckBox Grid.Row="12" Grid.Column="0" Content="{x:Static Loc:Language.Types_Bottom}" x:Name="CA_Bottom"/>
+                    <CheckBox Grid.Row="12" Grid.Column="1" Content="{x:Static Loc:Language.Types_Shoe}" x:Name="CA_Shoe"/>
+                    <CheckBox Grid.Row="12" Grid.Column="2" Content="{x:Static Loc:Language.Types_Ear}" x:Name="CA_Ear"/>
+                    <CheckBox Grid.Row="12" Grid.Column="3" Content="{x:Static Loc:Language.Types_Neck}" x:Name="CA_Neck"/>
+
+                    <CheckBox Grid.Row="13" Grid.Column="0" Content="{x:Static Loc:Language.Types_Wrist}" x:Name="CA_Wrist"/>
+                    <CheckBox Grid.Row="13" Grid.Column="1" Content="{x:Static Loc:Language.Types_Finger}" x:Name="CA_Finger"/>
                 </Grid>
             </TabItem>
-            <TabItem Header="Pictures">
+            <TabItem Header="{x:Static Loc:Language.Word_Pictures}">
                 <ListBox x:Name="imageListBox" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
                     <ListBox.ItemsPanel>
                         <ItemsPanelTemplate>
@@ -114,8 +142,8 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button Grid.Column="0" x:Name="Save_Button" Content="Save" Click="Save_Click" Width="100" HorizontalAlignment="Left"/>
-            <Button Grid.Column="2" Content="Reread" Click="Reread_Click" Width="100" HorizontalAlignment="Left"/>
+            <Button Grid.Column="0" x:Name="Save_Button" Content="{x:Static Loc:Language.Word_Save}" Click="Save_Click" Width="100" HorizontalAlignment="Left"/>
+            <Button Grid.Column="2" Content="{x:Static Loc:Language.Metadata_Reread}" Click="Reread_Click" Width="100" HorizontalAlignment="Left"/>
         </Grid>
         
     </Grid>

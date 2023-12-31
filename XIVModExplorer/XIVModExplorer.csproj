@@ -292,18 +292,16 @@
     <Compile Include="HelperWindows\MessageWindow.xaml.cs">
       <DependentUpon>MessageWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Locale\LocalizationManagers.cs" />
+    <Compile Include="Locales\Language.Designer.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>Language.resx</DependentUpon>
+    </Compile>
     <Compile Include="Scraping\DriveDownloader.cs" />
     <Compile Include="FolderPicker.cs" />
     <Compile Include="Scraping\DynamicSite.cs" />
     <Compile Include="Scraping\LuaScraper.cs" />
     <Compile Include="PenumbraBackup.cs" />
-    <Compile Include="Status.xaml.cs">
-      <DependentUpon>Status.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="TextInput.xaml.cs">
-      <DependentUpon>TextInput.xaml</DependentUpon>
-    </Compile>
     <Compile Include="Scraping\URL_ImgFind.cs" />
     <Compile Include="UserCtrl\BaseObject.cs" />
     <Compile Include="UserCtrl\Enums\IconSize.cs" />
@@ -346,14 +344,6 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Page Include="Status.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="TextInput.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
     <Page Include="UserCtrl\TreeViewFileExplorer.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -363,25 +353,12 @@
     <Compile Include="Properties\AssemblyInfo.cs">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Properties\Resources.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>Resources.resx</DependentUpon>
-    </Compile>
-    <Compile Include="Properties\Settings.Designer.cs">
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-    </Compile>
-    <EmbeddedResource Include="Properties\Resources.resx">
-      <Generator>ResXFileCodeGenerator</Generator>
-      <LastGenOutput>Resources.Designer.cs</LastGenOutput>
+    <EmbeddedResource Include="Locales\Language.de-DE.resx" />
+    <EmbeddedResource Include="Locales\Language.resx">
+      <Generator>PublicResXFileCodeGenerator</Generator>
+      <LastGenOutput>Language.Designer.cs</LastGenOutput>
     </EmbeddedResource>
     <None Include="packages.config" />
-    <None Include="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

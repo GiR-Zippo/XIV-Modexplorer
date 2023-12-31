@@ -3,7 +3,6 @@
 * Licensed under the Mozilla Public License Version 2.0. See https://github.com/GiR-Zippo/XIV-Modexplorer/blob/main/LICENSE for full license information.
 */
 
-using ReverseMarkdown.Converters;
 using SharpCompress.Archives;
 using SharpCompress.Common;
 using System;
@@ -94,6 +93,8 @@ namespace XIVModExplorer
         {
             this.Dispatcher.BeginInvoke(new Action(() =>
             {
+                selected_dir = Path.GetDirectoryName(e);
+                SelectedDir.Content = selected_dir;
                 PreviewArchive(e);
             }));
             return;
@@ -274,9 +275,9 @@ namespace XIVModExplorer
                 if (data != "")
                 {
                     if (URL_ImgFind.ScrapeURLforData(data, dlg.ResultName))
-                        MessageWindow.Show("Finished");
+                        MessageWindow.Show(Locales.Language.Word_Finished);
                     else
-                        MessageWindow.Show("Error while fetching data.", "ERROR");
+                        MessageWindow.Show(Locales.Language.Msg_Error_Fetch, Locales.Language.Word_Error);
                 }
             }
         }
@@ -297,10 +298,10 @@ namespace XIVModExplorer
                     if (URL_ImgFind.DownloadMod(data, dlg.ResultName, DLArchive.IsChecked.Value, DLRDir.IsChecked.Value))
                     {
                         FileTree.UpdateTreeView(selected_dir + "\\");
-                        MessageWindow.Show("Finished");
+                        MessageWindow.Show(Locales.Language.Word_Finished);
                     }
                     else
-                        MessageWindow.Show("Error while fetching data.", "ERROR");
+                        MessageWindow.Show(Locales.Language.Msg_Error_Fetch, Locales.Language.Word_Error);
                 }
             }
         }
@@ -323,7 +324,7 @@ namespace XIVModExplorer
                 archive.SaveTo(g, CompressionType.Deflate);
                 archive.Dispose();
                 FileTree.UpdateTreeView(selected_dir + "\\");
-                MessageWindow.Show("Finished");
+                MessageWindow.Show(Locales.Language.Word_Finished);
             }
         }
 
@@ -389,9 +390,9 @@ namespace XIVModExplorer
             if (data != "")
             {
                 if (URL_ImgFind.ScrapeURLforData(data, selected_dir))
-                    MessageWindow.Show("Finished");
+                    MessageWindow.Show(Locales.Language.Word_Finished);
                 else
-                    MessageWindow.Show("Error while fetching data.", "ERROR");
+                    MessageWindow.Show(Locales.Language.Msg_Error_Fetch, Locales.Language.Word_Error);
             }
         }
 
@@ -416,10 +417,10 @@ namespace XIVModExplorer
                     string g = result + "\\" + dirName + ".zip";
                     archive.SaveTo(g, CompressionType.Deflate);
                     FileTree.UpdateTreeView(selected_dir + "\\");
-                    MessageWindow.Show("Finished");
+                    MessageWindow.Show(Locales.Language.Word_Finished);
                 }
                 else
-                    MessageWindow.Show("Error while fetching data.", "ERROR");
+                    MessageWindow.Show(Locales.Language.Msg_Error_Fetch, Locales.Language.Word_Error);
             }
         }
 
@@ -437,10 +438,10 @@ namespace XIVModExplorer
                 if (URL_ImgFind.DownloadMod(data, selected_dir, DLArchive.IsChecked.Value, DLRDir.IsChecked.Value))
                 {
                     FileTree.UpdateTreeView(selected_dir + "\\");
-                    MessageWindow.Show("Finished");
+                    MessageWindow.Show(Locales.Language.Word_Finished);
                 }
                 else
-                    MessageWindow.Show("Error while fetching data.", "ERROR");
+                    MessageWindow.Show(Locales.Language.Msg_Error_Fetch, Locales.Language.Word_Error);
             }
 
         }
@@ -452,7 +453,7 @@ namespace XIVModExplorer
         /// <param name="e"></param>
         private void EditMetadata_Click(object sender, RoutedEventArgs e)
         {
-            Metadata mdata = new Metadata(right_clicked_item);
+            new Metadata(right_clicked_item);
         }
 
         /// <summary>
@@ -464,7 +465,7 @@ namespace XIVModExplorer
         {
             if (!Directory.Exists(selected_dir))
                 return;
-            var Result = MessageBox.Show(selected_dir, "Delete folder?", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            var Result = MessageBox.Show(selected_dir, Locales.Language.Msg_Delete_Folder_Confirm, MessageBoxButton.YesNo, MessageBoxImage.Question);
             if (Result == MessageBoxResult.Yes)
             {
                 //delete the dir
@@ -517,7 +518,7 @@ namespace XIVModExplorer
         {
             if (outputDirectory == "")
             {
-                MessageWindow.Show("No output direcory selected");
+                MessageWindow.Show(Locales.Language.Msg_No_Output_Dir);
                 return;
             }
             await Task.Run(() =>
@@ -531,7 +532,16 @@ namespace XIVModExplorer
                 archive.Dispose();
             });
             FileTree.UpdateTreeView(outputDirectory + "\\");
-            MessageWindow.Show("Finished compressing.");
+            MessageWindow.Show(Locales.Language.Msg_Finished_Compressing);
+        }
+
+        private void SetRemoveTitleStatus(string status, bool add = true)
+        {
+            if (add)
+                TitleText.Text += status;
+            else
+                TitleText.Text = TitleText.Text.Replace(status, "");
+
         }
     }
 }

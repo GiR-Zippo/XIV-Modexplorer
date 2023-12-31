@@ -20,7 +20,9 @@ namespace XIVModExplorer.Caching
         EAR     = 0b0000000001000000,
         NECK    = 0b0000000010000000,
         ARM     = 0b0000000100000000,
-        FINGER  = 0b0000001000000000
+        FINGER  = 0b0000001000000000,
+
+        ONACC   = 0b1000000000000000    //ists ein mod-accessoire
     }
 
     [Serializable]
@@ -30,6 +32,7 @@ namespace XIVModExplorer.Caching
         public Guid Id { get; set; }
         public string ModName { get; set; } = "";
         public UInt16 ModTypeFlag { get; set; } = 0;
+        public UInt16 AccModTypeFlag { get; set; } = 0;
         public string Description { get; set; } = "";
         public byte[] picture { get; set; } = null;
         public string Url { get; set; } = "";

@@ -5,6 +5,7 @@
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:Control="clr-namespace:XIVModExplorer.UserCtrl"
+        xmlns:Loc="clr-namespace:XIVModExplorer.Locales"
         xmlns:markdownviewer="clr-namespace:MarkdownViewer;assembly=MarkdownViewer"
         mc:Ignorable="d"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
@@ -12,13 +13,8 @@
         WindowStyle="None"
         AllowsTransparency="True"
         ResizeMode="CanResizeWithGrip"
-        Title="XIV-ModExplorer" Height="640" Width="900"
-        
-
-
->
-
-
+        Title="XIV-ModExplorer"
+        Height="640" Width="900">
     <Grid >
         <Grid.RowDefinitions>
             <RowDefinition Height="28"/>
@@ -42,36 +38,36 @@
         </Grid>
 
         <Menu Grid.Row="1" Grid.ColumnSpan="2">
-            <MenuItem Header="File">
-                <MenuItem Header="To Archive" Click="File_Compress_Click"/>
-                <MenuItem Header="Collect Data from Url" Click="File_Scrape_Click"/>
+            <MenuItem Header="{x:Static Loc:Language.Menu_File}">
+                <MenuItem Header="{x:Static Loc:Language.Menu_File_To_Archive}" Click="File_Compress_Click"/>
+                <MenuItem Header="{x:Static Loc:Language.Menu_File_Collect}" Click="File_Scrape_Click"/>
             </MenuItem>
-            <MenuItem Header="Download">
-                <CheckBox Content="Archive" x:Name="DLArchive"/>
-                <CheckBox Content="Remove Directory" x:Name="DLRDir"/>
-                <MenuItem Header="Download" Click="DownloadMenu_Click"/>
+            <MenuItem Header="{x:Static Loc:Language.Menu_Download}">
+                <CheckBox Content="{x:Static Loc:Language.Menu_Download_Archive}" x:Name="DLArchive"/>
+                <CheckBox Content="{x:Static Loc:Language.Menu_Download_Remove}" x:Name="DLRDir"/>
+                <MenuItem Header="{x:Static Loc:Language.Menu_Download}" Click="DownloadMenu_Click"/>
             </MenuItem>
-            <MenuItem Header="Penumbra">
-                <MenuItem Header="Backup Mod" Click="BackupPenumbraModMenu_Click" />
+            <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra}">
+                <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra_Backup_Mod}" Click="BackupPenumbraModMenu_Click" />
             </MenuItem>
-            <MenuItem Header="Settings">
-                <CheckBox Content="Use Cache Database" Checked="CacheBox_Checked" Unchecked="CacheBox_Checked" x:Name="UseDatabase"/>
-                <MenuItem Header="Set PenumbraModPath" Click="SetPenumbraMenu_Click"/>
-                <MenuItem Header="Set Mod Archive Path" Click="SetModArchiveMenu_Click"/>
+            <MenuItem Header="{x:Static Loc:Language.Menu_Settings}">
+                <CheckBox Content="{x:Static Loc:Language.Menu_Settings_Cache}" Checked="CacheBox_Checked" Unchecked="CacheBox_Checked" x:Name="UseDatabase"/>
+                <MenuItem Header="{x:Static Loc:Language.Menu_Settings_PenumbraPath}" Click="SetPenumbraMenu_Click"/>
+                <MenuItem Header="{x:Static Loc:Language.Menu_Settings_ModPath}" Click="SetModArchiveMenu_Click"/>
             </MenuItem>
 
         </Menu>
         <Control:TreeViewFileExplorer Grid.Row="3" Grid.Column="0" x:Name="FileTree">
             <Control:TreeViewFileExplorer.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Header="Compress" Click="ContextMenu_Compress_Click"/>
-                    <MenuItem Header="Scrape Data" Click="ContextMenu_Scrape_Click" />
-                    <MenuItem Header="Scrape and Compress" Click="ContextMenu_ScrapeCompress_Click" />
-                    <MenuItem Header="Download here" Click="ContextMenu_Download_Click" />
+                    <MenuItem Header="{x:Static Loc:Language.Context_Menu_Compress}" Click="ContextMenu_Compress_Click"/>
+                    <MenuItem Header="{x:Static Loc:Language.Context_Menu_Scrape}" Click="ContextMenu_Scrape_Click" />
+                    <MenuItem Header="{x:Static Loc:Language.Context_Menu_Scrape_Compress}" Click="ContextMenu_ScrapeCompress_Click" />
+                    <MenuItem Header="{x:Static Loc:Language.Context_Menu_Download}" Click="ContextMenu_Download_Click" />
                     <MenuItem/>
-                    <MenuItem Header="Edit Metadata" Click="EditMetadata_Click"/>
+                    <MenuItem Header="{x:Static Loc:Language.Context_Menu_EditMeta}" Click="EditMetadata_Click"/>
                     <MenuItem/>
-                    <MenuItem Header="Delete" Click="ContextMenu_Delete_Click" />
+                    <MenuItem Header="{x:Static Loc:Language.Context_Menu_Delete}" Click="ContextMenu_Delete_Click" />
                 </ContextMenu>
             </Control:TreeViewFileExplorer.ContextMenu>
         </Control:TreeViewFileExplorer>
