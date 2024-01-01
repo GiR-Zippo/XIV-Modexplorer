@@ -5,6 +5,7 @@
 
 using System;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
@@ -18,6 +19,8 @@ namespace XIVModExplorer
     /// </summary>
     public partial class App : Application
     {
+        public static string TempPath = Path.GetTempPath() + "XIVModExplorer\\";
+
         [DllImport("Kernel32.dll")]
         public static extern bool AttachConsole(int processId);
 
@@ -52,8 +55,8 @@ namespace XIVModExplorer
             }
 
             ConfigureLanguage(System.Threading.Thread.CurrentThread.CurrentUICulture.ToString());
-
-            Configuration.ReadConfig();
+            Configuration.ReadConfig(); //read the config
+            TrashRemover.Start(); //start the temp dir watchdog
             string archivePath = Configuration.GetValue("ModArchivePath");
             if (archivePath != null)
                 if (Configuration.GetBoolValue("UseDatabase"))
@@ -64,6 +67,7 @@ namespace XIVModExplorer
         protected override void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
+            TrashRemover.Stop();
             if (Configuration.GetBoolValue("UseDatabase"))
                 Database.Instance.Dispose();
         }
