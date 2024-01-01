@@ -122,6 +122,7 @@ namespace XIVModExplorer.Caching
                         modentry = tEntry;
                         modentry.Filename = Configuration.GetRelativeModPath(filename);
                         Database.Instance.SaveData(modentry);
+                        DisplayModInfo();
                         return;
                     }
                 }                  
