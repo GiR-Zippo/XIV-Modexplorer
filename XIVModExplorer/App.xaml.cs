@@ -43,7 +43,6 @@ namespace XIVModExplorer
             l.Dispose();
         }
 
-
         protected override void OnStartup(StartupEventArgs e)
         {
             AttachConsole(-1);
