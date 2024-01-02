@@ -286,6 +286,9 @@
     <Compile Include="Caching\Metadata.xaml.cs">
       <DependentUpon>Metadata.xaml</DependentUpon>
     </Compile>
+    <Compile Include="HelperWindows\DataGridInput.xaml.cs">
+      <DependentUpon>DataGridInput.xaml</DependentUpon>
+    </Compile>
     <Compile Include="HelperWindows\InputBox.xaml.cs">
       <DependentUpon>InputBox.xaml</DependentUpon>
     </Compile>
@@ -297,12 +300,15 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>Language.resx</DependentUpon>
     </Compile>
+    <Compile Include="Penumbra\Penumbra.cs" />
+    <Compile Include="Penumbra\PenumbraHttpApi.cs" />
     <Compile Include="Scraping\DriveDownloader.cs" />
     <Compile Include="FolderPicker.cs" />
     <Compile Include="Scraping\DynamicSite.cs" />
     <Compile Include="Scraping\LuaScraper.cs" />
     <Compile Include="PenumbraBackup.cs" />
     <Compile Include="Scraping\URL_ImgFind.cs" />
+    <Compile Include="TrashRemover.cs" />
     <Compile Include="UserCtrl\BaseObject.cs" />
     <Compile Include="UserCtrl\Enums\IconSize.cs" />
     <Compile Include="UserCtrl\Enums\ItemState.cs" />
@@ -321,6 +327,10 @@
       <DependentUpon>TreeViewFileExplorer.xaml</DependentUpon>
     </Compile>
     <Page Include="Caching\Metadata.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="HelperWindows\DataGridInput.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -373,6 +383,7 @@
       <Name>ReverseMarkdown</Name>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>

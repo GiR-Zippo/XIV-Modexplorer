@@ -96,6 +96,11 @@ namespace XIVModExplorer.Caching
         }
         #endregion
 
+        /// <summary>
+        /// Try to get the infos from the archive
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <param name="reload"></param>
         private async void TryGetMetaDataFromArchive(string filename, bool reload = false)
         {
             if (!reload)
@@ -113,11 +118,12 @@ namespace XIVModExplorer.Caching
                 Save_Button.IsEnabled = true;
                 TitleText.Text = TitleText.Text.Replace(" - Building Hash", "");
 
+                //Check if the hash is already in DB
                 var tEntry = Database.Instance.DoesHashExists(modentry.HashSha1);
                 if (tEntry != null)
                 {
                     var result = MessageBox.Show(Locales.Language.Metadata_SameHashFound, Locales.Language.Word_Warning, MessageBoxButton.YesNo, MessageBoxImage.Question);
-                    if (result == MessageBoxResult.Yes)
+                    if (result == MessageBoxResult.Yes) //use the data in DB and update hash
                     {
                         modentry = tEntry;
                         modentry.Filename = Configuration.GetRelativeModPath(filename);
@@ -176,6 +182,9 @@ namespace XIVModExplorer.Caching
             DisplayModInfo();
         }
 
+        /// <summary>
+        /// Display the read data
+        /// </summary>
         private void DisplayModInfo()
         {
             this.ModName.Text = modentry.ModName;
@@ -289,7 +298,11 @@ namespace XIVModExplorer.Caching
             }
         }
 
-
+        /// <summary>
+        /// Export info as Json
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ExportButton_Click(object sender, RoutedEventArgs e)
         {
             var dlg = new FolderPicker();

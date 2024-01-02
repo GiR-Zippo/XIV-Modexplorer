@@ -129,6 +129,9 @@
   <data name="Context_Menu_EditMeta" xml:space="preserve">
     <value>Editiere Metadaten</value>
   </data>
+  <data name="Context_Menu_InstallMod" xml:space="preserve">
+    <value>Installiere Mod</value>
+  </data>
   <data name="Context_Menu_Scrape" xml:space="preserve">
     <value>Download Info</value>
   </data>
@@ -158,6 +161,12 @@
   </data>
   <data name="Menu_Penumbra_Backup_Mod" xml:space="preserve">
     <value>Backup Mod</value>
+  </data>
+  <data name="Menu_Penumbra_Redraw_All" xml:space="preserve">
+    <value>Redraw All</value>
+  </data>
+  <data name="Menu_Penumbra_Redraw_Self" xml:space="preserve">
+    <value>Redraw Self</value>
   </data>
   <data name="Menu_Settings" xml:space="preserve">
     <value>Einstellungen</value>
@@ -197,6 +206,9 @@
   </data>
   <data name="Msg_No_Pic_Selected" xml:space="preserve">
     <value>Bitte Vorschaubild auswählen.</value>
+  </data>
+  <data name="Msg_Wrong_ModDir" xml:space="preserve">
+    <value>Sieht wie der falsche Ordner aus. Wirklich weitermachen?</value>
   </data>
   <data name="Types_Accessory" xml:space="preserve">
     <value>Mod ist ein Accessoire</value>
@@ -246,6 +258,9 @@
   <data name="Type_Vfx" xml:space="preserve">
     <value>VFX</value>
   </data>
+  <data name="Word_Cancel" xml:space="preserve">
+    <value>Abbruch</value>
+  </data>
   <data name="Word_Description" xml:space="preserve">
     <value>Beschreibung</value>
   </data>
@@ -254,6 +269,9 @@
   </data>
   <data name="Word_Finished" xml:space="preserve">
     <value>Feddich.</value>
+  </data>
+  <data name="Word_Okay" xml:space="preserve">
+    <value>Okay</value>
   </data>
   <data name="Word_Pictures" xml:space="preserve">
     <value>Bilder</value>

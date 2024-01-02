@@ -49,6 +49,9 @@
             </MenuItem>
             <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra}">
                 <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra_Backup_Mod}" Click="BackupPenumbraModMenu_Click" />
+                <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra_Redraw_Self}" Click="RedrawSelfMenuItem_Click" />
+                <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra_Redraw_All}" Click="RedrawAllMenuItem_Click" />
+                <!-- <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra_Redraw_All}" Click="InstallPenumbraMenuItem_Click"/> -->
             </MenuItem>
             <MenuItem Header="{x:Static Loc:Language.Menu_Settings}">
                 <CheckBox Content="{x:Static Loc:Language.Menu_Settings_Cache}" Checked="CacheBox_Checked" Unchecked="CacheBox_Checked" x:Name="UseDatabase"/>
@@ -66,6 +69,7 @@
                     <MenuItem Header="{x:Static Loc:Language.Context_Menu_Scrape_Compress}" Click="ContextMenu_ScrapeCompress_Click" />
                     <MenuItem Header="{x:Static Loc:Language.Context_Menu_Download}" Click="ContextMenu_Download_Click" />
                     <MenuItem/>
+                    <MenuItem Header="{x:Static Loc:Language.Context_Menu_InstallMod}" Click="ContextMenu_InstallMod_Click"/>
                     <MenuItem Header="{x:Static Loc:Language.Context_Menu_EditMeta}" Click="EditMetadata_Click"/>
                     <MenuItem/>
                     <MenuItem Header="{x:Static Loc:Language.Context_Menu_Delete}" Click="ContextMenu_Delete_Click" />

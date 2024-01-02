@@ -5,6 +5,7 @@
 
 using SharpCompress.Archives;
 using SharpCompress.Common;
+using SharpCompress.Readers;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -18,6 +19,7 @@ using System.Windows.Input;
 using System.Windows.Media.Imaging;
 using XIVModExplorer.Caching;
 using XIVModExplorer.HelperWindows;
+using XIVModExplorer.Penumbra;
 using XIVModExplorer.Scraping;
 
 namespace XIVModExplorer
@@ -328,6 +330,20 @@ namespace XIVModExplorer
             }
         }
 
+        private void RedrawSelfMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            new PenumbraApi().Redraw(0);
+        }
+
+        private void RedrawAllMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+            new PenumbraApi().Redraw(-1);
+        }
+
+        private void InstallPenumbraMenuItem_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
         /// <summary>
         /// Use Database (for previews)
         /// </summary>
@@ -379,6 +395,9 @@ namespace XIVModExplorer
         /// <param name="e"></param>
         private void ContextMenu_Compress_Click(object sender, RoutedEventArgs e)
         {
+            if (!IsModdir(selected_dir))
+                return;
+
             string result = new DirectoryInfo(selected_dir).Parent.FullName;
             compressArchive(selected_dir, result);
         }
@@ -390,6 +409,9 @@ namespace XIVModExplorer
         /// <param name="e"></param>
         private void ContextMenu_Scrape_Click(object sender, RoutedEventArgs e)
         {
+            if (!IsModdir(selected_dir))
+                return;
+
             InputBox input = new InputBox("Website Url:", "Input Url");
             string data = input.ShowDialog();
             if (data != "")
@@ -408,6 +430,9 @@ namespace XIVModExplorer
         /// <param name="e"></param>
         private void ContextMenu_ScrapeCompress_Click(object sender, RoutedEventArgs e)
         {
+            if (!IsModdir(selected_dir))
+                return;
+
             InputBox input = new InputBox("Website Url:", "Input Url");
             string data = input.ShowDialog();
             if (data != "")
@@ -449,6 +474,73 @@ namespace XIVModExplorer
                     MessageWindow.Show(Locales.Language.Msg_Error_Fetch, Locales.Language.Word_Error);
             }
 
+        }
+
+        /// <summary>
+        /// Install selected mod
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void ContextMenu_InstallMod_Click(object sender, RoutedEventArgs e)
+        {
+            if (current_preview == "")
+                return;
+
+            List<string> foundFiles = new List<string>();
+
+            string x = App.TempPath+Path.GetFileNameWithoutExtension(current_preview);
+            Directory.CreateDirectory(x);
+            await Task.Run(() =>
+            {
+                using (Stream stream = File.OpenRead(current_preview))
+                {
+                    var reader = ReaderFactory.Open(stream);
+                    while (reader.MoveToNextEntry())
+                    {
+                        //Extract normal ttmp2 and pmb
+                        if (!reader.Entry.IsDirectory)
+                        {
+                            if (reader.Entry.Key.EndsWith(".ttmp2") || reader.Entry.Key.EndsWith(".pmp"))
+                            {
+                                reader.WriteEntryToDirectory(x, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
+                                foundFiles.Add(reader.Entry.Key);
+                            }
+                            //Extract archives and mod
+                            if (reader.Entry.Key.EndsWith(".zip") || reader.Entry.Key.EndsWith(".rar") || reader.Entry.Key.EndsWith(".7z"))
+                            {
+                                reader.WriteEntryToDirectory(x, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
+                                using (Stream innerStream = File.OpenRead(x+"\\"+ reader.Entry.Key))
+                                {
+                                    var innerReader = ReaderFactory.Open(innerStream);
+                                    while (innerReader.MoveToNextEntry())
+                                    {
+                                        if (innerReader.Entry.Key.EndsWith(".ttmp2") || innerReader.Entry.Key.EndsWith(".pmp"))
+                                        {
+                                            innerReader.WriteEntryToDirectory(x, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
+                                            foundFiles.Add(innerReader.Entry.Key);
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    reader.Dispose();
+                }
+            });
+
+            //Generate the list and ask
+            Dictionary<string, string> d = new Dictionary<string, string>();
+            foreach (var it in foundFiles)
+                d.Add(x + "\\" + it, it);
+            List<string> retval = new DataGridInput(d, "Select mods").ShowDialog();
+            d.Clear();
+            foundFiles.Clear();
+
+            if (retval.Count() <= 0)
+                return;
+
+            foreach(string mod in retval)
+                new PenumbraApi().Install(mod);
         }
 
         /// <summary>
@@ -540,6 +632,17 @@ namespace XIVModExplorer
             MessageWindow.Show(Locales.Language.Msg_Finished_Compressing);
         }
 
+        private bool IsModdir(string path)
+        {
+            if (Directory.GetDirectories(selected_dir).Count() > 5 || Directory.GetFiles(selected_dir, "*.zip", SearchOption.TopDirectoryOnly).Count() > 2)
+            {
+                var Result = MessageBox.Show(Locales.Language.Msg_Wrong_ModDir + "\r\n" + selected_dir, Locales.Language.Word_Warning, MessageBoxButton.YesNo, MessageBoxImage.Question);
+                if (Result == MessageBoxResult.No)
+                    return false;
+            }
+            return true;
+        }
+
         private void SetRemoveTitleStatus(string status, bool add = true)
         {
             if (add)
@@ -548,7 +651,5 @@ namespace XIVModExplorer
                 TitleText.Text = TitleText.Text.Replace(status, "");
 
         }
-
-
     }
 }

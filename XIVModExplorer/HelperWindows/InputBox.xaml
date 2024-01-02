@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+        xmlns:Loc="clr-namespace:XIVModExplorer.Locales"
         mc:Ignorable="d"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
@@ -46,8 +47,8 @@
                     <ColumnDefinition Width="*"/>
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
-                <Button Grid.Column="0" MinHeight="30" MinWidth="70" Content="Ok"       Click="ok_Click"/>
-                <Button Grid.Column="2" MinHeight="30" MinWidth="70" Content="Cancel"   Click="cancel_Click"/>
+                <Button Grid.Column="0" MinHeight="30" MinWidth="70" Content="{x:Static Loc:Language.Word_Okay}"   Click="ok_Click"/>
+                <Button Grid.Column="2" MinHeight="30" MinWidth="70" Content="{x:Static Loc:Language.Word_Cancel}" Click="cancel_Click"/>
             </Grid>
         </Grid>
 

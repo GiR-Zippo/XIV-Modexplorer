@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+        xmlns:Loc="clr-namespace:XIVModExplorer.Locales"
         mc:Ignorable="d"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         Background="{DynamicResource MaterialDesignPaper}"
@@ -38,7 +39,7 @@
                 <ColumnDefinition Width="10"/>
             </Grid.ColumnDefinitions>
             <TextBlock  Grid.Row="0" Grid.Column="1" x:Name="tContent" FontSize="14" HorizontalAlignment="Center"/>
-            <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" MinHeight="30" MinWidth="70" Content="Ok" Click="ok_Click"/>
+            <Button Grid.Row="2" Grid.Column="1" HorizontalAlignment="Center" MinHeight="30" MinWidth="70" Content="{x:Static Loc:Language.Word_Okay}" Click="ok_Click"/>
         </Grid>
     </Grid>
 </Window>

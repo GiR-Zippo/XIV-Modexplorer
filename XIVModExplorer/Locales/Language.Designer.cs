@@ -97,6 +97,15 @@ namespace XIVModExplorer.Locales {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Install Mod ähnelt.
+        /// </summary>
+        public static string Context_Menu_InstallMod {
+            get {
+                return ResourceManager.GetString("Context_Menu_InstallMod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Download Info ähnelt.
         /// </summary>
         public static string Context_Menu_Scrape {
@@ -183,6 +192,24 @@ namespace XIVModExplorer.Locales {
         public static string Menu_Penumbra_Backup_Mod {
             get {
                 return ResourceManager.GetString("Menu_Penumbra_Backup_Mod", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Redraw all ähnelt.
+        /// </summary>
+        public static string Menu_Penumbra_Redraw_All {
+            get {
+                return ResourceManager.GetString("Menu_Penumbra_Redraw_All", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Redraw self ähnelt.
+        /// </summary>
+        public static string Menu_Penumbra_Redraw_Self {
+            get {
+                return ResourceManager.GetString("Menu_Penumbra_Redraw_Self", resourceCulture);
             }
         }
         
@@ -300,6 +327,15 @@ namespace XIVModExplorer.Locales {
         public static string Msg_No_Pic_Selected {
             get {
                 return ResourceManager.GetString("Msg_No_Pic_Selected", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Looks like the wrong directory. Really want to continue? ähnelt.
+        /// </summary>
+        public static string Msg_Wrong_ModDir {
+            get {
+                return ResourceManager.GetString("Msg_Wrong_ModDir", resourceCulture);
             }
         }
         
@@ -448,6 +484,15 @@ namespace XIVModExplorer.Locales {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Cancel ähnelt.
+        /// </summary>
+        public static string Word_Cancel {
+            get {
+                return ResourceManager.GetString("Word_Cancel", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Description ähnelt.
         /// </summary>
         public static string Word_Description {
@@ -471,6 +516,15 @@ namespace XIVModExplorer.Locales {
         public static string Word_Finished {
             get {
                 return ResourceManager.GetString("Word_Finished", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Okay ähnelt.
+        /// </summary>
+        public static string Word_Okay {
+            get {
+                return ResourceManager.GetString("Word_Okay", resourceCulture);
             }
         }
         

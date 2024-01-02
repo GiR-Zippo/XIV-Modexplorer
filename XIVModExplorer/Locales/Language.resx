@@ -129,6 +129,9 @@
   <data name="Context_Menu_EditMeta" xml:space="preserve">
     <value>Edit Metadata</value>
   </data>
+  <data name="Context_Menu_InstallMod" xml:space="preserve">
+    <value>Install Mod</value>
+  </data>
   <data name="Context_Menu_Scrape" xml:space="preserve">
     <value>Download Info</value>
   </data>
@@ -158,6 +161,12 @@
   </data>
   <data name="Menu_Penumbra_Backup_Mod" xml:space="preserve">
     <value>Backup Mod</value>
+  </data>
+  <data name="Menu_Penumbra_Redraw_All" xml:space="preserve">
+    <value>Redraw all</value>
+  </data>
+  <data name="Menu_Penumbra_Redraw_Self" xml:space="preserve">
+    <value>Redraw self</value>
   </data>
   <data name="Menu_Settings" xml:space="preserve">
     <value>Settings</value>
@@ -197,6 +206,9 @@
   </data>
   <data name="Msg_No_Pic_Selected" xml:space="preserve">
     <value>No preview picture selected</value>
+  </data>
+  <data name="Msg_Wrong_ModDir" xml:space="preserve">
+    <value>Looks like the wrong directory. Really want to continue?</value>
   </data>
   <data name="Types_Accessory" xml:space="preserve">
     <value>Mod is an accessory</value>
@@ -246,6 +258,9 @@
   <data name="Type_Vfx" xml:space="preserve">
     <value>VFX</value>
   </data>
+  <data name="Word_Cancel" xml:space="preserve">
+    <value>Cancel</value>
+  </data>
   <data name="Word_Description" xml:space="preserve">
     <value>Description</value>
   </data>
@@ -254,6 +269,9 @@
   </data>
   <data name="Word_Finished" xml:space="preserve">
     <value>Finished</value>
+  </data>
+  <data name="Word_Okay" xml:space="preserve">
+    <value>Okay</value>
   </data>
   <data name="Word_Pictures" xml:space="preserve">
     <value>Pictures</value>

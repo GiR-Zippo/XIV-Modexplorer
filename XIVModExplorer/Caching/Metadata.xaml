@@ -167,7 +167,6 @@
                 <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <Button Grid.Column="0" x:Name="Save_Button" Content="{x:Static Loc:Language.Word_Save}" Click="Save_Click" MinWidth="100" HorizontalAlignment="Left"/>
-
         </Grid>
     </Grid>
 </Window>
