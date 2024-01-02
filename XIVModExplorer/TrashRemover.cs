@@ -38,7 +38,7 @@ namespace XIVModExplorer
         public Timer cleanupoTimer { get; set; } = null;
         public TrashRemover()
         { 
-            cleanupoTimer = new Timer(5000);
+            cleanupoTimer = new Timer(15000);
             cleanupoTimer.Elapsed += OnTimedEvent;
             cleanupoTimer.AutoReset = true;
             cleanupoTimer.Enabled = true;
@@ -58,7 +58,7 @@ namespace XIVModExplorer
             var d = Directory.GetDirectories(App.TempPath);
             foreach (var t in d)
             {
-                double f = DateTimeOffset.Now.ToUnixTimeSeconds() - 60;
+                double f = DateTimeOffset.Now.ToUnixTimeSeconds() - 300;
                 double fa = Metadata.ConvertToUnixTimestamp(Directory.GetCreationTime(t));
                 if (fa < f)
                 {

@@ -506,7 +506,7 @@ namespace XIVModExplorer
                                 foundFiles.Add(reader.Entry.Key);
                             }
                             //Extract archives and mod
-                            if (reader.Entry.Key.EndsWith(".zip") || reader.Entry.Key.EndsWith(".rar") || reader.Entry.Key.EndsWith(".7z"))
+                            if (reader.Entry.Key.EndsWith(".zip") || reader.Entry.Key.EndsWith(".rar"))
                             {
                                 reader.WriteEntryToDirectory(x, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
                                 using (Stream innerStream = File.OpenRead(x+"\\"+ reader.Entry.Key))
@@ -520,7 +520,22 @@ namespace XIVModExplorer
                                             foundFiles.Add(innerReader.Entry.Key);
                                         }
                                     }
+                                    innerReader.Dispose();
                                 }
+                            }
+                            if (reader.Entry.Key.EndsWith(".7z"))
+                            {
+                                reader.WriteEntryToDirectory(x, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
+                                var innerReader = ArchiveFactory.Open(x + "\\" + reader.Entry.Key).ExtractAllEntries();
+                                while (innerReader.MoveToNextEntry())
+                                {
+                                    if (!innerReader.Entry.IsDirectory && (innerReader.Entry.Key.EndsWith(".ttmp2") || innerReader.Entry.Key.EndsWith(".pmp")))
+                                    {
+                                        innerReader.WriteEntryToDirectory(x, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
+                                        foundFiles.Add(innerReader.Entry.Key);
+                                    }
+                                }
+                                innerReader.Dispose();
                             }
                         }
                     }
