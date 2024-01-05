@@ -107,6 +107,7 @@ namespace XIVModExplorer.HelperWindows
 
         void cancel_Click(object sender, RoutedEventArgs e)
         {
+            input.Text = "";
             this.Close();
         }
 

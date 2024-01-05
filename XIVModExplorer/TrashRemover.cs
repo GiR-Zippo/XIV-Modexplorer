@@ -26,7 +26,6 @@ namespace XIVModExplorer
                 return;
             try
             {
-                var d = Path.GetDirectoryName(App.TempPath);
                 Directory.Delete(Path.GetDirectoryName(App.TempPath), true);
             }
             catch (IOException)

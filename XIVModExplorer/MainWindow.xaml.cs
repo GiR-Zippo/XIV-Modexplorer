@@ -565,7 +565,8 @@ namespace XIVModExplorer
         /// <param name="e"></param>
         private void EditMetadata_Click(object sender, RoutedEventArgs e)
         {
-            new Metadata(right_clicked_item);
+            if (!File.GetAttributes(right_clicked_item).HasFlag(FileAttributes.Directory))
+                new Metadata(right_clicked_item);
         }
 
         /// <summary>
