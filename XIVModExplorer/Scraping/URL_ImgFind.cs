@@ -40,7 +40,7 @@ namespace XIVModExplorer.Scraping
             string newPath = "";
 
             //scan the url for data
-            if (!ScanURLforData(url, path))
+            if (!ScanURLforData(url))
                 return false;
 
             //no download url, no download
@@ -128,7 +128,7 @@ namespace XIVModExplorer.Scraping
             _description = "";
             _downloadUrl.Clear();
             _externalSite = "";
-            if (!ScanURLforData(url, path))
+            if (!ScanURLforData(url))
                 return false;
 
             Parallel.ForEach(_images, new ParallelOptions { MaxDegreeOfParallelism = 2 }, (target, state, index) =>
@@ -140,7 +140,7 @@ namespace XIVModExplorer.Scraping
             return true;
         }
 
-        private static bool ScanURLforData(string url, string path)
+        private static bool ScanURLforData(string url)
         {
             string urlAddress = url;
             string hostname = "";
@@ -533,27 +533,31 @@ namespace XIVModExplorer.Scraping
         /// <param name="filename"></param>
         private static void saveImage(string imageUrl, string filename)
         {
-            using (WebClient webClient = new WebClient())
+            try
             {
-                byte[] data = webClient.DownloadData(imageUrl);
-
-                using (var stream = new MemoryStream(data))
+                using (WebClient webClient = new WebClient())
                 {
-                    using (var image = new MagickImage(stream))
+                    byte[] data = webClient.DownloadData(imageUrl);
+
+                    using (var stream = new MemoryStream(data))
                     {
-                        using (var outputStream = new MemoryStream())
+                        using (var image = new MagickImage(stream))
                         {
-                            image.Format = MagickFormat.Png;
-                            image.Quality = 80;
-                            image.Write(outputStream);
-                            using (var yourImage = Image.FromStream(outputStream))
+                            using (var outputStream = new MemoryStream())
                             {
-                                yourImage.Save(filename, ImageFormat.Png);
+                                image.Format = MagickFormat.Png;
+                                image.Quality = 80;
+                                image.Write(outputStream);
+                                using (var yourImage = Image.FromStream(outputStream))
+                                {
+                                    yourImage.Save(filename, ImageFormat.Png);
+                                }
                             }
                         }
                     }
                 }
             }
+            catch { }
         }
 
         /// <summary>
