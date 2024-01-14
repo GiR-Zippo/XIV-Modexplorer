@@ -1,5 +1,5 @@
 ﻿/*
-* Copyright(c) 2023 GiR-Zippo
+* Copyright(c) 2024 GiR-Zippo
 * Licensed under the Mozilla Public License Version 2.0. See https://github.com/GiR-Zippo/XIV-Modexplorer/blob/main/LICENSE for full license information.
 */
 
@@ -13,15 +13,13 @@ namespace XIVModExplorer.HelperWindows
     /// </summary>
     public partial class MessageWindow : Window
     {
-
         public static void Show(string content = "", string Htitle = "")
         {
-            new MessageWindow(content, Htitle);
+            App.Current.Dispatcher.Invoke(() =>
+            {
+                new MessageWindow(content, Htitle);
+            });
         }
-
-        public MessageWindow()
-        { }
-
 
         private MessageWindow(string content = "", string Htitle = "")
         {

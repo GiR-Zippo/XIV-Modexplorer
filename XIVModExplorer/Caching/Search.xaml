@@ -1,0 +1,82 @@
+﻿<Window x:Class="XIVModExplorer.Caching.Search"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:fa="http://schemas.awesome.incremented/wpf/xaml/fontawesome.sharp"
+        xmlns:Loc="clr-namespace:XIVModExplorer.Locales"
+        mc:Ignorable="d"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="{DynamicResource MaterialDesignPaper}"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        ResizeMode="CanResizeWithGrip"
+        Height="450" Width="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Background="Transparent" Height="28" VerticalAlignment="Top" MouseDown="OnTitleBarMouseDown">
+            <TextBlock x:Name="TitleText" Grid.Column="1" Text="Search" VerticalAlignment="Center" Margin="8, 0, 0, 0" Opacity="0.9" Foreground="White"/>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button Margin="3,0,3,0" Width="28" Height="28" Padding="8" Background="Transparent" BorderThickness="0" Click="OnCloseClick">
+                    <fa:IconBlock Icon="Times" Opacity="0.5" FontSize="12" Foreground="{DynamicResource MaterialDesignBody}"/>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="10"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="20"/>
+                    <RowDefinition Height="Auto"/>
+
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <Label Grid.Row="1" Grid.Column="0" Content="Search:"/>
+                <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Width="400" x:Name="Search_Text" KeyDown="Search_Text_KeyDown"/>
+
+                <CheckBox Grid.Row="3" Grid.Column="0" Content="{x:Static Loc:Language.Types_Weapon}" x:Name="C_Weapon"/>
+                <CheckBox Grid.Row="3" Grid.Column="1" Content="{x:Static Loc:Language.Types_Head}" x:Name="C_Head"/>
+                <CheckBox Grid.Row="3" Grid.Column="2" Content="{x:Static Loc:Language.Types_Top}" x:Name="C_Top"/>
+                <CheckBox Grid.Row="3" Grid.Column="3" Content="{x:Static Loc:Language.Types_Hands}" x:Name="C_Hands"/>
+
+                <CheckBox Grid.Row="4" Grid.Column="0" Content="{x:Static Loc:Language.Types_Bottom}" x:Name="C_Bottom"/>
+                <CheckBox Grid.Row="4" Grid.Column="1" Content="{x:Static Loc:Language.Types_Shoe}" x:Name="C_Shoe"/>
+                <CheckBox Grid.Row="4" Grid.Column="2" Content="{x:Static Loc:Language.Types_Ear}" x:Name="C_Ear"/>
+                <CheckBox Grid.Row="4" Grid.Column="3" Content="{x:Static Loc:Language.Types_Neck}" x:Name="C_Neck"/>
+
+                <CheckBox Grid.Row="5" Grid.Column="0" Content="{x:Static Loc:Language.Types_Wrist}" x:Name="C_Wrist"/>
+                <CheckBox Grid.Row="5" Grid.Column="1" Content="{x:Static Loc:Language.Types_Finger}" x:Name="C_Finger"/>
+
+                <CheckBox Grid.Row="6" Grid.Column="0" Content="{x:Static Loc:Language.Type_Minion}" x:Name="C_Minion"/>
+                <CheckBox Grid.Row="6" Grid.Column="1" Content="{x:Static Loc:Language.Type_Mount}" x:Name="C_Mount"/>
+
+                <CheckBox Grid.Row="7" Grid.Column="0" Content="{x:Static Loc:Language.Type_Animation}" x:Name="C_Animation"/>
+                <CheckBox Grid.Row="7" Grid.Column="1" Content="{x:Static Loc:Language.Type_Vfx}" x:Name="C_Vfx"/>
+
+                <CheckBox Grid.Row="9" Grid.Column="0" Content="{x:Static Loc:Language.Types_Accessory}" x:Name="C_ACCS"/>
+            </Grid>
+
+        </Grid>
+
+    </Grid>
+</Window>

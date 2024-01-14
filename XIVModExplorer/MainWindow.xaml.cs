@@ -1,5 +1,5 @@
 ﻿/*
-* Copyright(c) 2023 GiR-Zippo
+* Copyright(c) 2024 GiR-Zippo
 * Licensed under the Mozilla Public License Version 2.0. See https://github.com/GiR-Zippo/XIV-Modexplorer/blob/main/LICENSE for full license information.
 */
 
@@ -37,6 +37,8 @@ namespace XIVModExplorer
         public Timer slideTimer = null;
         public int SliderIndex { get; set; } = 0;
 
+        private Scraper scraper { get; set; } = null;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -50,6 +52,8 @@ namespace XIVModExplorer
             FileTree.OnRightClicked += RightSelected;
             FileTree.OnDirClicked += DirSelected;
             FileTree.OnArchiveClicked += ArchivePreview;
+
+            scraper = new Scraper();
         }
 
         #region Events
@@ -266,8 +270,11 @@ namespace XIVModExplorer
         /// <summary>
         /// Scrape the mod data
         /// </summary>
-        private void File_Scrape_Click(object sender, RoutedEventArgs e)
+        private async void File_Scrape_Click(object sender, RoutedEventArgs e)
         {
+            SetRemoveTitleStatus(" - Collecting", true);
+            toggleDownloadContext(false);
+
             var dlg = new FolderPicker();
             dlg.InputPath = @"C:\";
             if (dlg.ShowDialog(this) == true)
@@ -276,19 +283,23 @@ namespace XIVModExplorer
                 string data = input.ShowDialog();
                 if (data != "")
                 {
-                    if (URL_ImgFind.ScrapeURLforData(data, dlg.ResultName))
+                    if (await scraper.ScrapeURLforData(data, dlg.ResultName))
                         MessageWindow.Show(Locales.Language.Word_Finished);
                     else
                         MessageWindow.Show(Locales.Language.Msg_Error_Fetch, Locales.Language.Word_Error);
                 }
             }
+            toggleDownloadContext(true);
+            SetRemoveTitleStatus(" - Collecting", false);
         }
 
         /// <summary>
         /// Download a mod from a website
         /// </summary>
-        private void DownloadMenu_Click(object sender, RoutedEventArgs e)
+        private async void DownloadMenu_Click(object sender, RoutedEventArgs e)
         {
+            SetRemoveTitleStatus(" - Downloading", true);
+            toggleDownloadContext(false);
             var dlg = new FolderPicker();
             dlg.InputPath = @"C:\";
             if (dlg.ShowDialog(this) == true)
@@ -297,7 +308,7 @@ namespace XIVModExplorer
                 string data = input.ShowDialog();
                 if (data != "")
                 {
-                    if (URL_ImgFind.DownloadMod(data, dlg.ResultName, DLArchive.IsChecked.Value, DLRDir.IsChecked.Value))
+                    if (await scraper.DownloadMod(data, dlg.ResultName, DLArchive.IsChecked.Value, DLRDir.IsChecked.Value))
                     {
                         FileTree.UpdateTreeView(selected_dir + "\\");
                         MessageWindow.Show(Locales.Language.Word_Finished);
@@ -306,6 +317,8 @@ namespace XIVModExplorer
                         MessageWindow.Show(Locales.Language.Msg_Error_Fetch, Locales.Language.Word_Error);
                 }
             }
+            toggleDownloadContext(true);
+            SetRemoveTitleStatus(" - Downloading", false);
         }
 
         /// <summary>
@@ -342,7 +355,8 @@ namespace XIVModExplorer
 
         private void InstallPenumbraMenuItem_Click(object sender, RoutedEventArgs e)
         {
-
+            Search search = new Search();
+            search.Show();
         }
         /// <summary>
         /// Use Database (for previews)
@@ -380,7 +394,7 @@ namespace XIVModExplorer
             dlg.InputPath = "C:\\";
             if (dlg.ShowDialog(this) == true)
             {
-                Configuration.SetValue("ModArchivePath", dlg.ResultPath);
+                Configuration.SetValue("ModArchivePath", dlg.ResultPath+"\\");
                 FileTree.UpdateTreeView(Configuration.GetValue("ModArchivePath"));
                 Database.Initialize(Configuration.GetValue("ModArchivePath") + "Database.db");
             }
@@ -407,7 +421,7 @@ namespace XIVModExplorer
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ContextMenu_Scrape_Click(object sender, RoutedEventArgs e)
+        private async void ContextMenu_Scrape_Click(object sender, RoutedEventArgs e)
         {
             if (!IsModdir(selected_dir))
                 return;
@@ -416,10 +430,16 @@ namespace XIVModExplorer
             string data = input.ShowDialog();
             if (data != "")
             {
-                if (URL_ImgFind.ScrapeURLforData(data, selected_dir))
+                SetRemoveTitleStatus(" - Collecting", true);
+                toggleDownloadContext(false);
+
+                if (await scraper.ScrapeURLforData(data, selected_dir))
                     MessageWindow.Show(Locales.Language.Word_Finished);
                 else
                     MessageWindow.Show(Locales.Language.Msg_Error_Fetch, Locales.Language.Word_Error);
+
+                toggleDownloadContext(true);
+                SetRemoveTitleStatus(" - Collecting", false);
             }
         }
 
@@ -428,7 +448,7 @@ namespace XIVModExplorer
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ContextMenu_ScrapeCompress_Click(object sender, RoutedEventArgs e)
+        private async void ContextMenu_ScrapeCompress_Click(object sender, RoutedEventArgs e)
         {
             if (!IsModdir(selected_dir))
                 return;
@@ -437,7 +457,10 @@ namespace XIVModExplorer
             string data = input.ShowDialog();
             if (data != "")
             {
-                if (URL_ImgFind.ScrapeURLforData(data, selected_dir))
+                SetRemoveTitleStatus(" - Collecting", true);
+                toggleDownloadContext(false);
+
+                if (await scraper.ScrapeURLforData(data, selected_dir))
                 {
                     var dirName = new DirectoryInfo(selected_dir).Name;
                     string result = new DirectoryInfo(selected_dir).Parent.FullName;
@@ -451,6 +474,9 @@ namespace XIVModExplorer
                 }
                 else
                     MessageWindow.Show(Locales.Language.Msg_Error_Fetch, Locales.Language.Word_Error);
+
+                toggleDownloadContext(true);
+                SetRemoveTitleStatus(" - Collecting", false);
             }
         }
 
@@ -459,21 +485,25 @@ namespace XIVModExplorer
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void ContextMenu_Download_Click(object sender, RoutedEventArgs e)
+        private async void ContextMenu_Download_Click(object sender, RoutedEventArgs e)
         {
+            SetRemoveTitleStatus(" - Downloading", true);
+            toggleDownloadContext(false);
+
             InputBox input = new InputBox("Website Url:", "Input Url");
             string data = input.ShowDialog();
             if (data != "")
             {
-                if (URL_ImgFind.DownloadMod(data, selected_dir, DLArchive.IsChecked.Value, DLRDir.IsChecked.Value))
-                {
-                    FileTree.UpdateTreeView(selected_dir + "\\");
+                if (await scraper.DownloadMod(data, selected_dir, DLArchive.IsChecked.Value, DLRDir.IsChecked.Value))
                     MessageWindow.Show(Locales.Language.Word_Finished);
-                }
                 else
                     MessageWindow.Show(Locales.Language.Msg_Error_Fetch, Locales.Language.Word_Error);
+
+                FileTree.UpdateTreeView(selected_dir + "\\");
             }
 
+            toggleDownloadContext(true);
+            SetRemoveTitleStatus(" - Downloading", false);
         }
 
         /// <summary>
@@ -607,6 +637,7 @@ namespace XIVModExplorer
 
         private void OnCloseClick(object sender, RoutedEventArgs e)
         {
+            scraper.Dispose();
             Application.Current.MainWindow.Close();
         }
 
@@ -665,6 +696,16 @@ namespace XIVModExplorer
                 TitleText.Text += status;
             else
                 TitleText.Text = TitleText.Text.Replace(status, "");
+        }
+
+        private void toggleDownloadContext(bool visible)
+        {
+            mainMenu.IsEnabled = visible;
+            for (int i = 0; i != 4 ; i++)
+            {
+                MenuItem fi = FileTree.ContextMenu.Items.GetItemAt(i) as MenuItem;
+                fi.IsEnabled = visible;
+            }
 
         }
     }

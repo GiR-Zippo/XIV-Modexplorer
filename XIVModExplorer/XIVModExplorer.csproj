@@ -281,6 +281,9 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="Caching\Search.xaml.cs">
+      <DependentUpon>Search.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Configuration.cs" />
     <Compile Include="Caching\Database.cs" />
     <Compile Include="Caching\Metadata.xaml.cs">
@@ -302,12 +305,15 @@
     </Compile>
     <Compile Include="Penumbra\Penumbra.cs" />
     <Compile Include="Penumbra\PenumbraHttpApi.cs" />
-    <Compile Include="Scraping\DriveDownloader.cs" />
+    <Compile Include="Scraping\WebService\DriveDownloader.cs" />
     <Compile Include="FolderPicker.cs" />
-    <Compile Include="Scraping\DynamicSite.cs" />
+    <Compile Include="Scraping\Internal\Helper.cs" />
+    <Compile Include="Scraping\Internal\InternalScraper.cs" />
     <Compile Include="Scraping\LuaScraper.cs" />
     <Compile Include="PenumbraBackup.cs" />
-    <Compile Include="Scraping\URL_ImgFind.cs" />
+    <Compile Include="Scraping\WebService\MegaDownloader.cs" />
+    <Compile Include="Scraping\WebService\Scraper.cs" />
+    <Compile Include="Scraping\WebService\WebService.cs" />
     <Compile Include="TrashRemover.cs" />
     <Compile Include="UserCtrl\BaseObject.cs" />
     <Compile Include="UserCtrl\Enums\IconSize.cs" />
@@ -327,6 +333,10 @@
       <DependentUpon>TreeViewFileExplorer.xaml</DependentUpon>
     </Compile>
     <Page Include="Caching\Metadata.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Caching\Search.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

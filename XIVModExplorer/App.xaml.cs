@@ -1,5 +1,5 @@
 ﻿/*
-* Copyright(c) 2023 GiR-Zippo
+* Copyright(c) 2024 GiR-Zippo
 * Licensed under the Mozilla Public License Version 2.0. See https://github.com/GiR-Zippo/XIV-Modexplorer/blob/main/LICENSE for full license information.
 */
 
@@ -56,6 +56,8 @@ namespace XIVModExplorer
             ConfigureLanguage(System.Threading.Thread.CurrentThread.CurrentUICulture.ToString());
             Configuration.ReadConfig(); //read the config
             TrashRemover.Start(); //start the temp dir watchdog
+            WebService.Initialize(); //inititalize the WebService
+
             string archivePath = Configuration.GetValue("ModArchivePath");
             if (archivePath != null)
                 if (Configuration.GetBoolValue("UseDatabase"))
@@ -69,6 +71,7 @@ namespace XIVModExplorer
             TrashRemover.Stop();
             if (Configuration.GetBoolValue("UseDatabase"))
                 Database.Instance.Dispose();
+            WebService.Instance.Dispose();
         }
 
         internal static void ConfigureLanguage(string langCode = null)

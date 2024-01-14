@@ -37,7 +37,7 @@
             </StackPanel>
         </Grid>
 
-        <Menu Grid.Row="1" Grid.ColumnSpan="2">
+        <Menu Grid.Row="1" Grid.ColumnSpan="2" x:Name="mainMenu">
             <MenuItem Header="{x:Static Loc:Language.Menu_File}">
                 <MenuItem Header="{x:Static Loc:Language.Menu_File_To_Archive}" Click="File_Compress_Click"/>
                 <MenuItem Header="{x:Static Loc:Language.Menu_File_Collect}" Click="File_Scrape_Click"/>
@@ -51,7 +51,7 @@
                 <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra_Backup_Mod}" Click="BackupPenumbraModMenu_Click" />
                 <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra_Redraw_Self}" Click="RedrawSelfMenuItem_Click" />
                 <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra_Redraw_All}" Click="RedrawAllMenuItem_Click" />
-                <!-- <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra_Redraw_All}" Click="InstallPenumbraMenuItem_Click"/> -->
+                <MenuItem Header="Search" Click="InstallPenumbraMenuItem_Click"/>
             </MenuItem>
             <MenuItem Header="{x:Static Loc:Language.Menu_Settings}">
                 <CheckBox Content="{x:Static Loc:Language.Menu_Settings_Cache}" Checked="CacheBox_Checked" Unchecked="CacheBox_Checked" x:Name="UseDatabase"/>
