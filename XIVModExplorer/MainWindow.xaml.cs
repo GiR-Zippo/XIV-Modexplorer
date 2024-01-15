@@ -294,6 +294,17 @@ namespace XIVModExplorer
         }
 
         /// <summary>
+        /// Enter search mode
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Menu_Search_Click(object sender, RoutedEventArgs e)
+        {
+            Search search = new Search(this);
+            search.Show();
+        }
+
+        /// <summary>
         /// Download a mod from a website
         /// </summary>
         private async void DownloadMenu_Click(object sender, RoutedEventArgs e)
@@ -353,11 +364,6 @@ namespace XIVModExplorer
             new PenumbraApi().Redraw(-1);
         }
 
-        private void InstallPenumbraMenuItem_Click(object sender, RoutedEventArgs e)
-        {
-            Search search = new Search();
-            search.Show();
-        }
         /// <summary>
         /// Use Database (for previews)
         /// </summary>
@@ -394,7 +400,7 @@ namespace XIVModExplorer
             dlg.InputPath = "C:\\";
             if (dlg.ShowDialog(this) == true)
             {
-                Configuration.SetValue("ModArchivePath", dlg.ResultPath+"\\");
+                Configuration.SetValue("ModArchivePath", dlg.ResultPath + "\\");
                 FileTree.UpdateTreeView(Configuration.GetValue("ModArchivePath"));
                 Database.Initialize(Configuration.GetValue("ModArchivePath") + "Database.db");
             }
@@ -518,7 +524,7 @@ namespace XIVModExplorer
 
             List<string> foundFiles = new List<string>();
 
-            string x = App.TempPath+Path.GetFileNameWithoutExtension(current_preview);
+            string x = App.TempPath + Path.GetFileNameWithoutExtension(current_preview);
             Directory.CreateDirectory(x);
             await Task.Run(() =>
             {
@@ -539,7 +545,7 @@ namespace XIVModExplorer
                             if (reader.Entry.Key.EndsWith(".zip") || reader.Entry.Key.EndsWith(".rar"))
                             {
                                 reader.WriteEntryToDirectory(x, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
-                                using (Stream innerStream = File.OpenRead(x+"\\"+ reader.Entry.Key))
+                                using (Stream innerStream = File.OpenRead(x + "\\" + reader.Entry.Key))
                                 {
                                     var innerReader = ReaderFactory.Open(innerStream);
                                     while (innerReader.MoveToNextEntry())
@@ -584,7 +590,7 @@ namespace XIVModExplorer
             if (retval.Count() <= 0)
                 return;
 
-            foreach(string mod in retval)
+            foreach (string mod in retval)
                 new PenumbraApi().Install(mod);
         }
 
@@ -690,7 +696,7 @@ namespace XIVModExplorer
             return true;
         }
 
-        private void SetRemoveTitleStatus(string status, bool add = true)
+        public void SetRemoveTitleStatus(string status, bool add = true)
         {
             if (add)
                 TitleText.Text += status;
@@ -701,12 +707,86 @@ namespace XIVModExplorer
         private void toggleDownloadContext(bool visible)
         {
             mainMenu.IsEnabled = visible;
-            for (int i = 0; i != 4 ; i++)
+            for (int i = 0; i != 4; i++)
             {
                 MenuItem fi = FileTree.ContextMenu.Items.GetItemAt(i) as MenuItem;
                 fi.IsEnabled = visible;
             }
 
         }
+
+        #region SearchMode
+        private void Search_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var lI = sender as ListViewItem;
+            if (lI == null)
+                return;
+
+            var item = lI.Content as ModEntry;
+            if (item == null)
+                return;
+
+            string fullpath = Configuration.GetValue("ModArchivePath") + item.Filename;
+            if (!File.Exists(fullpath))
+                return;
+
+            if (e.ClickCount == 2)
+            {
+                if (File.Exists(fullpath))
+                {
+                    current_preview = fullpath;
+                    OpenArchive(current_preview);
+                }
+                return;
+            }
+            else
+            {
+                if (current_preview == fullpath)
+                    return;
+
+                current_preview = fullpath;
+                current_archive = "";
+
+                if (slideTimer != null)
+                {
+                    slideTimer.Elapsed -= OnTimedEvent;
+                    slideTimer.AutoReset = false;
+                    slideTimer.Enabled = false;
+                    SliderIndex = 0;
+                }
+
+                pictures.Clear();
+                Description.Text = "";
+                ModName.Content = "";
+                ModUrl.Content = "";
+                NormalTextScroll.Visibility = Visibility.Hidden;
+                MarkdownScroll.Visibility = Visibility.Hidden;
+                Img.Source = null;
+
+                ModName.Content = item.ModName;
+                ModUrl.Content = item.Url;
+                MarkdownScroll.Visibility = Visibility.Visible;
+                MarkdownContent.Text = item.Description;
+                MemoryStream str = new MemoryStream(item.picture);
+                JpegBitmapDecoder jpegDecoder = new JpegBitmapDecoder(str, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.None);
+
+                Img.Source = jpegDecoder.Frames[0];
+            }
+        }
+
+        private void Search_ContextMenu_InstallMod_Click(object sender, RoutedEventArgs e)
+        {
+            var p = SearchList.SelectedItem as ModEntry;
+            if (p == null)
+                return;
+
+            string fullpath = Configuration.GetValue("ModArchivePath") + p.Filename;
+            if (File.Exists(fullpath))
+            {
+                current_preview = fullpath;
+                ContextMenu_InstallMod_Click(null, null);
+            }
+        }
+        #endregion
     }
 }

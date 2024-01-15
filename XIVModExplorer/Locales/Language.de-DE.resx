@@ -168,6 +168,9 @@
   <data name="Menu_Penumbra_Redraw_Self" xml:space="preserve">
     <value>Redraw Self</value>
   </data>
+  <data name="Menu_Search" xml:space="preserve">
+    <value>Suche</value>
+  </data>
   <data name="Menu_Settings" xml:space="preserve">
     <value>Einstellungen</value>
   </data>

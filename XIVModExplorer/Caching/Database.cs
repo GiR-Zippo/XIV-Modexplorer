@@ -5,7 +5,9 @@
 
 using LiteDB;
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace XIVModExplorer.Caching
 {
@@ -96,7 +98,7 @@ namespace XIVModExplorer.Caching
 
         internal static Database CreateInstance(string dbPath)
         {
-            var dbi = new LiteDatabase(dbPath);
+            var dbi = new LiteDatabase(@"filename=" + dbPath + "; journal = false");
             return new Database(dbi);
         }
 
@@ -104,6 +106,24 @@ namespace XIVModExplorer.Caching
         {
             this.dbi.Checkpoint();
             this.dbi.Rebuild();
+        }
+
+        public async Task<List<ModEntry>> FindModsAsync(string name, string description, UInt16 typeFlag, UInt16 accModTypeFlag, string url)
+        {
+            List<ModEntry> list = new List<ModEntry>();
+            await Task.Run(() =>
+            {
+                name = name.ToLower();
+                description = description.ToLower();
+                url = url.ToLower();
+                list = collection.Find(n => name != ""        ? n.ModName.ToLower().Contains(name) : true   &&
+                                            description != "" ? n.Description.ToLower().Contains(description) : true  &&
+                                            typeFlag != 0     ? n.ModTypeFlag == typeFlag : true &&
+                                            accModTypeFlag != 0 ? n.AccModTypeFlag == accModTypeFlag : true &&
+                                            url != ""         ? n.Url.ToLower().Contains(url) : true
+                ).ToList();
+            });
+            return list;
         }
 
         public ModEntry FindData(string filename)

@@ -214,6 +214,15 @@ namespace XIVModExplorer.Locales {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Search ähnelt.
+        /// </summary>
+        public static string Menu_Search {
+            get {
+                return ResourceManager.GetString("Menu_Search", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Settings ähnelt.
         /// </summary>
         public static string Menu_Settings {

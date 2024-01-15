@@ -57,8 +57,6 @@ namespace XIVModExplorer
             Uri path2 = new Uri(filename);
             Uri diff = path1.MakeRelativeUri(path2);
             return Uri.UnescapeDataString(diff.OriginalString);
-
-
         }
 
         public static string GetAbsoluteModPath(string filename)

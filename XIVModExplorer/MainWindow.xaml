@@ -42,6 +42,7 @@
                 <MenuItem Header="{x:Static Loc:Language.Menu_File_To_Archive}" Click="File_Compress_Click"/>
                 <MenuItem Header="{x:Static Loc:Language.Menu_File_Collect}" Click="File_Scrape_Click"/>
             </MenuItem>
+            <MenuItem Header="{x:Static Loc:Language.Menu_Search}" Click="Menu_Search_Click"/>
             <MenuItem Header="{x:Static Loc:Language.Menu_Download}">
                 <CheckBox Content="{x:Static Loc:Language.Menu_Download_Archive}" x:Name="DLArchive"/>
                 <CheckBox Content="{x:Static Loc:Language.Menu_Download_Remove}" x:Name="DLRDir"/>
@@ -51,7 +52,6 @@
                 <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra_Backup_Mod}" Click="BackupPenumbraModMenu_Click" />
                 <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra_Redraw_Self}" Click="RedrawSelfMenuItem_Click" />
                 <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra_Redraw_All}" Click="RedrawAllMenuItem_Click" />
-                <MenuItem Header="Search" Click="InstallPenumbraMenuItem_Click"/>
             </MenuItem>
             <MenuItem Header="{x:Static Loc:Language.Menu_Settings}">
                 <CheckBox Content="{x:Static Loc:Language.Menu_Settings_Cache}" Checked="CacheBox_Checked" Unchecked="CacheBox_Checked" x:Name="UseDatabase"/>
@@ -61,6 +61,36 @@
             </MenuItem>
 
         </Menu>
+        <ListView Grid.Row="3" Grid.Column="0" x:Name="SearchList" Visibility="Hidden">
+            <ListView.View>
+                <GridView>
+                    <GridViewColumn Header="Name" DisplayMemberBinding="{Binding ModName}" Width="Auto"/>
+                    <GridView.ColumnHeaderTemplate>
+                        <DataTemplate>
+                            <TextBlock Foreground="{DynamicResource MaterialDesignBody}" Text="{Binding}"/>
+                        </DataTemplate>
+                    </GridView.ColumnHeaderTemplate>
+                </GridView>
+            </ListView.View>
+            <ListView.ItemContainerStyle>
+                <Style TargetType="ListViewItem">
+                    <EventSetter Event="PreviewMouseLeftButtonDown" Handler="Search_PreviewMouseLeftButtonDown" />
+                    <Setter Property="Foreground" Value="{DynamicResource MaterialDesignBody}"/>
+                    <Style.Triggers>
+                        <Trigger Property="IsSelected" Value="true" >
+                            <Setter Property="Foreground" Value="{DynamicResource MaterialDesignPaper}" />
+                            <Setter Property="Background" Value="{DynamicResource MaterialDesignBody}" />
+                        </Trigger>
+                    </Style.Triggers>
+                </Style>
+            </ListView.ItemContainerStyle>
+            <ListView.ContextMenu>
+                <ContextMenu>
+                    <MenuItem Header="{x:Static Loc:Language.Context_Menu_InstallMod}" Click="Search_ContextMenu_InstallMod_Click"/>
+                </ContextMenu>
+            </ListView.ContextMenu>
+        </ListView>
+
         <Control:TreeViewFileExplorer Grid.Row="3" Grid.Column="0" x:Name="FileTree">
             <Control:TreeViewFileExplorer.ContextMenu>
                 <ContextMenu>

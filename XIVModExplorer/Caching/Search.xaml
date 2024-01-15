@@ -35,13 +35,8 @@
                     <RowDefinition Height="Auto"/>
                     <RowDefinition Height="10"/>
                     <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="10"/>
                     <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="Auto"/>
-                    <RowDefinition Height="20"/>
-                    <RowDefinition Height="Auto"/>
-
                     <RowDefinition Height="*"/>
                 </Grid.RowDefinitions>
                 <Grid.ColumnDefinitions>
@@ -51,29 +46,76 @@
                     <ColumnDefinition Width="Auto"/>
                 </Grid.ColumnDefinitions>
 
-                <Label Grid.Row="1" Grid.Column="0" Content="Search:"/>
+                <Label Grid.Row="1" Grid.Column="0" Content="Search Modname:"/>
                 <TextBox Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Width="400" x:Name="Search_Text" KeyDown="Search_Text_KeyDown"/>
 
-                <CheckBox Grid.Row="3" Grid.Column="0" Content="{x:Static Loc:Language.Types_Weapon}" x:Name="C_Weapon"/>
-                <CheckBox Grid.Row="3" Grid.Column="1" Content="{x:Static Loc:Language.Types_Head}" x:Name="C_Head"/>
-                <CheckBox Grid.Row="3" Grid.Column="2" Content="{x:Static Loc:Language.Types_Top}" x:Name="C_Top"/>
-                <CheckBox Grid.Row="3" Grid.Column="3" Content="{x:Static Loc:Language.Types_Hands}" x:Name="C_Hands"/>
+                <Label Grid.Row="3" Grid.Column="0" Content="Search in description:"/>
+                <TextBox Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="4" Width="400" x:Name="Search_Description" KeyDown="Search_Text_KeyDown"/>
 
-                <CheckBox Grid.Row="4" Grid.Column="0" Content="{x:Static Loc:Language.Types_Bottom}" x:Name="C_Bottom"/>
-                <CheckBox Grid.Row="4" Grid.Column="1" Content="{x:Static Loc:Language.Types_Shoe}" x:Name="C_Shoe"/>
-                <CheckBox Grid.Row="4" Grid.Column="2" Content="{x:Static Loc:Language.Types_Ear}" x:Name="C_Ear"/>
-                <CheckBox Grid.Row="4" Grid.Column="3" Content="{x:Static Loc:Language.Types_Neck}" x:Name="C_Neck"/>
+                <Grid Grid.Row="5" Grid.ColumnSpan="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="10"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="20"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                    </Grid.ColumnDefinitions>
 
-                <CheckBox Grid.Row="5" Grid.Column="0" Content="{x:Static Loc:Language.Types_Wrist}" x:Name="C_Wrist"/>
-                <CheckBox Grid.Row="5" Grid.Column="1" Content="{x:Static Loc:Language.Types_Finger}" x:Name="C_Finger"/>
+                    <Label Grid.Row="1" Grid.ColumnSpan="3" Content="{x:Static Loc:Language.Word_Replaces}"/>
 
-                <CheckBox Grid.Row="6" Grid.Column="0" Content="{x:Static Loc:Language.Type_Minion}" x:Name="C_Minion"/>
-                <CheckBox Grid.Row="6" Grid.Column="1" Content="{x:Static Loc:Language.Type_Mount}" x:Name="C_Mount"/>
+                    <CheckBox Grid.Row="3" Grid.Column="0" Content="{x:Static Loc:Language.Types_Weapon}" x:Name="C_Weapon"/>
+                    <CheckBox Grid.Row="3" Grid.Column="1" Content="{x:Static Loc:Language.Types_Head}" x:Name="C_Head"/>
+                    <CheckBox Grid.Row="3" Grid.Column="2" Content="{x:Static Loc:Language.Types_Top}" x:Name="C_Top"/>
+                    <CheckBox Grid.Row="3" Grid.Column="3" Content="{x:Static Loc:Language.Types_Hands}" x:Name="C_Hands"/>
 
-                <CheckBox Grid.Row="7" Grid.Column="0" Content="{x:Static Loc:Language.Type_Animation}" x:Name="C_Animation"/>
-                <CheckBox Grid.Row="7" Grid.Column="1" Content="{x:Static Loc:Language.Type_Vfx}" x:Name="C_Vfx"/>
+                    <CheckBox Grid.Row="4" Grid.Column="0" Content="{x:Static Loc:Language.Types_Bottom}" x:Name="C_Bottom"/>
+                    <CheckBox Grid.Row="4" Grid.Column="1" Content="{x:Static Loc:Language.Types_Shoe}" x:Name="C_Shoe"/>
+                    <CheckBox Grid.Row="4" Grid.Column="2" Content="{x:Static Loc:Language.Types_Ear}" x:Name="C_Ear"/>
+                    <CheckBox Grid.Row="4" Grid.Column="3" Content="{x:Static Loc:Language.Types_Neck}" x:Name="C_Neck"/>
 
-                <CheckBox Grid.Row="9" Grid.Column="0" Content="{x:Static Loc:Language.Types_Accessory}" x:Name="C_ACCS"/>
+                    <CheckBox Grid.Row="5" Grid.Column="0" Content="{x:Static Loc:Language.Types_Wrist}" x:Name="C_Wrist"/>
+                    <CheckBox Grid.Row="5" Grid.Column="1" Content="{x:Static Loc:Language.Types_Finger}" x:Name="C_Finger"/>
+
+                    <CheckBox Grid.Row="6" Grid.Column="0" Content="{x:Static Loc:Language.Type_Minion}" x:Name="C_Minion"/>
+                    <CheckBox Grid.Row="6" Grid.Column="1" Content="{x:Static Loc:Language.Type_Mount}" x:Name="C_Mount"/>
+
+                    <CheckBox Grid.Row="7" Grid.Column="0" Content="{x:Static Loc:Language.Type_Animation}" x:Name="C_Animation"/>
+                    <CheckBox Grid.Row="7" Grid.Column="1" Content="{x:Static Loc:Language.Type_Vfx}" x:Name="C_Vfx"/>
+
+                    <CheckBox Grid.Row="9" Grid.Column="0" Content="{x:Static Loc:Language.Types_Accessory}" x:Name="C_ACCS"/>
+                    <Label Grid.Row="10" Grid.ColumnSpan="4" Content="{x:Static Loc:Language.Types_Displays}"/>
+
+                    <CheckBox Grid.Row="13" Grid.Column="0" Content="{x:Static Loc:Language.Types_Weapon}" x:Name="CA_Weapon"/>
+                    <CheckBox Grid.Row="13" Grid.Column="1" Content="{x:Static Loc:Language.Types_Head}" x:Name="CA_Head"/>
+                    <CheckBox Grid.Row="13" Grid.Column="2" Content="{x:Static Loc:Language.Types_Top}" x:Name="CA_Top"/>
+                    <CheckBox Grid.Row="13" Grid.Column="3" Content="{x:Static Loc:Language.Types_Hands}" x:Name="CA_Hands"/>
+
+                    <CheckBox Grid.Row="14" Grid.Column="0" Content="{x:Static Loc:Language.Types_Bottom}" x:Name="CA_Bottom"/>
+                    <CheckBox Grid.Row="14" Grid.Column="1" Content="{x:Static Loc:Language.Types_Shoe}" x:Name="CA_Shoe"/>
+                    <CheckBox Grid.Row="14" Grid.Column="2" Content="{x:Static Loc:Language.Types_Ear}" x:Name="CA_Ear"/>
+                    <CheckBox Grid.Row="14" Grid.Column="3" Content="{x:Static Loc:Language.Types_Neck}" x:Name="CA_Neck"/>
+
+                    <CheckBox Grid.Row="15" Grid.Column="0" Content="{x:Static Loc:Language.Types_Wrist}" x:Name="CA_Wrist"/>
+                    <CheckBox Grid.Row="15" Grid.Column="1" Content="{x:Static Loc:Language.Types_Finger}" x:Name="CA_Finger"/>
+                </Grid>
             </Grid>
 
         </Grid>

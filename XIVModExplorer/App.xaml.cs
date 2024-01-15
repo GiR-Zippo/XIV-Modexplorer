@@ -68,10 +68,10 @@ namespace XIVModExplorer
         protected override void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
-            TrashRemover.Stop();
             if (Configuration.GetBoolValue("UseDatabase"))
                 Database.Instance.Dispose();
             WebService.Instance.Dispose();
+            TrashRemover.Stop();
         }
 
         internal static void ConfigureLanguage(string langCode = null)
