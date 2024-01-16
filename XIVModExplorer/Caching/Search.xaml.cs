@@ -56,30 +56,35 @@ namespace XIVModExplorer.Caching
             }
         }
 
-        UInt16 GetModType()
+        UInt32 GetModType()
         {
-            return (UInt16)((C_Weapon.IsChecked.Value ? Type.WEAPON : Type.NONE) |
-                                         (C_Head.IsChecked.Value ? Type.HEAD : Type.NONE) |
-                                         (C_Top.IsChecked.Value ? Type.TOP : Type.NONE) |
-                                         (C_Hands.IsChecked.Value ? Type.HANDS : Type.NONE) |
-                                         (C_Bottom.IsChecked.Value ? Type.BOTTOM : Type.NONE) |
-                                         (C_Shoe.IsChecked.Value ? Type.SHOE : Type.NONE) |
-                                         (C_Ear.IsChecked.Value ? Type.EAR : Type.NONE) |
-                                         (C_Neck.IsChecked.Value ? Type.NECK : Type.NONE) |
-                                         (C_Wrist.IsChecked.Value ? Type.ARM : Type.NONE) |
-                                         (C_Finger.IsChecked.Value ? Type.FINGER : Type.NONE) |
-                                         (C_Minion.IsChecked.Value ? Type.MINION : Type.NONE) |
-                                         (C_Finger.IsChecked.Value ? Type.MOUNT : Type.NONE) |
-                                         (C_Animation.IsChecked.Value ? Type.ANIMATION : Type.NONE) |
-                                         (C_Vfx.IsChecked.Value ? Type.VFX : Type.NONE) |
-                                         (C_ACCS.IsChecked.Value ? Type.ONACC : Type.NONE));
+            return (UInt32)((C_Weapon.IsChecked.Value ? Type.WEAPON : Type.NONE) |
+                             (C_Head.IsChecked.Value ? Type.HEAD : Type.NONE) |
+                             (C_Top.IsChecked.Value ? Type.TOP : Type.NONE) |
+                             (C_Hands.IsChecked.Value ? Type.HANDS : Type.NONE) |
+                             (C_Bottom.IsChecked.Value ? Type.BOTTOM : Type.NONE) |
+                             (C_Shoe.IsChecked.Value ? Type.SHOE : Type.NONE) |
+                             (C_Ear.IsChecked.Value ? Type.EAR : Type.NONE) |
+                             (C_Neck.IsChecked.Value ? Type.NECK : Type.NONE) |
+                             (C_Wrist.IsChecked.Value ? Type.ARM : Type.NONE) |
+                             (C_Finger.IsChecked.Value ? Type.FINGER : Type.NONE) |
+                             (C_Minion.IsChecked.Value ? Type.MINION : Type.NONE) |
+                             (C_Mount.IsChecked.Value ? Type.MOUNT : Type.NONE) |
+                             (C_ACCS.IsChecked.Value ? Type.ONACC : Type.NONE) |
+                             (C_BodyReplacement.IsChecked.Value ? Type.BREPLAC : Type.NONE) |
+                             (C_Hair.IsChecked.Value ? Type.HAIR : Type.NONE) |
+                             (C_Face.IsChecked.Value ? Type.FACE : Type.NONE) |
+                             (C_Skin.IsChecked.Value ? Type.SKIN : Type.NONE) |
+                             (C_Housing.IsChecked.Value ? Type.HOUSING : Type.NONE) |
+                             (C_Animation.IsChecked.Value ? Type.ANIMATION : Type.NONE) |
+                             (C_Vfx.IsChecked.Value ? Type.VFX : Type.NONE));
         }
 
-        UInt16 GetAccsType()
+        UInt32 GetAccsType()
         {
             if (C_ACCS.IsChecked.Value)
             {
-                return (UInt16)((CA_Weapon.IsChecked.Value ? Type.WEAPON : Type.NONE) |
+                return (UInt32)((CA_Weapon.IsChecked.Value ? Type.WEAPON : Type.NONE) |
                                  (CA_Head.IsChecked.Value ? Type.HEAD : Type.NONE) |
                                  (CA_Top.IsChecked.Value ? Type.TOP : Type.NONE) |
                                  (CA_Hands.IsChecked.Value ? Type.HANDS : Type.NONE) |

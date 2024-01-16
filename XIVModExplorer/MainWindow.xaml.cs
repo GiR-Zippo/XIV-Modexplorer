@@ -38,6 +38,7 @@ namespace XIVModExplorer
         public int SliderIndex { get; set; } = 0;
 
         private Scraper scraper { get; set; } = null;
+        private PenumbraApi penumbra {get;set;} = null;
 
         public MainWindow()
         {
@@ -54,6 +55,7 @@ namespace XIVModExplorer
             FileTree.OnArchiveClicked += ArchivePreview;
 
             scraper = new Scraper();
+            penumbra = new PenumbraApi();
         }
 
         #region Events
@@ -591,7 +593,7 @@ namespace XIVModExplorer
                 return;
 
             foreach (string mod in retval)
-                new PenumbraApi().Install(mod);
+                penumbra.Install(mod);
         }
 
         /// <summary>
@@ -644,6 +646,7 @@ namespace XIVModExplorer
         private void OnCloseClick(object sender, RoutedEventArgs e)
         {
             scraper.Dispose();
+            penumbra.Dispose();
             Application.Current.MainWindow.Close();
         }
 

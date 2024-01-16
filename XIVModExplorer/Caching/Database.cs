@@ -6,34 +6,48 @@
 using LiteDB;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics.Metrics;
 using System.Linq;
 using System.Threading.Tasks;
+using XIVModExplorer.Scraping;
 
 namespace XIVModExplorer.Caching
 {
     public enum Type
     {
-        NONE    = 0b0000000000000000,
-        WEAPON  = 0b0000000000000001,
-        HEAD    = 0b0000000000000010,
-        TOP     = 0b0000000000000100,
-        HANDS   = 0b0000000000001000,
-        BOTTOM  = 0b0000000000010000,
-        SHOE    = 0b0000000000100000,
-        EAR     = 0b0000000001000000,
-        NECK    = 0b0000000010000000,
-        ARM     = 0b0000000100000000,
-        FINGER  = 0b0000001000000000,
+        NONE    = 0b00000000000000000000000000000000,
+        //Body
+        WEAPON  = 0b00000000000000000000000000000001,
+        HEAD    = 0b00000000000000000000000000000010,
+        TOP     = 0b00000000000000000000000000000100,
+        HANDS   = 0b00000000000000000000000000001000,
+        BOTTOM  = 0b00000000000000000000000000010000,
+        SHOE    = 0b00000000000000000000000000100000,
+        EAR     = 0b00000000000000000000000001000000,
+        NECK    = 0b00000000000000000000000010000000,
+        ARM     = 0b00000000000000000000000100000000,
+        FINGER  = 0b00000000000000000000001000000000,
 
-        MINION  = 0b0000010000000000,
-        MOUNT   = 0b0000100000000000,
+        //Pets
+        MINION  = 0b00000000000000000000010000000000,
+        MOUNT   = 0b00000000000000000000100000000000,
+                //0b00000000000000000001000000000000,
+                //0b00000000000000000010000000000000,
+                //0b00000000000000000100000000000000,
+        ONACC   = 0b00000000000000001000000000000000,    //ists ein mod-accessoire
+        BREPLAC = 0b00000000000000100000000000000000,
+        HAIR    = 0b00000000000001000000000000000000,
+        FACE    = 0b00000000000010000000000000000000,
+        SKIN    = 0b00000000000100000000000000000000,
 
-        VFX     = 0b0001000000000000,
-      ANIMATION = 0b0010000000000000,
+        HOUSING = 0b00001000000000000000000000000000,
+
+        VFX     = 0b00010000000000000000000000000000,
+      ANIMATION = 0b00100000000000000000000000000000,
         
-        MISC    = 0b0100000000000000,
+        MISC    = 0b01000000000000000000000000000000,
 
-        ONACC   = 0b1000000000000000    //ists ein mod-accessoire
+
     }
 
     [Serializable]
@@ -42,8 +56,8 @@ namespace XIVModExplorer.Caching
         [BsonId]
         public Guid Id { get; set; }
         public string ModName { get; set; } = "";
-        public UInt16 ModTypeFlag { get; set; } = 0;
-        public UInt16 AccModTypeFlag { get; set; } = 0;
+        public UInt32 ModTypeFlag { get; set; } = 0;
+        public UInt32 AccModTypeFlag { get; set; } = 0;
         public string Description { get; set; } = "";
         public byte[] picture { get; set; } = null;
         public string Url { get; set; } = "";
@@ -108,20 +122,41 @@ namespace XIVModExplorer.Caching
             this.dbi.Rebuild();
         }
 
-        public async Task<List<ModEntry>> FindModsAsync(string name, string description, UInt16 typeFlag, UInt16 accModTypeFlag, string url)
+        public static bool DBFindData(ModEntry me, string name, string description, UInt32 typeFlag, UInt32 accModTypeFlag, string url)
+        {
+            if (name != "")
+                if (!me.ModName.ToLower().Contains(name.ToLower()))
+                    return false;
+
+            if (me.Description !=null)
+                if (description != "")
+                    if (!me.Description.ToLower().Contains(description.ToLower()))
+                        return false;
+            
+            if (me.Url != null)
+                if (url != "")
+                    if (!me.Url.ToLower().Contains(url.ToLower()))
+                        return false;
+
+            if (typeFlag != 0)
+                if ((me.ModTypeFlag & typeFlag) == 0)
+                    return false;
+
+            if (accModTypeFlag != 0)
+                if ((me.AccModTypeFlag & accModTypeFlag) == 0)
+                    return false;
+
+            return true;
+        }
+
+        public async Task<List<ModEntry>> FindModsAsync(string name, string description, UInt32 typeFlag, UInt32 accModTypeFlag, string url)
         {
             List<ModEntry> list = new List<ModEntry>();
             await Task.Run(() =>
             {
-                name = name.ToLower();
-                description = description.ToLower();
-                url = url.ToLower();
-                list = collection.Find(n => name != ""        ? n.ModName.ToLower().Contains(name) : true   &&
-                                            description != "" ? n.Description.ToLower().Contains(description) : true  &&
-                                            typeFlag != 0     ? n.ModTypeFlag == typeFlag : true &&
-                                            accModTypeFlag != 0 ? n.AccModTypeFlag == accModTypeFlag : true &&
-                                            url != ""         ? n.Url.ToLower().Contains(url) : true
-                ).ToList();
+                foreach (var x in collection.FindAll())
+                    if (DBFindData(x, name, description, typeFlag, accModTypeFlag, url))
+                        list.Add(x);
             });
             return list;
         }

@@ -191,32 +191,38 @@ namespace XIVModExplorer.Caching
             this.Description.Text = modentry.Description;
             this.Filename.Text = modentry.Filename;
             this.ModUrl.Text = modentry.Url;
-            C_Weapon.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.WEAPON) == (UInt16)Type.WEAPON;
-            C_Head.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.HEAD) == (UInt16)Type.HEAD;
-            C_Top.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.TOP) == (UInt16)Type.TOP;
-            C_Bottom.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.BOTTOM) == (UInt16)Type.BOTTOM;
-            C_Shoe.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.SHOE) == (UInt16)Type.SHOE;
-            C_Ear.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.EAR) == (UInt16)Type.EAR;
-            C_Neck.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.NECK) == (UInt16)Type.NECK;
-            C_Wrist.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.ARM) == (UInt16)Type.ARM;
-            C_Finger.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.FINGER) == (UInt16)Type.FINGER;
-            C_Minion.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.MINION) == (UInt16)Type.MINION;
-            C_Mount.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.MOUNT) == (UInt16)Type.MOUNT;
-            C_Animation.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.ANIMATION) == (UInt16)Type.ANIMATION;
-            C_Vfx.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.VFX) == (UInt16)Type.VFX;
-            C_ACCS.IsChecked = (modentry.ModTypeFlag & (UInt16)Type.ONACC) == (UInt16)Type.ONACC;
+            C_Weapon.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.WEAPON) == (UInt32)Type.WEAPON;
+            C_Head.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.HEAD) == (UInt32)Type.HEAD;
+            C_Top.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.TOP) == (UInt32)Type.TOP;
+            C_Bottom.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.BOTTOM) == (UInt32)Type.BOTTOM;
+            C_Shoe.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.SHOE) == (UInt32)Type.SHOE;
+            C_Ear.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.EAR) == (UInt32)Type.EAR;
+            C_Neck.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.NECK) == (UInt32)Type.NECK;
+            C_Wrist.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.ARM) == (UInt32)Type.ARM;
+            C_Finger.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.FINGER) == (UInt32)Type.FINGER;
+            C_Minion.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.MINION) == (UInt32)Type.MINION;
+            C_Mount.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.MOUNT) == (UInt32)Type.MOUNT;
+            C_ACCS.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.ONACC) == (UInt32)Type.ONACC;
+
+            C_BodyReplacement.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.BREPLAC) == (UInt32)Type.BREPLAC;
+            C_Hair.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.HAIR) == (UInt32)Type.HAIR;
+            C_Face.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.FACE) == (UInt32)Type.FACE;
+            C_Skin.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.SKIN) == (UInt32)Type.SKIN;
+            C_Housing.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.HOUSING) == (UInt32)Type.HOUSING;
+            C_Animation.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.ANIMATION) == (UInt32)Type.ANIMATION;
+            C_Vfx.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.VFX) == (UInt32)Type.VFX;
 
             if (C_ACCS.IsChecked.Value)
             {
-                CA_Weapon.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.WEAPON) == (UInt16)Type.WEAPON;
-                CA_Head.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.HEAD) == (UInt16)Type.HEAD;
-                CA_Top.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.TOP) == (UInt16)Type.TOP;
-                CA_Bottom.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.BOTTOM) == (UInt16)Type.BOTTOM;
-                CA_Shoe.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.SHOE) == (UInt16)Type.SHOE;
-                CA_Ear.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.EAR) == (UInt16)Type.EAR;
-                CA_Neck.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.NECK) == (UInt16)Type.NECK;
-                CA_Wrist.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.ARM) == (UInt16)Type.ARM;
-                CA_Finger.IsChecked = (modentry.AccModTypeFlag & (UInt16)Type.FINGER) == (UInt16)Type.FINGER;
+                CA_Weapon.IsChecked = (modentry.AccModTypeFlag & (UInt32)Type.WEAPON) == (UInt32)Type.WEAPON;
+                CA_Head.IsChecked = (modentry.AccModTypeFlag & (UInt32)Type.HEAD) == (UInt32)Type.HEAD;
+                CA_Top.IsChecked = (modentry.AccModTypeFlag & (UInt32)Type.TOP) == (UInt32)Type.TOP;
+                CA_Bottom.IsChecked = (modentry.AccModTypeFlag & (UInt32)Type.BOTTOM) == (UInt32)Type.BOTTOM;
+                CA_Shoe.IsChecked = (modentry.AccModTypeFlag & (UInt32)Type.SHOE) == (UInt32)Type.SHOE;
+                CA_Ear.IsChecked = (modentry.AccModTypeFlag & (UInt32)Type.EAR) == (UInt32)Type.EAR;
+                CA_Neck.IsChecked = (modentry.AccModTypeFlag & (UInt32)Type.NECK) == (UInt32)Type.NECK;
+                CA_Wrist.IsChecked = (modentry.AccModTypeFlag & (UInt32)Type.ARM) == (UInt32)Type.ARM;
+                CA_Finger.IsChecked = (modentry.AccModTypeFlag & (UInt32)Type.FINGER) == (UInt32)Type.FINGER;
             }
 
             if (modentry.HashSha1 != null)
@@ -237,7 +243,7 @@ namespace XIVModExplorer.Caching
             modentry.ModName = ModName.Text;
             modentry.Description = Description.Text;
 
-            modentry.ModTypeFlag = (UInt16)((C_Weapon.IsChecked.Value ? Type.WEAPON : Type.NONE) |
+            modentry.ModTypeFlag = (UInt32)((C_Weapon.IsChecked.Value ? Type.WEAPON : Type.NONE) |
                              (C_Head.IsChecked.Value ? Type.HEAD : Type.NONE) |
                              (C_Top.IsChecked.Value ? Type.TOP : Type.NONE) |
                              (C_Hands.IsChecked.Value ? Type.HANDS : Type.NONE) |
@@ -248,14 +254,19 @@ namespace XIVModExplorer.Caching
                              (C_Wrist.IsChecked.Value ? Type.ARM : Type.NONE) |
                              (C_Finger.IsChecked.Value ? Type.FINGER : Type.NONE) |
                              (C_Minion.IsChecked.Value ? Type.MINION : Type.NONE) |
-                             (C_Finger.IsChecked.Value ? Type.MOUNT : Type.NONE) |
+                             (C_Mount.IsChecked.Value ? Type.MOUNT : Type.NONE) |
+                             (C_ACCS.IsChecked.Value ? Type.ONACC : Type.NONE) |
+                             (C_BodyReplacement.IsChecked.Value ? Type.BREPLAC : Type.NONE) |
+                             (C_Hair.IsChecked.Value ? Type.HAIR : Type.NONE) |
+                             (C_Face.IsChecked.Value ? Type.FACE : Type.NONE) |
+                             (C_Skin.IsChecked.Value ? Type.SKIN : Type.NONE) |
+                             (C_Housing.IsChecked.Value ? Type.HOUSING : Type.NONE) |
                              (C_Animation.IsChecked.Value ? Type.ANIMATION : Type.NONE) |
-                             (C_Vfx.IsChecked.Value ? Type.VFX : Type.NONE) |
-                             (C_ACCS.IsChecked.Value ? Type.ONACC : Type.NONE));
+                             (C_Vfx.IsChecked.Value ? Type.VFX : Type.NONE));
 
             if (C_ACCS.IsChecked.Value)
             {
-                modentry.AccModTypeFlag = (UInt16)((CA_Weapon.IsChecked.Value ? Type.WEAPON : Type.NONE) |
+                modentry.AccModTypeFlag = (UInt32)((CA_Weapon.IsChecked.Value ? Type.WEAPON : Type.NONE) |
                                  (CA_Head.IsChecked.Value ? Type.HEAD : Type.NONE) |
                                  (CA_Top.IsChecked.Value ? Type.TOP : Type.NONE) |
                                  (CA_Hands.IsChecked.Value ? Type.HANDS : Type.NONE) |

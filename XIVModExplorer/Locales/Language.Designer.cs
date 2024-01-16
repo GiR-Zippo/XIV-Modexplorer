@@ -358,6 +358,33 @@ namespace XIVModExplorer.Locales {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Face ähnelt.
+        /// </summary>
+        public static string Type_Face {
+            get {
+                return ResourceManager.GetString("Type_Face", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Hair ähnelt.
+        /// </summary>
+        public static string Type_Hair {
+            get {
+                return ResourceManager.GetString("Type_Hair", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Housing ähnelt.
+        /// </summary>
+        public static string Type_Housing {
+            get {
+                return ResourceManager.GetString("Type_Housing", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Minion ähnelt.
         /// </summary>
         public static string Type_Minion {
@@ -372,6 +399,24 @@ namespace XIVModExplorer.Locales {
         public static string Type_Mount {
             get {
                 return ResourceManager.GetString("Type_Mount", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Other mod ähnelt.
+        /// </summary>
+        public static string Type_Other {
+            get {
+                return ResourceManager.GetString("Type_Other", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Skin / Scales ähnelt.
+        /// </summary>
+        public static string Type_Skin {
+            get {
+                return ResourceManager.GetString("Type_Skin", resourceCulture);
             }
         }
         

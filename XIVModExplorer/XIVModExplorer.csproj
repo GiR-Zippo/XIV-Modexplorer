@@ -304,7 +304,6 @@
       <DependentUpon>Language.resx</DependentUpon>
     </Compile>
     <Compile Include="Penumbra\Penumbra.cs" />
-    <Compile Include="Penumbra\PenumbraHttpApi.cs" />
     <Compile Include="Scraping\WebService\DriveDownloader.cs" />
     <Compile Include="FolderPicker.cs" />
     <Compile Include="Scraping\Internal\Helper.cs" />

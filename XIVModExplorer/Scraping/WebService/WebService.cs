@@ -19,7 +19,8 @@ namespace XIVModExplorer.Scraping
             NONE = 0,
             HTML = 1,
             IMAGE = 2,
-            DOWNLOAD = 3
+            DOWNLOAD = 3,
+            PENUMBRA = 4
         }
 
         public class GetRequest :IDisposable
@@ -47,6 +48,30 @@ namespace XIVModExplorer.Scraping
             }
         }
 
+        public class PostRequest : IDisposable
+        {
+            public string Url { get; set; } = "";
+            public Requester Requester { get; set; } = Requester.NONE;
+            public object Parameters { get; set; } = null;
+            public string UserAgent { get; set; } = "Mozilla/5.0 (Windows NT 10.0; Win64; x64)";
+            public string Accept { get; set; } = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
+
+            public HttpContent Content { get; set; } = null;
+
+            public HttpStatusCode ResponseCode { get; set; } = HttpStatusCode.Unused;
+            public string ResponseMsg { get; set; } = "";
+
+            public string Host { get; set; } = "";
+
+            public System.Collections.ObjectModel.ReadOnlyCollection<OpenQA.Selenium.Cookie> CookieJar { get; set; } = null;
+
+            public void Dispose()
+            {
+                Content.Dispose();
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+            }
+        }
 
         public EventHandler<object> OnRequestFinished;
 
@@ -132,6 +157,8 @@ namespace XIVModExplorer.Scraping
 
                     if (request is GetRequest)
                         _ = GetHtmlAsync(request as GetRequest);
+                    if (request is PostRequest)
+                        _ = PostHtmlAsync(request as PostRequest);
 
                 }
                 await Task.Delay(100, token).ContinueWith(tsk => { });
@@ -161,12 +188,44 @@ namespace XIVModExplorer.Scraping
             }
 
             HttpResponseMessage response = await httpClient.GetAsync(request.Url);
-            //response.EnsureSuccessStatusCode();
             request.ResponseBody = response.Content;
             request.Host = new Uri(request.Url).DnsSafeHost;
             request.ResponseCode = response.StatusCode;
             request.ResponseMsg = response.ReasonPhrase;
             OnRequestFinished(this, request);
         }
+
+        private async Task PostHtmlAsync(PostRequest request)
+        {
+            foreach (Cookie co in httpClientHandler.CookieContainer.GetCookies(new Uri(request.Url)))
+            {
+                co.Expires = DateTime.Now.Subtract(TimeSpan.FromDays(1));
+            }
+
+            httpClient.DefaultRequestHeaders.Add("User-Agent", request.UserAgent);
+            if (request.Accept != "")
+                httpClient.DefaultRequestHeaders.Add("Accept", request.Accept);
+
+            if (request.CookieJar != null)
+            {
+                foreach (var cookie in request.CookieJar)
+                    httpClientHandler.CookieContainer.Add(new Cookie(cookie.Name, cookie.Value, cookie.Path, string.IsNullOrWhiteSpace(cookie.Domain) ? new Uri(request.Url).Host : cookie.Domain));
+            }
+            try
+            {
+                HttpResponseMessage response = await httpClient.PostAsync(request.Url, request.Content);
+                request.Content = response.Content;
+                request.Host = new Uri(request.Url).DnsSafeHost;
+                request.ResponseCode = response.StatusCode;
+                request.ResponseMsg = response.ReasonPhrase;
+            }
+            catch (HttpRequestException e)
+            {
+                request.ResponseCode = HttpStatusCode.ServiceUnavailable;
+                request.ResponseMsg = e.InnerException.Message;
+            }
+            OnRequestFinished(this, request);
+        }
+
     }
 }

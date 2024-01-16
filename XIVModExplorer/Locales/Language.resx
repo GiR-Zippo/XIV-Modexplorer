@@ -252,11 +252,26 @@
   <data name="Type_Animation" xml:space="preserve">
     <value>Animation</value>
   </data>
+  <data name="Type_Face" xml:space="preserve">
+    <value>Face</value>
+  </data>
+  <data name="Type_Hair" xml:space="preserve">
+    <value>Hair</value>
+  </data>
+  <data name="Type_Housing" xml:space="preserve">
+    <value>Housing</value>
+  </data>
   <data name="Type_Minion" xml:space="preserve">
     <value>Minion</value>
   </data>
   <data name="Type_Mount" xml:space="preserve">
     <value>Mount</value>
+  </data>
+  <data name="Type_Other" xml:space="preserve">
+    <value>Other mod</value>
+  </data>
+  <data name="Type_Skin" xml:space="preserve">
+    <value>Skin / Scales</value>
   </data>
   <data name="Type_Vfx" xml:space="preserve">
     <value>VFX</value>
