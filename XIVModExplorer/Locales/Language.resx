@@ -207,6 +207,9 @@
   <data name="Misc_Cache_Disabled" xml:space="preserve">
     <value>Chaching isn't enabled</value>
   </data>
+  <data name="Misc_Install_Backup" xml:space="preserve">
+    <value>Install penumbra backup file</value>
+  </data>
   <data name="Msg_Delete_Folder_Confirm" xml:space="preserve">
     <value>Delete folder?</value>
   </data>

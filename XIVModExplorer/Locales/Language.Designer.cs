@@ -331,6 +331,15 @@ namespace XIVModExplorer.Locales {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Install penumbra backup file ähnelt.
+        /// </summary>
+        public static string Misc_Install_Backup {
+            get {
+                return ResourceManager.GetString("Misc_Install_Backup", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Delete folder? ähnelt.
         /// </summary>
         public static string Msg_Delete_Folder_Confirm {

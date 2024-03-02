@@ -99,8 +99,11 @@
                     <MenuItem Header="{x:Static Loc:Language.Context_Menu_Scrape_Compress}" Click="ContextMenu_ScrapeCompress_Click" />
                     <MenuItem Header="{x:Static Loc:Language.Context_Menu_Download}" Click="ContextMenu_Download_Click" />
                     <MenuItem/>
-                    <MenuItem Header="{x:Static Loc:Language.Context_Menu_InstallMod}" Click="ContextMenu_InstallMod_Click"/>
                     <MenuItem Header="{x:Static Loc:Language.Context_Menu_EditMeta}" Click="EditMetadata_Click"/>
+                    <MenuItem/>
+                    <MenuItem Header="{x:Static Loc:Language.Context_Menu_InstallMod}" Click="ContextMenu_InstallMod_Click"/>
+                    <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra_Backup_Mod}" Click="ContextMenu_BackupMod_Click"/>
+                    <MenuItem Header="{x:Static Loc:Language.Misc_Install_Backup}" Click="ContextMenu_InstallModBackup_Click"/>
                     <MenuItem/>
                     <MenuItem Header="{x:Static Loc:Language.Context_Menu_Delete}" Click="ContextMenu_Delete_Click" />
                 </ContextMenu>

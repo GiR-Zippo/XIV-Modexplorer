@@ -517,6 +517,17 @@ namespace XIVModExplorer
         }
 
         /// <summary>
+        /// Opens the Meta edit
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void EditMetadata_Click(object sender, RoutedEventArgs e)
+        {
+            if (!File.GetAttributes(right_clicked_item).HasFlag(FileAttributes.Directory))
+                new Metadata(right_clicked_item);
+        }
+
+        /// <summary>
         /// Install selected mod
         /// </summary>
         /// <param name="sender"></param>
@@ -542,8 +553,22 @@ namespace XIVModExplorer
                         {
                             if (reader.Entry.Key.EndsWith(".ttmp2") || reader.Entry.Key.EndsWith(".pmp"))
                             {
-                                reader.WriteEntryToDirectory(x, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
-                                foundFiles.Add(reader.Entry.Key);
+                                try
+                                {
+                                    reader.WriteEntryToDirectory(x, new ExtractionOptions() { ExtractFullPath = true, Overwrite = true });
+                                    foundFiles.Add(reader.Entry.Key);
+                                }
+                                catch (ArgumentException)
+                                {
+                                    string newName = x + "\\" + Utils.Util.MakeValidFileName(reader.Entry.Key);
+                                    using (var entryStream = reader.OpenEntryStream())
+                                    {
+                                        var fs = new FileStream(newName, FileMode.Create);
+                                        entryStream.CopyTo(fs);
+                                        fs.Close();
+                                    }
+                                    foundFiles.Add(Utils.Util.MakeValidFileName(reader.Entry.Key));
+                                }
                             }
                             //Extract archives and mod
                             if (reader.Entry.Key.EndsWith(".zip") || reader.Entry.Key.EndsWith(".rar"))
@@ -599,14 +624,42 @@ namespace XIVModExplorer
         }
 
         /// <summary>
-        /// Opens the Meta edit
+        /// Backup selected mod
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void EditMetadata_Click(object sender, RoutedEventArgs e)
+        private async void ContextMenu_BackupMod_Click(object sender, RoutedEventArgs e)
         {
-            if (!File.GetAttributes(right_clicked_item).HasFlag(FileAttributes.Directory))
-                new Metadata(right_clicked_item);
+            if (!Configuration.GetBoolValue("UseDatabase"))
+                return;
+
+            ModEntry me = Database.Instance.FindData(Configuration.GetRelativeModPath(current_preview));
+            if (me == null)
+                return;
+
+            await Task.Run(() =>
+            {
+                if (me.PenumbraPath != null)
+                    if (me.PenumbraPath.Length > 1 && Directory.Exists(Configuration.GetValue("PenumbraPath") + "\\" + me.PenumbraPath))
+                        PenumbraBackup.BackupMod(me.PenumbraName, Configuration.GetAbsoluteModPath(me.Filename), Configuration.GetValue("PenumbraPath") + "\\" + me.PenumbraPath);
+            });
+        }
+
+        /// <summary>
+        /// Install backup from selected mod
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ContextMenu_InstallModBackup_Click(object sender, RoutedEventArgs e)
+        {
+            if (!Configuration.GetBoolValue("UseDatabase"))
+                return;
+
+            ModEntry me = Database.Instance.FindData(Configuration.GetRelativeModPath(current_preview));
+            if (me == null)
+                return;
+
+            PenumbraBackup.InstallModBackup(me.PenumbraName, Configuration.GetAbsoluteModPath(me.Filename));
         }
 
         /// <summary>

@@ -170,16 +170,22 @@
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="5"/>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="5"/>
                         <ColumnDefinition Width="*"/>
                         <ColumnDefinition Width="10"/>
                     </Grid.ColumnDefinitions>
-                    <Label Grid.Row="1" Grid.ColumnSpan="2" Content="{x:Static Loc:Language.Metadata_PenumbraName}"/>
-                    <TextBox Grid.Row="2" Grid.ColumnSpan="2" Text="" x:Name="Pen_ModName"/>
+                    <Label Grid.Row="1" Grid.ColumnSpan="6" Content="{x:Static Loc:Language.Metadata_PenumbraName}"/>
+                    <TextBox Grid.Row="2" Grid.ColumnSpan="6" Text="" x:Name="Pen_ModName"/>
 
-                    <Label Grid.Row="3" Grid.ColumnSpan="2" Content="{x:Static Loc:Language.Metadata_PenumbraPath}"/>
-                    <TextBox Grid.Row="4" Grid.ColumnSpan="2" Text="" x:Name="Pen_ModPath"/>
+                    <Label Grid.Row="3" Grid.ColumnSpan="6" Content="{x:Static Loc:Language.Metadata_PenumbraPath}"/>
+                    <TextBox Grid.Row="4" Grid.ColumnSpan="6" Text="" x:Name="Pen_ModPath"/>
 
                     <Button Grid.Row="6" Grid.Column="1" Content="{x:Static Loc:Language.Metadata_FindInPenumbra}" Click="PenumbraButton_Click" MinWidth="100" HorizontalAlignment="Left"/>
+                    <Button Grid.Row="6" Grid.Column="3" Content="Backup Mod" Click="PenumbraBackupButton_Click" MinWidth="100" HorizontalAlignment="Left"/>
+                    <Button Grid.Row="6" Grid.Column="5" Content="{x:Static Loc:Language.Misc_Install_Backup}" Click="PenumbraBackupInstallButton_Click" MinWidth="100" HorizontalAlignment="Left"/>
                 </Grid>
             </TabItem>
             <TabItem Header="Misc">

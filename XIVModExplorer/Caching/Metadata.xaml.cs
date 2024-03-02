@@ -290,7 +290,8 @@ namespace XIVModExplorer.Caching
             if (modentry.PenumbraName != null)
                 Pen_ModName.Text = modentry.PenumbraName;
             if (modentry.PenumbraPath != null)
-                Pen_ModPath.Text = Configuration.GetValue("PenumbraPath")+"\\"+modentry.PenumbraPath;
+                if (modentry.PenumbraPath.Length > 1 && Directory.Exists(Configuration.GetValue("PenumbraPath") + "\\" + modentry.PenumbraPath))
+                    Pen_ModPath.Text = Configuration.GetValue("PenumbraPath")+"\\"+modentry.PenumbraPath;
         }
 
         /// <summary>
@@ -357,11 +358,41 @@ namespace XIVModExplorer.Caching
         }
 
         /// <summary>
+        /// Trigger the penumbra path jobby
+        /// </summary>
+        private void PenumbraButton_Click(object sender, RoutedEventArgs e)
+        {
+            penumbra.GetMods();
+        }
+
+        /// <summary>
+        /// Triggers the penumbra backup
+        /// </summary>
+        private void PenumbraBackupButton_Click(object sender, RoutedEventArgs e)
+        {
+            Task.Run(() =>
+            {
+                if (modentry.PenumbraPath != null)
+                    if (modentry.PenumbraPath.Length > 1 && Directory.Exists(Configuration.GetValue("PenumbraPath") + "\\" + modentry.PenumbraPath))
+                        PenumbraBackup.BackupMod(modentry.PenumbraName, Configuration.GetAbsoluteModPath(modentry.Filename), Configuration.GetValue("PenumbraPath") + "\\" + modentry.PenumbraPath);
+            });
+        }
+
+        /// <summary>
+        /// Triggers the backup installation
+        /// </summary>
+        private void PenumbraBackupInstallButton_Click(object sender, RoutedEventArgs e)
+        {
+            PenumbraBackup.InstallModBackup(modentry.PenumbraName, Configuration.GetAbsoluteModPath(modentry.Filename));
+            DisplayModInfo();
+        }
+
+        /// <summary>
         /// Set the preview image
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void Image_PreviewMouseUp(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void Image_PreviewMouseUp(object sender, MouseButtonEventArgs e)
         {
             var x = (sender as System.Windows.Controls.Image).Source as BitmapSource;
             var jpegEncoder = new JpegBitmapEncoder();
@@ -429,11 +460,6 @@ namespace XIVModExplorer.Caching
             DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             TimeSpan diff = date.ToUniversalTime() - origin;
             return Math.Floor(diff.TotalSeconds);
-        }
-
-        private void PenumbraButton_Click(object sender, RoutedEventArgs e)
-        {
-            penumbra.GetMods();
         }
     }
 }

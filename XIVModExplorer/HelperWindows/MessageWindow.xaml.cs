@@ -24,7 +24,7 @@ namespace XIVModExplorer.HelperWindows
         private MessageWindow(string content = "", string Htitle = "")
         {
             InitializeComponent();
-
+            this.Topmost = true;
             if (content != "")
                 tContent.Text = content;
 
