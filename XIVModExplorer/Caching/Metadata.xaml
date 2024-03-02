@@ -29,7 +29,7 @@
             </StackPanel>
         </Grid>
 
-        <TabControl Grid.Row="1" TabStripPlacement="Left">
+        <TabControl Grid.Row="1" TabStripPlacement="Left" x:Name="LeftTab">
             <TabItem Header="{x:Static Loc:Language.Word_Description}">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -43,9 +43,11 @@
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="Auto"/>
                             <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
                         </Grid.ColumnDefinitions>
                         <Label Grid.Column="0" FontSize="20" Content="Mod-Name:"/>
                         <TextBox Grid.Column="1" FontSize="20" Text="" x:Name="ModName"/>
+                        <fa:IconBlock x:Name="PenumbraIndicator" Icon="Times" Grid.Column="2" FontSize="20" Opacity="0.5" Foreground="{DynamicResource MaterialDesignBody}"/>
                     </Grid>
                     <Grid Grid.Row="1">
                         <Grid.ColumnDefinitions>
@@ -155,6 +157,31 @@
                     </ListBox.ItemTemplate>
                 </ListBox>
             </TabItem>
+            <TabItem Header="Penumbra" IsEnabled="false" x:Name="TabPenumbra">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="10"/>
+                    </Grid.ColumnDefinitions>
+                    <Label Grid.Row="1" Grid.ColumnSpan="2" Content="{x:Static Loc:Language.Metadata_PenumbraName}"/>
+                    <TextBox Grid.Row="2" Grid.ColumnSpan="2" Text="" x:Name="Pen_ModName"/>
+
+                    <Label Grid.Row="3" Grid.ColumnSpan="2" Content="{x:Static Loc:Language.Metadata_PenumbraPath}"/>
+                    <TextBox Grid.Row="4" Grid.ColumnSpan="2" Text="" x:Name="Pen_ModPath"/>
+
+                    <Button Grid.Row="6" Grid.Column="1" Content="{x:Static Loc:Language.Metadata_FindInPenumbra}" Click="PenumbraButton_Click" MinWidth="100" HorizontalAlignment="Left"/>
+                </Grid>
+            </TabItem>
             <TabItem Header="Misc">
                 <Grid>
                     <Grid.RowDefinitions>
@@ -163,6 +190,7 @@
                         <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="Auto"/>
                         <ColumnDefinition Width="*"/>

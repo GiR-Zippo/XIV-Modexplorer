@@ -56,8 +56,11 @@ namespace XIVModExplorer.Scraping
                     foreach (var x in env.Images as LuaTable)
                         Pictures.Add((string)x.Value);
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
+                    Console.WriteLine("Expception: {0}", e.Message);
+                    var d = LuaExceptionData.GetData(e); // get stack trace
+                    Console.WriteLine("StackTrace: {0}", d.FormatStackTrace(0, false));
                     return false;
                 }
                 lua.Dispose();

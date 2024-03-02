@@ -3,6 +3,7 @@
 * Licensed under the Mozilla Public License Version 2.0. See https://github.com/GiR-Zippo/XIV-Modexplorer/blob/main/LICENSE for full license information.
 */
 
+using FontAwesome.Sharp;
 using Newtonsoft.Json;
 using SharpCompress.Archives;
 using System;
@@ -17,6 +18,7 @@ using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using XIVModExplorer.HelperWindows;
+using XIVModExplorer.Penumbra;
 
 namespace XIVModExplorer.Caching
 {
@@ -51,11 +53,13 @@ namespace XIVModExplorer.Caching
     {
         private ModEntry modentry { get; set; } = new ModEntry();
         List<byte[]> pictures { get; set; } = new List<byte[]>();
+        private PenumbraApi penumbra { get; set; } = null;
 
         public Metadata(string filename)
         {
             if (filename == "" || !Configuration.GetBoolValue("UseDatabase"))
             {
+                MessageWindow.Show(Locales.Language.Misc_Cache_Disabled, Locales.Language.Word_Error);
                 this.Close();
                 return;
             }
@@ -65,6 +69,13 @@ namespace XIVModExplorer.Caching
                 return;
             }
             InitializeComponent();
+
+            //enable only if penumbra path was set and exists
+            if (Configuration.GetValue("PenumbraPath") != "")
+            {
+                if (Directory.Exists(Configuration.GetValue("PenumbraPath")))
+                    TabPenumbra.IsEnabled = true;
+            }
 
             this.Show();
             this.Visibility = Visibility.Visible;
@@ -79,19 +90,65 @@ namespace XIVModExplorer.Caching
                     RecalculateHash(filename);
                 DisplayModInfo();
             }
+
+            penumbra = new PenumbraApi();
+            penumbra.OnModRequestFinished += Instance_ModRequest;
+        }
+
+        private void Instance_ModRequest(object sender, object e)
+        {
+            this.Dispatcher.BeginInvoke((Action)(() =>
+            {
+                LeftTab.SelectedIndex = 0;
+                var l = e as List<Entry>;
+                Dictionary<string, string> tempDict = new Dictionary<string, string>();
+
+                foreach (var ent in l)
+                {
+                    var ret = Utils.StringOperations.CalculateSimilarity(modentry.ModName, ent.Item1);
+                    tempDict.Add(ent.Item1, ret.ToString());
+
+                }
+                tempDict = tempDict.OrderByDescending(obj => obj.Value).ToDictionary(obj => obj.Key, obj => obj.Key);
+                DataGridInput li = new DataGridInput(tempDict, "Select mod");
+                var f = li.ShowDialog();
+                if (f.Count() != 0)
+                {
+                    modentry.PenumbraName = f[0];
+                    modentry.FoundInPenumbra = true;
+
+                    //try get the path
+                    var x = Utils.Util.SearchForDirectory(Configuration.GetValue("PenumbraPath"), modentry.PenumbraName);
+                    if (x.Count > 1)
+                    {
+                        tempDict.Clear();
+                        foreach (var res in x)
+                            tempDict.Add(res, res);
+
+                        DataGridInput dirGrid = new DataGridInput(tempDict, "Select path");
+                        var dirRes = dirGrid.ShowDialog();
+                        if (dirRes.Count() != 0)
+                            modentry.PenumbraPath = x.First();
+                    }
+                    else
+                        modentry.PenumbraPath = x.First();
+                    Database.Instance.SaveData(modentry);
+                    DisplayModInfo(); //update displayed data
+                }
+            }));
         }
 
         #region WindowEvents
-        private void OnTitleBarMouseDown(object sender, System.Windows.Input.MouseButtonEventArgs e)
+        private void OnTitleBarMouseDown(object sender, MouseButtonEventArgs e)
         {
             if (e.ChangedButton == MouseButton.Left)
-            {
                 this.DragMove();
-            }
         }
 
         private void OnCloseClick(object sender, RoutedEventArgs e)
         {
+            this.penumbra.OnModRequestFinished -= Instance_ModRequest;
+            this.penumbra.Dispose();
             this.Close();
         }
         #endregion
@@ -191,6 +248,8 @@ namespace XIVModExplorer.Caching
             this.Description.Text = modentry.Description;
             this.Filename.Text = modentry.Filename;
             this.ModUrl.Text = modentry.Url;
+            this.PenumbraIndicator.Icon = modentry.FoundInPenumbra ? IconChar.Check : IconChar.Times;
+
             C_Weapon.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.WEAPON) == (UInt32)Type.WEAPON;
             C_Head.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.HEAD) == (UInt32)Type.HEAD;
             C_Top.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.TOP) == (UInt32)Type.TOP;
@@ -227,6 +286,11 @@ namespace XIVModExplorer.Caching
 
             if (modentry.HashSha1 != null)
                 Hash.Text = GetHashString(modentry.HashSha1);
+
+            if (modentry.PenumbraName != null)
+                Pen_ModName.Text = modentry.PenumbraName;
+            if (modentry.PenumbraPath != null)
+                Pen_ModPath.Text = Configuration.GetValue("PenumbraPath")+"\\"+modentry.PenumbraPath;
         }
 
         /// <summary>
@@ -365,6 +429,11 @@ namespace XIVModExplorer.Caching
             DateTime origin = new DateTime(1970, 1, 1, 0, 0, 0, 0, DateTimeKind.Utc);
             TimeSpan diff = date.ToUniversalTime() - origin;
             return Math.Floor(diff.TotalSeconds);
+        }
+
+        private void PenumbraButton_Click(object sender, RoutedEventArgs e)
+        {
+            penumbra.GetMods();
         }
     }
 }

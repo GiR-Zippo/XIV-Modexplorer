@@ -165,7 +165,7 @@ namespace XIVModExplorer.Scraping
             }
         }
 
-        public void AddToDownload(object dl)
+        public void AddToQueue(object dl)
         {
             downloadQueue.Enqueue(dl);
         }
@@ -187,11 +187,19 @@ namespace XIVModExplorer.Scraping
                     httpClientHandler.CookieContainer.Add(new Cookie(cookie.Name, cookie.Value, cookie.Path, string.IsNullOrWhiteSpace(cookie.Domain) ? new Uri(request.Url).Host : cookie.Domain));
             }
 
-            HttpResponseMessage response = await httpClient.GetAsync(request.Url);
-            request.ResponseBody = response.Content;
-            request.Host = new Uri(request.Url).DnsSafeHost;
-            request.ResponseCode = response.StatusCode;
-            request.ResponseMsg = response.ReasonPhrase;
+            try
+            {
+                HttpResponseMessage response = await httpClient.GetAsync(request.Url);
+                request.ResponseBody = response.Content;
+                request.Host = new Uri(request.Url).DnsSafeHost;
+                request.ResponseCode = response.StatusCode;
+                request.ResponseMsg = response.ReasonPhrase;
+            }
+            catch (HttpRequestException e)
+            {
+                request.ResponseCode = HttpStatusCode.ServiceUnavailable;
+                request.ResponseMsg = e.InnerException.Message;
+            }
             OnRequestFinished(this, request);
         }
 

@@ -277,6 +277,33 @@ namespace XIVModExplorer.Locales {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Find Mod in Penumbra ähnelt.
+        /// </summary>
+        public static string Metadata_FindInPenumbra {
+            get {
+                return ResourceManager.GetString("Metadata_FindInPenumbra", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Mod-Name in penumbra ähnelt.
+        /// </summary>
+        public static string Metadata_PenumbraName {
+            get {
+                return ResourceManager.GetString("Metadata_PenumbraName", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Penumbra Mod-Path ähnelt.
+        /// </summary>
+        public static string Metadata_PenumbraPath {
+            get {
+                return ResourceManager.GetString("Metadata_PenumbraPath", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Reread from archive ähnelt.
         /// </summary>
         public static string Metadata_Reread {
@@ -291,6 +318,15 @@ namespace XIVModExplorer.Locales {
         public static string Metadata_SameHashFound {
             get {
                 return ResourceManager.GetString("Metadata_SameHashFound", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Chaching isn&apos;t enabled ähnelt.
+        /// </summary>
+        public static string Misc_Cache_Disabled {
+            get {
+                return ResourceManager.GetString("Misc_Cache_Disabled", resourceCulture);
             }
         }
         

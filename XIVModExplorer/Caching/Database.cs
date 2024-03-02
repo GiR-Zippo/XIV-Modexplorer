@@ -6,10 +6,10 @@
 using LiteDB;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics.Metrics;
+using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Threading.Tasks;
-using XIVModExplorer.Scraping;
 
 namespace XIVModExplorer.Caching
 {
@@ -65,6 +65,9 @@ namespace XIVModExplorer.Caching
         public byte[] HashSha1 { get; set; } = null;
         public DateTime CreationDate { get; set; } = DateTime.MinValue;
         public DateTime ModificationDate { get; set; } = DateTime.MinValue;
+        public bool FoundInPenumbra { get; set; } = false;
+        public string PenumbraName { get; set; } = "";
+        public string PenumbraPath { get; set; } = "";
     }
 
     public sealed class Database : IDisposable
@@ -91,7 +94,6 @@ namespace XIVModExplorer.Caching
                 {
                     this.dbi.Dispose();
                 }
-
                 disposedValue = true;
             }
         }
@@ -100,19 +102,17 @@ namespace XIVModExplorer.Caching
         public static Database Instance => _instance ?? throw new Exception("Init first");
 
         private readonly LiteDatabase dbi;
-        private readonly LiteCollection<ModEntry> collection;
         private bool disposedValue;
 
         private Database(LiteDatabase dbi)
         {
             this.dbi = dbi;
-            this.collection = (LiteCollection<ModEntry>)dbi.GetCollection<ModEntry>();
             this.disposedValue = false;
         }
 
         internal static Database CreateInstance(string dbPath)
         {
-            var dbi = new LiteDatabase(@"filename=" + dbPath + "; journal = false");
+            var dbi = new LiteDatabase(@"filename=" + dbPath + "; journal=false");
             return new Database(dbi);
         }
 
@@ -124,7 +124,7 @@ namespace XIVModExplorer.Caching
 
         public static bool DBFindData(ModEntry me, string name, string description, UInt32 typeFlag, UInt32 accModTypeFlag, string url)
         {
-            if (name != "")
+            if (me.ModName != null && name != null)
                 if (!me.ModName.ToLower().Contains(name.ToLower()))
                     return false;
 
@@ -154,7 +154,7 @@ namespace XIVModExplorer.Caching
             List<ModEntry> list = new List<ModEntry>();
             await Task.Run(() =>
             {
-                foreach (var x in collection.FindAll())
+                foreach (var x in dbi.GetCollection<ModEntry>().FindAll())
                     if (DBFindData(x, name, description, typeFlag, accModTypeFlag, url))
                         list.Add(x);
             });
@@ -163,12 +163,23 @@ namespace XIVModExplorer.Caching
 
         public ModEntry FindData(string filename)
         {
-            return collection.FindOne(n=> n.Filename.Equals(filename));
+            return dbi.GetCollection<ModEntry>().FindOne(n=> n.Filename.Equals(filename));
+        }
+
+        public async Task<List<ModEntry>> GetModListAsync()
+        {
+            List<ModEntry> list = new List<ModEntry>();
+            await Task.Run(() =>
+            {
+                foreach (var x in dbi.GetCollection<ModEntry>().FindAll())
+                    list.Add(x);
+            });
+            return list;
         }
 
         public ModEntry DoesHashExists(byte[] hash)
         {
-            foreach (var p in collection.Find(n => n.HashSha1 != null))
+            foreach (var p in dbi.GetCollection<ModEntry>().Find(n => n.HashSha1 != null))
             {
                 if (p.HashSha1.SequenceEqual(hash))
                     return p;
@@ -178,14 +189,38 @@ namespace XIVModExplorer.Caching
 
         public void SaveData(ModEntry me)
         {
-            var found = collection.FindOne(n => n.Id == me.Id);
+            var found = dbi.GetCollection<ModEntry>().FindOne(n => n.Id == me.Id);
             if (found != null)
-                collection.Update(found.Id,me);
+                dbi.GetCollection<ModEntry>().Update(found.Id,me);
             else
             {
                 me.Id = Guid.NewGuid();
-                collection.Insert(me);
+                dbi.GetCollection<ModEntry>().Insert(me);
             }
+        }
+
+        public static void SaveMinimalData(string url, string modname, string discription, byte[] pictureBytes, string file)
+        {
+            if (!Database.Initialized)
+                return;
+
+            string relFile = Configuration.GetRelativeModPath(file);
+            ModEntry mod = new ModEntry
+            {
+                Url = url,
+                ModName = modname,
+                Description = discription,
+                picture = pictureBytes,
+                Filename = relFile
+            };
+
+            SHA1Managed managed = new SHA1Managed();
+            using (FileStream stream = File.OpenRead(file))
+            {
+                mod.HashSha1 = managed.ComputeHashAsync(stream).Result;
+                mod.ModificationDate = File.GetLastWriteTime(file);
+            }
+            Database.Instance.SaveData(mod);
         }
     }
 }

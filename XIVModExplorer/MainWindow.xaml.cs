@@ -47,8 +47,8 @@ namespace XIVModExplorer
             if (Configuration.GetValue("ModArchivePath") != null)
                 FileTree.UpdateTreeView(Configuration.GetValue("ModArchivePath"));
 
-            if (Configuration.GetBoolValue("UseDatabase"))
-                UseDatabase.IsChecked = true;
+            UseDatabase.IsChecked = Configuration.GetBoolValue("UseDatabase");
+
             FileTree.OnFileClicked += FileSelected;
             FileTree.OnRightClicked += RightSelected;
             FileTree.OnDirClicked += DirSelected;
@@ -147,9 +147,11 @@ namespace XIVModExplorer
             ModUrl.Content = me.Url;
             MarkdownScroll.Visibility = Visibility.Visible;
             MarkdownContent.Text = me.Description;
+            if (me.picture == null)
+                return;
+
             MemoryStream str = new MemoryStream(me.picture);
             JpegBitmapDecoder jpegDecoder = new JpegBitmapDecoder(str, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.None);
-
             Img.Source = jpegDecoder.Frames[0];
         }
 

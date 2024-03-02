@@ -53,6 +53,7 @@ namespace XIVModExplorer
                 Environment.Exit(1);
             }
 
+            Console.WriteLine("Starting...");
             ConfigureLanguage(System.Threading.Thread.CurrentThread.CurrentUICulture.ToString());
             Configuration.ReadConfig(); //read the config
             TrashRemover.Start(); //start the temp dir watchdog

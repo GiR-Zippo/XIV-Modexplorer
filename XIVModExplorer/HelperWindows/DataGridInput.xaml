@@ -11,7 +11,7 @@
         WindowStyle="None"
         AllowsTransparency="True"
         DataContext="{Binding RelativeSource={RelativeSource Self}}"
-        MinWidth="200" MinHeight="100" Left="500" Top="500"
+        MinWidth="200" MinHeight="100" Left="500" Top="500" MaxHeight="500"
         SizeToContent="WidthAndHeight">
     <Grid>
         <Grid.RowDefinitions>
@@ -38,7 +38,11 @@
                 <ColumnDefinition Width="*"/>
                 <ColumnDefinition Width="10"/>
             </Grid.ColumnDefinitions>
-            <ListView x:Name="ItemList" Grid.Row="0" Grid.Column="1" AllowDrop="True" Grid.IsSharedSizeScope="True">
+            <ListView x:Name="ItemList" Grid.Row="0" Grid.Column="1" 
+                    AllowDrop="True" Grid.IsSharedSizeScope="True" 
+                    VerticalContentAlignment="Top"   MaxHeight="400"
+                    ScrollViewer.VerticalScrollBarVisibility="Visible"
+                    ScrollViewer.CanContentScroll="True">
                 <ListView.ItemContainerStyle>
                     <Style TargetType="{x:Type ListViewItem}">
                         <EventSetter Event="MouseMove" Handler="ListViewItem_MouseMove"/>

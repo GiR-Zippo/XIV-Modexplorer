@@ -4,8 +4,6 @@
 */
 
 using ImageMagick;
-using SharpCompress.Archives;
-using SharpCompress.Common;
 using System;
 using System.Collections.Generic;
 using System.Drawing;
@@ -17,6 +15,7 @@ using System.Text;
 using System.Threading.Tasks;
 using XIVModExplorer.HelperWindows;
 using XIVModExplorer.Scraping.Internal;
+using XIVModExplorer.Utils;
 
 namespace XIVModExplorer.Scraping
 {
@@ -40,7 +39,7 @@ namespace XIVModExplorer.Scraping
         /// <summary>
         /// Is our data ready
         /// </summary>
-        private List<string> DataReady { get; set; } = new List<string>();
+        private ConcurrentList<string> DataReady { get; set; } = new ConcurrentList<string>();
 
         /// <summary>
         /// the collection
@@ -69,8 +68,15 @@ namespace XIVModExplorer.Scraping
                 await Task.Delay(200);
             DataReady.Remove(url);
 
+            //no data no download
             if (collectedData == null)
+            {
+                MessageWindow.Show("No collectable data found.");
                 return false;
+            }
+            //an external site, let's get the data there
+            if (collectedData.ExternalSite != "")
+                return await DownloadMod(collectedData.ExternalSite, path, archive, deldir);
 
             //no download url, no download
             if (collectedData.DownloadUrl.Count() == 0)
@@ -78,9 +84,6 @@ namespace XIVModExplorer.Scraping
                 MessageWindow.Show("Can't download mod from:\r\n" + url, "Error");
                 return false;
             }
-            //an external site, let's get the data there
-            if (collectedData.ExternalSite != "")
-                return await DownloadMod(url, path, archive, deldir);
 
             //Check if it's a filehoster and try download
             if (!Helper.IsSameDomain(url, collectedData.DownloadUrl[0]))
@@ -102,8 +105,10 @@ namespace XIVModExplorer.Scraping
 
 
             if (current_downloadPath == "")
+            {
+                MessageWindow.Show("Download-path error.");
                 return false;
-
+            }
             //Remove the first element
             collectedData.DownloadUrl.RemoveAt(0);
 
@@ -128,8 +133,7 @@ namespace XIVModExplorer.Scraping
             int index = 0;
             foreach (var imageUrl in collectedData.Images)
             {
-                DataReady.Add(imageUrl);
-                WebService.Instance.AddToDownload(new WebService.GetRequest()
+                WebService.Instance.AddToQueue(new WebService.GetRequest()
                 {
                     Url = imageUrl,
                     Requester = WebService.Requester.IMAGE,
@@ -138,34 +142,38 @@ namespace XIVModExplorer.Scraping
                 index++;
             }
 
-            while (DataReady.Count() == collectedData.Images.Count())
-                await Task.Delay(200);
-            DataReady.Clear();
+            //wait until all data is ready
+            while (DataReady.Count() != collectedData.Images.Count() + collectedData.DownloadUrl.Count())
+                await Task.Delay(500);
 
+            DataReady.Clear();
+           
             if (!archive)
                 return true;
 
-            //archive the directory
-            var dirName = new DirectoryInfo(current_downloadPath).Name;
-            string result = new DirectoryInfo(current_downloadPath).Parent.FullName;
-            var carchive = ArchiveFactory.Create(ArchiveType.Zip);
-            carchive.AddAllFromDirectory(current_downloadPath);
-
-            string g = result + "\\" + dirName + ".zip";
-            carchive.SaveTo(g, CompressionType.Deflate);
-            carchive.Dispose();
-
-            if (!deldir)
-                return true;
-
-            //delete the dir
-            try
+            await Task.Run(() =>
             {
-                Directory.Delete(current_downloadPath, true);
-            }
-            catch (IOException)
-            {
-            }
+                //archive the directory
+                Util.CompressToArchive(current_downloadPath);
+
+                //cache min data, if db is enabled
+                if (Configuration.GetBoolValue("UseDatabase"))
+                    Util.CreateMetaEntry(current_downloadPath, url, collectedData.Modname, collectedData.Description);
+
+                //delete the dir
+                if (deldir)
+                {
+                    try
+                    {
+                        Directory.Delete(current_downloadPath, true);
+                    }
+                    catch (IOException e)
+                    {
+                        Console.WriteLine("Expception: {0}", e.Message);
+                    }
+                }
+            });
+
             return true;
         }
 
@@ -185,7 +193,7 @@ namespace XIVModExplorer.Scraping
             int index = 0;
             foreach (var imageUrl in collectedData.Images)
             {
-                WebService.Instance.AddToDownload(new WebService.GetRequest()
+                WebService.Instance.AddToQueue(new WebService.GetRequest()
                 {
                     Url = imageUrl,
                     Requester = WebService.Requester.IMAGE,
@@ -200,7 +208,7 @@ namespace XIVModExplorer.Scraping
         private void ScanURLforData(string url)
         {
             collectedData = null;
-            WebService.Instance.AddToDownload(new WebService.GetRequest()
+            WebService.Instance.AddToQueue(new WebService.GetRequest()
             {
                 Url = url,
                 Requester = WebService.Requester.HTML
@@ -231,7 +239,7 @@ namespace XIVModExplorer.Scraping
             if (!Helper.IsSameDomain(finalUrl, downloadUrl))
                 downloadUrl = finalUrl;
 
-            WebService.Instance.AddToDownload(new WebService.GetRequest()
+            WebService.Instance.AddToQueue(new WebService.GetRequest()
             {
                 Url = downloadUrl,
                 Requester = WebService.Requester.DOWNLOAD,
@@ -244,7 +252,7 @@ namespace XIVModExplorer.Scraping
             var temp = InternalScraper.GetGOFileDownloads(downloadUrl);
             foreach (var url in temp.Key)
             {
-                WebService.Instance.AddToDownload(new WebService.GetRequest()
+                WebService.Instance.AddToQueue(new WebService.GetRequest()
                 {
                     Url = url,
                     Requester = WebService.Requester.DOWNLOAD,
@@ -302,11 +310,13 @@ namespace XIVModExplorer.Scraping
                 LuaScraper l = new LuaScraper();
                 if (!l.Execute(x, html))
                     return;
+
                 collectedData = new CollectedData();
                 collectedData.Modname = l.ModName;
-                collectedData.Images = l.Pictures;
+                collectedData.Images = new List<string>(l.Pictures);
                 collectedData.Description = l.Content;
-                collectedData.DownloadUrl = l.DownloadLink;
+                collectedData.DownloadUrl = new List<string>(l.DownloadLink);
+                l.Dispose();
             }
             request.Dispose();
             DataReady.Add(request.Url);
@@ -331,12 +341,15 @@ namespace XIVModExplorer.Scraping
                         using (var yourImage = Image.FromStream(outputStream))
                         {
                             yourImage.Save((string)request.Parameters, ImageFormat.Png);
+                            yourImage.Dispose();
                         }
                     }
                 }
             }
-            catch { }
-
+            catch
+            {
+                Console.WriteLine("Error pic");
+            }
             request.Dispose();
             DataReady.Add(request.Url);
             return Task.CompletedTask;

@@ -189,11 +189,23 @@
   <data name="Metadata_Export_Json" xml:space="preserve">
     <value>Export as Json</value>
   </data>
+  <data name="Metadata_FindInPenumbra" xml:space="preserve">
+    <value>Find Mod in Penumbra</value>
+  </data>
+  <data name="Metadata_PenumbraName" xml:space="preserve">
+    <value>Mod-Name in penumbra</value>
+  </data>
+  <data name="Metadata_PenumbraPath" xml:space="preserve">
+    <value>Penumbra Mod-Path</value>
+  </data>
   <data name="Metadata_Reread" xml:space="preserve">
     <value>Reread from archive</value>
   </data>
   <data name="Metadata_SameHashFound" xml:space="preserve">
     <value>Same hash found, update found mod-data?</value>
+  </data>
+  <data name="Misc_Cache_Disabled" xml:space="preserve">
+    <value>Chaching isn't enabled</value>
   </data>
   <data name="Msg_Delete_Folder_Confirm" xml:space="preserve">
     <value>Delete folder?</value>

@@ -1,4 +1,9 @@
-﻿using System;
+﻿/*
+* Copyright(c) 2020 Hosch250
+* Licensed under Unlicense license. See https://raw.githubusercontent.com/Hosch250/MarkdownViewer/master/LICENSE for full license information.
+*/
+
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
