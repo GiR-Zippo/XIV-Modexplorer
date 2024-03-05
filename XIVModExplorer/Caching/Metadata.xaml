@@ -203,6 +203,7 @@
                     </Grid.ColumnDefinitions>
                     <Button Grid.Row="2" Grid.Column="0" Content="{x:Static Loc:Language.Metadata_Export_Json}" Click="ExportButton_Click" MinWidth="100" HorizontalAlignment="Left" VerticalAlignment="Bottom"/>
                     <Button Grid.Row="2" Grid.Column="1" Content="{x:Static Loc:Language.Metadata_Reread}" Click="Reread_Click" MinWidth="100" HorizontalAlignment="Left"/>
+                    <Button Grid.Row="2" Grid.Column="2" Content="{x:Static Loc:Language.Metadata_FindInPenumbra}" Click="PenumbraButton_Click" MinWidth="100" HorizontalAlignment="Left"/>
                 </Grid>
             </TabItem>
         </TabControl>
