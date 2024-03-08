@@ -12,6 +12,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using XIVModExplorer.HelperWindows;
 using XIVModExplorer.Scraping.Internal;
@@ -26,7 +27,7 @@ namespace XIVModExplorer.Scraping
         public string Description { get; set; } = "";
         public List<string> DownloadUrl { get; set; } = new List<string>();
         public string ExternalSite { get; set; } = ""; //in case the mod refs to patreon, coomer...
-
+        
         public void Dispose()
         {
             Images.Clear();
@@ -47,6 +48,7 @@ namespace XIVModExplorer.Scraping
         private CollectedData collectedData { get; set; } = null;
 
         private string current_downloadPath { get; set; } = "";
+        public int Retry { get; set; } = 3;
 
         public Scraper()
         {
@@ -177,8 +179,9 @@ namespace XIVModExplorer.Scraping
             return true;
         }
 
-        public async Task<bool> ScrapeURLforData(string url, string path)
+        public async Task<bool> ScrapeURLforData(string url, string path, bool archive = false, bool deldir = false)
         {
+            Retry = 4;
             ScanURLforData(url);
 
             while (!DataReady.Contains(url))
@@ -201,7 +204,38 @@ namespace XIVModExplorer.Scraping
                 });
                 index++;
             }
-            collectedData = null;
+
+            //wait until all data is ready
+            while (DataReady.Count() != collectedData.Images.Count())
+                await Task.Delay(500);
+
+            DataReady.Clear();
+
+            if (!archive)
+                return true;
+
+            await Task.Run(() =>
+            {
+                //archive the directory
+                Util.CompressToArchive(path);
+
+                //cache min data, if db is enabled
+                if (Configuration.GetBoolValue("UseDatabase"))
+                    Util.CreateMetaEntry(path, url, collectedData.Modname, collectedData.Description);
+
+                //delete the dir
+                if (deldir)
+                {
+                    try
+                    {
+                        Directory.Delete(path, true);
+                    }
+                    catch (IOException e)
+                    {
+                        Console.WriteLine("Expception: {0}", e.Message);
+                    }
+                }
+            });
             return true;
         }
 
@@ -280,6 +314,14 @@ namespace XIVModExplorer.Scraping
         #region ResponseHandler
         private void ScanURLforData(WebService.GetRequest request)
         {
+            if (request.ResponseCode == HttpStatusCode.ServiceUnavailable && Retry != 0)
+            {
+                Retry--;
+                Thread.Sleep(2000);
+                ScanURLforData(request.Url);
+                return;
+            }
+
             if (request.ResponseCode != HttpStatusCode.OK)
             {
                 MessageWindow.Show("Server is telling us: \r\n" + request.ResponseMsg + "\r\nPlz try again or give up.", "Http Error");

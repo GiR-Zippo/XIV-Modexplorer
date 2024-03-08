@@ -470,18 +470,8 @@ namespace XIVModExplorer
                 SetRemoveTitleStatus(" - Collecting", true);
                 toggleDownloadContext(false);
 
-                if (await scraper.ScrapeURLforData(data, selected_dir))
-                {
-                    var dirName = new DirectoryInfo(selected_dir).Name;
-                    string result = new DirectoryInfo(selected_dir).Parent.FullName;
-                    var archive = ArchiveFactory.Create(ArchiveType.Zip);
-                    archive.AddAllFromDirectory(selected_dir);
-
-                    string g = result + "\\" + dirName + ".zip";
-                    archive.SaveTo(g, CompressionType.Deflate);
-                    FileTree.UpdateTreeView(selected_dir + "\\");
+                if (await scraper.ScrapeURLforData(data, selected_dir, DLArchive.IsChecked.Value, DLRDir.IsChecked.Value))
                     MessageWindow.Show(Locales.Language.Word_Finished);
-                }
                 else
                     MessageWindow.Show(Locales.Language.Msg_Error_Fetch, Locales.Language.Word_Error);
 
