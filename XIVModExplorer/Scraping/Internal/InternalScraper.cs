@@ -14,6 +14,7 @@ using HtmlAgilityPack;
 using System.Linq;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
+using XIVModExplorer.HelperWindows;
 
 namespace XIVModExplorer.Scraping.Internal
 {
@@ -25,6 +26,7 @@ namespace XIVModExplorer.Scraping.Internal
         /// <param name="lines"></param>
         public static CollectedData ReadXIVArchive(string[] lines)
         {
+            LogWindow.Message($"[Scraper] Using XIVArchive reader");
             CollectedData collectedData = new CollectedData();
             //get the name
             foreach (var line in lines)
@@ -111,7 +113,7 @@ namespace XIVModExplorer.Scraping.Internal
             {
                 JObject o2 = (JObject)JToken.ReadFrom(reader);
                 int ix = 0;
-                collectedData.Modname =  o2["props"]["pageProps"]["bootstrapEnvelope"]["bootstrap"]["post"]["data"]["attributes"]["title"].Value<string>();
+                collectedData.Modname =  o2["props"]["pageProps"]["bootstrapEnvelope"]["bootstrap"]["post"]["data"]["attributes"]["title"].Value<string>().TrimEnd();
                 collectedData.Description = o2["props"]["pageProps"]["bootstrapEnvelope"]["bootstrap"]["post"]["data"]["attributes"]["content"].Value<string>(); ;
 
                 foreach (var d in o2["props"]["pageProps"]["bootstrapEnvelope"]["bootstrap"]["post"]["included"])
@@ -134,6 +136,7 @@ namespace XIVModExplorer.Scraping.Internal
         /// <param name="lines"></param>
         public static CollectedData ReadKofi(string[] lines)
         {
+            LogWindow.Message($"[Scraper] Using Kofi reader");
             CollectedData collectedData = new CollectedData();
             //get the text
             string text = "";
@@ -170,6 +173,7 @@ namespace XIVModExplorer.Scraping.Internal
         /// <param name="lines"></param>
         public static CollectedData ReadAetherlink(string html)
         {
+            LogWindow.Message($"[Scraper] Using Aetherlink reader");
             CollectedData collectedData = new CollectedData();
             string[] term = { "<script id=\"__NEXT_DATA__\" type=\"application/json\">" };
             var xx = html.Split(term, StringSplitOptions.RemoveEmptyEntries)[1].Replace("</script></body></html>", "");
@@ -177,7 +181,7 @@ namespace XIVModExplorer.Scraping.Internal
             using (JsonTextReader reader = new JsonTextReader(dr))
             {
                 JObject o2 = (JObject)JToken.ReadFrom(reader);
-                collectedData.Modname = o2["props"]["pageProps"]["mod"]["meta"]["name"]["short"].Value<string>();
+                collectedData.Modname = o2["props"]["pageProps"]["mod"]["meta"]["name"]["short"].Value<string>().TrimEnd();
                 collectedData.Description = o2["props"]["pageProps"]["mod"]["meta"]["description"]["html"].Value<string>();
 
                 foreach (var d in o2["props"]["pageProps"]["downloads"])
@@ -192,6 +196,7 @@ namespace XIVModExplorer.Scraping.Internal
         #region ExtDownload
         public static KeyValuePair<string[], System.Collections.ObjectModel.ReadOnlyCollection<Cookie>> GetGOFileDownloads(string url)
         {
+            LogWindow.Message($"[Scraper] Using GOFile reader");
             List<string> downloadUrl = new List<string>();
 
             var DriverService = EdgeDriverService.CreateDefaultService();

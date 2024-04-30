@@ -26,6 +26,7 @@ namespace XIVModExplorer.Caching
     {
         public static async Task<byte[]> ComputeHashAsync(this SHA1 sha1, Stream inputStream)
         {
+            LogWindow.Message("[Metadata-Extentions] Calculationg hash");
             const int BufferSize = 4096;
 
             sha1.Initialize();
@@ -42,6 +43,7 @@ namespace XIVModExplorer.Caching
                 }
                 sha1.TransformBlock(buffer, 0, read, default(byte[]), default(int));
             }
+            LogWindow.Message("[Metadata-Extentions] Calculationg hash done");
             return sha1.Hash;
         }
     }
@@ -191,6 +193,7 @@ namespace XIVModExplorer.Caching
                 }                  
             }
 
+            LogWindow.Message("[Metadata] Get MetaData from archive");
             var archive = ArchiveFactory.Open(filename);
             modentry.ModName = Path.GetFileNameWithoutExtension(filename);
             modentry.Filename = Configuration.GetRelativeModPath(filename);
@@ -237,6 +240,7 @@ namespace XIVModExplorer.Caching
             archive.Dispose();
             imageListBox.ItemsSource = pictures.Select(n => (BitmapSource)new ImageSourceConverter().ConvertFrom(n));
             DisplayModInfo();
+            LogWindow.Message("[Metadata] Get MetaData from archive done");
         }
 
         /// <summary>

@@ -8,6 +8,7 @@ using SharpCompress;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using XIVModExplorer.HelperWindows;
 
 namespace XIVModExplorer.Scraping
 {
@@ -38,6 +39,7 @@ namespace XIVModExplorer.Scraping
 
         public bool Execute(string luafile, string html)
         {
+            LogWindow.Message($"[Scraper] Using Lua reader");
             using (Lua lua = new Lua())
             {
                 string text = File.ReadAllText(luafile);

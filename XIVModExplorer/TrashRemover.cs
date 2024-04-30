@@ -4,9 +4,12 @@
 */
 
 using System;
+using System.Collections.Concurrent;
+using System.Data;
 using System.IO;
 using System.Timers;
 using XIVModExplorer.Caching;
+using XIVModExplorer.Utils;
 
 namespace XIVModExplorer
 {
@@ -30,6 +33,17 @@ namespace XIVModExplorer
         {
             remover.halt();
 
+            //lösch die alten dirs, welche noch in use waren
+            while (RemoveDirectoryList.TryDequeue(out var directoryName))
+            {
+                try
+                {
+                    Directory.Delete(directoryName, true);
+                }
+                catch (IOException)
+                {}
+            }
+
             //remove temp directory
             if (!Directory.Exists(App.TempPath))
                 return;
@@ -42,6 +56,8 @@ namespace XIVModExplorer
         }
 
         private static TrashRemover remover { get; set; } = null;
+
+        public static ConcurrentQueue<string> RemoveDirectoryList { get; set; } = new ConcurrentQueue<string>();
 
         public Timer cleanupTimer { get; set; } = null;
 
@@ -72,6 +88,21 @@ namespace XIVModExplorer
         private void OnTimedEvent(object sender, ElapsedEventArgs e)
         {
             GC.Collect(); //remove at the moment when M$ doesn't suck
+
+            //lösch die alten dirs, welche noch in use waren
+            while (RemoveDirectoryList.TryDequeue(out var directoryName))
+            {
+                try
+                {
+                    Directory.Delete(directoryName, true);
+                }
+                catch (IOException)
+                {
+                    RemoveDirectoryList.Enqueue(directoryName);
+                }
+            }
+
+
             if (!Directory.Exists(App.TempPath))
                 return;
 

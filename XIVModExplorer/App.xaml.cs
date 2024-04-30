@@ -10,6 +10,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Windows;
 using XIVModExplorer.Caching;
+using XIVModExplorer.RestApi;
 using XIVModExplorer.Scraping;
 
 namespace XIVModExplorer
@@ -63,12 +64,18 @@ namespace XIVModExplorer
             if (archivePath != null)
                 if (Configuration.GetBoolValue("UseDatabase"))
                     Database.Initialize(archivePath+"Database.db");
+
+            ExplorerRestServer.Initialize();
+
             base.OnStartup(e);
         }
 
         protected override void OnExit(ExitEventArgs e)
         {
             base.OnExit(e);
+
+            ExplorerRestServer.Instance.Dispose();
+
             if (Configuration.GetBoolValue("UseDatabase"))
                 Database.Instance.Dispose();
             WebService.Instance.Dispose();

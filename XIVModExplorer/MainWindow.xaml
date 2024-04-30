@@ -55,9 +55,11 @@
             </MenuItem>
             <MenuItem Header="{x:Static Loc:Language.Menu_Settings}">
                 <CheckBox Content="{x:Static Loc:Language.Menu_Settings_Cache}" Checked="CacheBox_Checked" Unchecked="CacheBox_Checked" x:Name="UseDatabase"/>
-                <MenuItem Header="{x:Static Loc:Language.Menu_Settings_RebuildDB}" Click="RebuildDBMenu_Click"/>
+                <MenuItem Header="{x:Static Loc:Language.Menu_Settings_RebuildDB}" Click="RebuildDBMenu_Click" MouseRightButtonDown="RebuildDBFullMenu_Click"/>
                 <MenuItem Header="{x:Static Loc:Language.Menu_Settings_PenumbraPath}" Click="SetPenumbraMenu_Click"/>
                 <MenuItem Header="{x:Static Loc:Language.Menu_Settings_ModPath}" Click="SetModArchiveMenu_Click"/>
+                <MenuItem Header="List orphaned entries" Click="OrphanedModsMenu_Click"/>
+                <MenuItem Header="Log-Window" Click="ShowLogWindowMenu_Click"/>
             </MenuItem>
 
         </Menu>

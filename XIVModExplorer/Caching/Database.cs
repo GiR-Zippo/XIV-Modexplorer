@@ -6,10 +6,12 @@
 using LiteDB;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Threading.Tasks;
+using XIVModExplorer.HelperWindows;
 
 namespace XIVModExplorer.Caching
 {
@@ -116,10 +118,78 @@ namespace XIVModExplorer.Caching
             return new Database(dbi);
         }
 
-        public void Optimize()
+        public void CheckOrphanedEntries()
         {
-            this.dbi.Checkpoint();
+            Dictionary<string, string> tempDict = new Dictionary<string, string>();
+            var list = this.dbi.GetCollection<ModEntry>().FindAll().ToList();
+            foreach (var t in list)
+            {
+                if (t.Filename != null && t.Filename.Length != 0)
+                {
+                    if (!File.Exists(Configuration.GetAbsoluteModPath(t.Filename)))
+                        tempDict[t.Filename] = t.Filename;
+                }
+            }
+            if (tempDict.Count == 0)
+            {
+                MessageWindow.Show("None found.");
+                return;
+            }
+            DataGridInput li = new DataGridInput(tempDict, "Select to remove");
+            var f = li.ShowDialog();
+            if (f.Count() != 0)
+            {
+                foreach (var t in f)
+                {
+                    var item = list.Find(i => i.Filename.Equals(t));
+                    if (item != null)
+                        this.dbi.GetCollection<ModEntry>().Delete(item.Id);
+                }
+            }
+            tempDict.Clear();
+            list.Clear();
+        }
+
+        public void Optimize(bool full = false)
+        {
+            LogWindow.Message("[Database - Optimize] Creating Checkpoint");
+            try
+            {
+                this.dbi.Checkpoint();
+            }
+            catch
+            { }
+
+            if (full)
+            {
+                LogWindow.Message("[Database] Optimize full");
+                Dictionary<string, string> tempDict = new Dictionary<string, string>();
+                var list = this.dbi.GetCollection<ModEntry>().FindAll().ToList();
+                foreach (var t in list)
+                {
+                    if (t.Filename != null && t.Filename.Length != 0)
+                    {
+                        if (!File.Exists(Configuration.GetAbsoluteModPath(t.Filename)))
+                            tempDict[t.Filename] = t.Filename;
+                    }
+                }
+                DataGridInput li = new DataGridInput(tempDict, "Select to remove");
+                var f = li.ShowDialog();
+                if (f.Count() != 0)
+                {
+                    foreach (var t in f)
+                    {
+                        var item = list.Find(i=> i.Filename.Equals(t));
+                        if (item != null)
+                            this.dbi.GetCollection<ModEntry>().Delete(item.Id);
+                    }
+                }
+                tempDict.Clear();
+                list.Clear();
+            }
+            LogWindow.Message("[Database - Optimize] Rebuild database");
             this.dbi.Rebuild();
+            LogWindow.Message("[Database] Optimize done");
         }
 
         public static bool DBFindData(ModEntry me, string name, string description, UInt32 typeFlag, UInt32 accModTypeFlag, string url)
@@ -175,6 +245,26 @@ namespace XIVModExplorer.Caching
                     list.Add(x);
             });
             return list;
+        }
+
+        public ModEntry GetModByIdAsync(string Id)
+        {
+            foreach (var p in dbi.GetCollection<ModEntry>().Find(n => n.HashSha1 != null))
+            {
+                if (p.Id == Guid.Parse(Id))
+                    return p;
+            }
+            return null;
+        }
+
+        public ModEntry GetModByUrl(string url)
+        {
+            foreach (var p in dbi.GetCollection<ModEntry>().Find(n => n.HashSha1 != null && n.Url != null))
+            {
+                if (p.Url.Equals(url))
+                    return p;
+            }
+            return null;
         }
 
         public ModEntry DoesHashExists(byte[] hash)

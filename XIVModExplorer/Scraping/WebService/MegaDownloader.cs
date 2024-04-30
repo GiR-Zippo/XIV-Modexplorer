@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using XIVModExplorer.HelperWindows;
 
 namespace XIVModExplorer.Scraping
 {
@@ -16,6 +17,7 @@ namespace XIVModExplorer.Scraping
     {
         public Task downloadMega(string url, string path, bool createDir = true)
         {
+            LogWindow.Message("[MegaDownloader] Starting...");
             MegaApiClient client = new MegaApiClient();
             client.LoginAnonymous();
 
@@ -27,6 +29,7 @@ namespace XIVModExplorer.Scraping
             }
 
             //If it's a file, just download
+            LogWindow.Message($"[MegaDownloader] Downloading file");
             Uri fileLink = new Uri(url);
             INode node = client.GetNodeFromLink(fileLink);
 
@@ -44,11 +47,13 @@ namespace XIVModExplorer.Scraping
             client.Logout();
             current_downloadPath = path + "\\" + result;
             DataReady.Add("url");
+            LogWindow.Message($"[MegaDownloader] Downloading file done.");
             return Task.CompletedTask;
         }
 
         private async void MegaDownloader_DownloadFolder(MegaApiClient client, string url, string path, bool createDir)
         {
+            LogWindow.Message($"[MegaDownloader] Downloading folder(s)");
             var splitted = url.Split('?');
             var foldeUrl = splitted.FirstOrDefault();
             var folderLink = new Uri(foldeUrl);
@@ -87,6 +92,7 @@ namespace XIVModExplorer.Scraping
                 }
                 if (node.Type == NodeType.File)
                 {
+                    LogWindow.Message($"[MegaDownloader] Downloading file {node.Name}");
                     string destDir = current_downloadPath + "\\ModData\\" + MegaDownloader_TargetGetDirectory(dirstruct, node.ParentId);
                     if (!Directory.Exists(destDir))
                         Directory.CreateDirectory(destDir);
@@ -99,6 +105,7 @@ namespace XIVModExplorer.Scraping
             /*var doubleProgress = new Progress<double>((p) => progress?.Report((int)p));
             downloadFileLocation = GetDownloadFilePath(downloadFileRootPath, fileNameNoExtension, GetFileExtension(node.Name));*/
             DataReady.Add("url");
+            LogWindow.Message($"[MegaDownloader] Downloading folder(s) done");
         }
 
         static string MegaDownloader_TargetGetDirectory(Dictionary<string, KeyValuePair<string, string>> dirstruct, string parent)

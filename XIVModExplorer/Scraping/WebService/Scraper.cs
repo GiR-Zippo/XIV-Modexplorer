@@ -65,6 +65,7 @@ namespace XIVModExplorer.Scraping
             current_downloadPath = "";
             ScanURLforData(url);
 
+            LogWindow.Message("[Scraper - DownloadMod] Waiting for scraped data");
             //wait until our data is ready
             while (!DataReady.Contains(url))
                 await Task.Delay(200);
@@ -76,7 +77,8 @@ namespace XIVModExplorer.Scraping
                 MessageWindow.Show("No collectable data found.");
                 return false;
             }
-            //an external site, let's get the data there
+
+            LogWindow.Message("[Scraper - DownloadMod] It's an external site, let's get the data there");
             if (collectedData.ExternalSite != "")
                 return await DownloadMod(collectedData.ExternalSite, path, archive, deldir);
 
@@ -88,6 +90,7 @@ namespace XIVModExplorer.Scraping
             }
 
             //Check if it's a filehoster and try download
+            LogWindow.Message("[Scraper - DownloadMod] Download binary data...");
             if (!Helper.IsSameDomain(url, collectedData.DownloadUrl[0]))
                 /*if (_downloadUrl.Contains("drive.google"))
                     newPath = downloadGoogleDrive(_downloadUrl[0], path);
@@ -104,7 +107,7 @@ namespace XIVModExplorer.Scraping
             while (DataReady.Count() == 0)
                 await Task.Delay(200);
             DataReady.Clear();
-
+            LogWindow.Message("[Scraper - DownloadMod] Download binary data done");
 
             if (current_downloadPath == "")
             {
@@ -144,17 +147,19 @@ namespace XIVModExplorer.Scraping
                 index++;
             }
 
+            LogWindow.Message("[Scraper - DownloadMod] Download everything else...");
             //wait until all data is ready
             while (DataReady.Count() != collectedData.Images.Count() + collectedData.DownloadUrl.Count())
                 await Task.Delay(500);
-
             DataReady.Clear();
-           
+            LogWindow.Message("[Scraper - DownloadMod] Download everything else done");
+
             if (!archive)
                 return true;
 
             await Task.Run(() =>
             {
+                LogWindow.Message("[Scraper - DownloadMod] Compressing to archive");
                 //archive the directory
                 Util.CompressToArchive(current_downloadPath);
 
@@ -172,8 +177,11 @@ namespace XIVModExplorer.Scraping
                     catch (IOException e)
                     {
                         Console.WriteLine("Expception: {0}", e.Message);
+                        TrashRemover.RemoveDirectoryList.Enqueue(current_downloadPath);
+                        LogWindow.Message($"[Scraper - DownloadMod] Can't delete {current_downloadPath}, deleting later.");
                     }
                 }
+                LogWindow.Message("[Scraper - DownloadMod] Compressing to archive done");
             });
 
             return true;
@@ -233,6 +241,7 @@ namespace XIVModExplorer.Scraping
                     catch (IOException e)
                     {
                         Console.WriteLine("Expception: {0}", e.Message);
+                        TrashRemover.RemoveDirectoryList.Enqueue(path);
                     }
                 }
             });
@@ -331,14 +340,14 @@ namespace XIVModExplorer.Scraping
 
             var html = request.ResponseBody.ReadAsStringAsync().Result;
             var lines = html.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
-
+            LogWindow.Message($"[Scraper] Searching for data at {request.Host}");
             if (request.Host.Contains("xivmodarchive.com"))
                 collectedData = InternalScraper.ReadXIVArchive(lines);
             else if (request.Host.Contains("patreon.com"))
                 collectedData = InternalScraper.ReadPatreon(html);
             else if (request.Host.Contains("ko-fi.com"))
                 collectedData = InternalScraper.ReadKofi(lines);
-            else if (request.Host.Contains("beta.aetherlink.app"))
+            else if (request.Host.Contains("aetherlink.app"))
                 collectedData = InternalScraper.ReadAetherlink(html);
             else
             {
@@ -347,11 +356,19 @@ namespace XIVModExplorer.Scraping
                 var myFiles = Directory.EnumerateFiles(strWorkPath + "\\ScraperLua", "*.*", SearchOption.AllDirectories);
                 var x = myFiles.Where(n => n.EndsWith(request.Host.Replace("www.", "") + ".lua")).FirstOrDefault();
                 if (x == null)
+                {
+                    request.Dispose();
+                    DataReady.Add(request.Url);
                     return;
+                }
 
                 LuaScraper l = new LuaScraper();
                 if (!l.Execute(x, html))
+                {
+                    request.Dispose();
+                    DataReady.Add(request.Url);
                     return;
+                }
 
                 collectedData = new CollectedData();
                 collectedData.Modname = l.ModName;
@@ -362,6 +379,7 @@ namespace XIVModExplorer.Scraping
             }
             request.Dispose();
             DataReady.Add(request.Url);
+            LogWindow.Message($"[Scraper] Searching for data at {request.Host} done");
         }
 
         /// <summary>
@@ -384,13 +402,14 @@ namespace XIVModExplorer.Scraping
                         {
                             yourImage.Save((string)request.Parameters, ImageFormat.Png);
                             yourImage.Dispose();
+                            LogWindow.Message($"[Scraper] Download picture {(string)request.Parameters} done");
                         }
                     }
                 }
             }
             catch
             {
-                Console.WriteLine("Error pic");
+                LogWindow.Message($"[Scraper] Error getting/converting picture");
             }
             request.Dispose();
             DataReady.Add(request.Url);
@@ -405,6 +424,7 @@ namespace XIVModExplorer.Scraping
         /// <returns></returns>
         private Task saveData(WebService.GetRequest request)
         {
+            LogWindow.Message($"[Scraper] Got binary data");
             string downloadUrl = request.Url;
             var Param = (KeyValuePair<string, KeyValuePair<bool, bool>>)request.Parameters;
             bool create_newdir = Param.Value.Key;
@@ -456,16 +476,17 @@ namespace XIVModExplorer.Scraping
             //create a new direcory
             if (create_newdir)
             {
-                result = fileName.Substring(0, fileName.Length - extension.Length) + "\\";
+                result = fileName.Substring(0, fileName.Length - extension.Length).TrimEnd() + "\\";
                 if (!Directory.Exists(Param.Key + "\\" + fileName.Substring(0, fileName.Length - extension.Length)))
                     Directory.CreateDirectory(Param.Key + "\\" + fileName.Substring(0, fileName.Length - extension.Length));
             }
 
+            LogWindow.Message($"[Scraper] Saving binary data");
             BinaryWriter binWriter = new BinaryWriter(File.Open(Param.Key + "\\" + result + fileName, FileMode.Create));
             binWriter.Write(data);
             binWriter.Close();
             binWriter.Dispose();
-
+            LogWindow.Message($"[Scraper] Saving binary data done");
             //var res = request.ResponseBody.ReadAsStreamAsync().Result;
             //res.CopyTo(File.Open(Param.Key + "\\" + result + fileName, FileMode.Create));
             //res.Close();

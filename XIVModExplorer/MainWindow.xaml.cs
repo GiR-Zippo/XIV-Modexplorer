@@ -11,6 +11,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Timers;
 using System.Windows;
@@ -34,11 +35,14 @@ namespace XIVModExplorer
         public string current_preview = "";
         public string right_clicked_item = "";
         public List<BitmapFrame> pictures = new List<BitmapFrame>();
-        public Timer slideTimer = null;
+        public System.Timers.Timer slideTimer = null;
         public int SliderIndex { get; set; } = 0;
 
         private Scraper scraper { get; set; } = null;
         private PenumbraApi penumbra {get;set;} = null;
+        private LogWindow logwindow { get; set; } = null;
+        private Thread logwindowThread { get; set; } = null;
+
 
         public MainWindow()
         {
@@ -56,6 +60,16 @@ namespace XIVModExplorer
 
             scraper = new Scraper();
             penumbra = new PenumbraApi();
+
+            //LogWindow to it's own thread
+            logwindowThread = new Thread(delegate ()
+            {
+                logwindow = new LogWindow();
+                System.Windows.Threading.Dispatcher.Run();
+            });
+
+            logwindowThread.SetApartmentState(ApartmentState.STA); // needs to be STA or throws exception
+            logwindowThread.Start();
         }
 
         #region Events
@@ -121,18 +135,12 @@ namespace XIVModExplorer
             if (current_preview == archiveName)
                 return;
 
+            LogWindow.Message($"[MainWindow] Previewing archive {archiveName}");
             current_preview = archiveName;
             current_archive = "";
             ModEntry me = Database.Instance.FindData(Configuration.GetRelativeModPath(archiveName));
 
-            if (slideTimer != null)
-            {
-                slideTimer.Elapsed -= OnTimedEvent;
-                slideTimer.AutoReset = false;
-                slideTimer.Enabled = false;
-                SliderIndex = 0;
-            }
-
+            ResetSlideTimer();
             pictures.Clear();
             Description.Text = "";
             ModName.Content = "";
@@ -163,15 +171,11 @@ namespace XIVModExplorer
         {
             if (current_archive == archiveName)
                 return;
+
+            LogWindow.Message($"[MainWindow] Opening archive {archiveName}");
             current_archive = archiveName;
 
-            if (slideTimer != null)
-            {
-                slideTimer.Elapsed -= OnTimedEvent;
-                slideTimer.AutoReset = false;
-                slideTimer.Enabled = false;
-                SliderIndex = 0;
-            }
+            ResetSlideTimer();
             pictures.Clear();
             Description.Text = "";
             NormalTextScroll.Visibility = Visibility.Hidden;
@@ -220,17 +224,12 @@ namespace XIVModExplorer
             if (pictures.Count() != 0)
             {
                 Img.Source = pictures.First();
-                slideTimer = new Timer(5000);
+                slideTimer = new System.Timers.Timer(5000);
                 slideTimer.Elapsed += OnTimedEvent;
                 slideTimer.AutoReset = true;
                 slideTimer.Enabled = true;
             }
             archive.Dispose();
-        }
-
-        private void BackupPenumbra(object sender, RoutedEventArgs e)
-        {
-
         }
 
         #region Picture controls
@@ -256,6 +255,17 @@ namespace XIVModExplorer
 
             Img.Source = null;
             Img.Source = pictures[SliderIndex];
+        }
+
+        private void ResetSlideTimer()
+        {
+            if (slideTimer != null)
+            {
+                slideTimer.Elapsed -= OnTimedEvent;
+                slideTimer.AutoReset = false;
+                slideTimer.Enabled = false;
+                SliderIndex = 0;
+            }
         }
         #endregion
 
@@ -346,7 +356,7 @@ namespace XIVModExplorer
             if (dlg.ShowDialog(this) == true)
             {
                 var dirName = new DirectoryInfo(dlg.ResultName).Name;
-                string result = new DirectoryInfo(dlg.ResultName).Parent.FullName;
+                LogWindow.Message($"[MainWindow] Backup penumbra mod {dirName}");
                 var archive = ArchiveFactory.Create(ArchiveType.Zip);
                 archive.AddAllFromDirectory(dlg.ResultName);
 
@@ -354,6 +364,7 @@ namespace XIVModExplorer
                 archive.SaveTo(g, CompressionType.Deflate);
                 archive.Dispose();
                 FileTree.UpdateTreeView(selected_dir + "\\");
+                LogWindow.Message($"[MainWindow] Backup penumbra mod {dirName} done");
                 MessageWindow.Show(Locales.Language.Word_Finished);
             }
         }
@@ -384,6 +395,11 @@ namespace XIVModExplorer
             Database.Instance.Optimize();
         }
 
+        private void RebuildDBFullMenu_Click(object sender, RoutedEventArgs e)
+        {
+            Database.Instance.Optimize(true);
+        }
+
         /// <summary>
         /// Set the penumbra folder
         /// </summary>
@@ -409,6 +425,23 @@ namespace XIVModExplorer
                 Database.Initialize(Configuration.GetValue("ModArchivePath") + "Database.db");
             }
         }
+
+        /// <summary>
+        /// Display the LodWindow
+        /// </summary>
+        private void ShowLogWindowMenu_Click(object sender, RoutedEventArgs e)
+        {
+            logwindow.ToggleVisibility();
+        }
+
+        /// <summary>
+        /// Set the mod archive folder
+        /// </summary>
+        private void OrphanedModsMenu_Click(object sender, RoutedEventArgs e)
+        {
+            Database.Instance.CheckOrphanedEntries();
+        }
+
         #endregion
 
         #region ContextMenu
@@ -494,6 +527,16 @@ namespace XIVModExplorer
             string data = input.ShowDialog();
             if (data != "")
             {
+                if (Database.Instance.GetModByUrl(data) != null)
+                {
+                    if (MessageBox.Show("Mod already downloaded, proceed?", "Warning", MessageBoxButton.YesNo) == MessageBoxResult.No)
+                    {
+                        toggleDownloadContext(true);
+                        SetRemoveTitleStatus(" - Downloading", false);
+                        return;
+                    }
+                }
+
                 if (await scraper.DownloadMod(data, selected_dir, DLArchive.IsChecked.Value, DLRDir.IsChecked.Value))
                     MessageWindow.Show(Locales.Language.Word_Finished);
                 else
@@ -533,6 +576,7 @@ namespace XIVModExplorer
             Directory.CreateDirectory(x);
             await Task.Run(() =>
             {
+                LogWindow.Message($"[MainWindow] Installing mod decompressing {current_preview}");
                 using (Stream stream = File.OpenRead(current_preview))
                 {
                     var reader = ReaderFactory.Open(stream);
@@ -597,6 +641,7 @@ namespace XIVModExplorer
                     reader.Dispose();
                 }
             });
+            LogWindow.Message($"[MainWindow] Installing mod decompressing {current_preview} finished");
 
             //Generate the list and ask
             Dictionary<string, string> d = new Dictionary<string, string>();
@@ -692,6 +737,8 @@ namespace XIVModExplorer
         {
             scraper.Dispose();
             penumbra.Dispose();
+            logwindow.Shutdown();
+            logwindowThread.Abort();            
             Application.Current.MainWindow.Close();
         }
 
@@ -721,6 +768,7 @@ namespace XIVModExplorer
             }
             await Task.Run(() =>
             {
+                LogWindow.Message($"[MainWindow] Compressing {inputDirectory}");
                 var dirName = new DirectoryInfo(inputDirectory).Name;
                 var archive = ArchiveFactory.Create(ArchiveType.Zip);
                 archive.AddAllFromDirectory(inputDirectory);
@@ -728,6 +776,7 @@ namespace XIVModExplorer
                 string g = outputDirectory + "\\" + dirName + ".zip";
                 archive.SaveTo(g, CompressionType.Deflate);
                 archive.Dispose();
+                LogWindow.Message($"[MainWindow] Compressing {inputDirectory} done");
             });
             FileTree.UpdateTreeView(outputDirectory + "\\");
             MessageWindow.Show(Locales.Language.Msg_Finished_Compressing);

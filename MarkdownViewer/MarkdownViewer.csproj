@@ -7,7 +7,7 @@
 
   <ItemGroup>
     <PackageReference Include="AvalonEdit" Version="6.0.1" />
-    <PackageReference Include="Microsoft.Toolkit.Parsers" Version="6.0.0" />
+    <PackageReference Include="Microsoft.Toolkit.Parsers" Version="6.1.1" />
   </ItemGroup>
 
 </Project>
