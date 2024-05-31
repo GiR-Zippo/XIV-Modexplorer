@@ -63,6 +63,9 @@ jobs:
             Remove-Item -Path ./XIVModExplorer/bin/x64/Release/Magick.Native-Q16-x86.dll
             Remove-Item -Path ./XIVModExplorer/bin/x64/Release/XIVModExplorer.pdb
 
+      - name: Copy ScraperLua
+        run: Copy-Item -Path ./ScraperLua -Destination ./XIVModExplorer/bin/x64/Release/ScraperLua
+      
       - name: Compress the Project
         run: Compress-Archive -Path ./XIVModExplorer/bin/x64/Release/* -Destination ./XIVModExplorer/bin/x64/Release/latest.zip
       
