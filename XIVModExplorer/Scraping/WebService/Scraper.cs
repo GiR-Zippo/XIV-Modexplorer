@@ -154,7 +154,7 @@ namespace XIVModExplorer.Scraping
             DataReady.Clear();
             LogWindow.Message("[Scraper - DownloadMod] Download everything else done");
 
-            if (!archive)
+            if (!archive || current_downloadPath == "")
                 return true;
 
             await Task.Run(() =>

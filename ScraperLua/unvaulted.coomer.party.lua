@@ -76,8 +76,10 @@ function GetDownload()
             dl = split(dl, '\"')[1]
         end
         if string.find(line, 'fa%-download') then
-            table.insert(Downloads, dl);
-            dl = "";
+			if not string.find(dl, 'https://t.me') then -- don't deal with telegram
+				table.insert(Downloads, dl);
+				dl = "";
+			end
         end
     end
 end
