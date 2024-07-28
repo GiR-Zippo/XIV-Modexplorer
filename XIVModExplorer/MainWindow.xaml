@@ -46,6 +46,7 @@
             <MenuItem Header="{x:Static Loc:Language.Menu_Download}">
                 <CheckBox Content="{x:Static Loc:Language.Menu_Download_Archive}" x:Name="DLArchive"/>
                 <CheckBox Content="{x:Static Loc:Language.Menu_Download_Remove}" x:Name="DLRDir"/>
+                <CheckBox Content="{x:Static Loc:Language.Menu_Download_DTUpgrade}" x:Name="DLDTUp"/>
                 <MenuItem Header="{x:Static Loc:Language.Menu_Download}" Click="DownloadMenu_Click"/>
             </MenuItem>
             <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra}">
@@ -57,6 +58,7 @@
                 <CheckBox Content="{x:Static Loc:Language.Menu_Settings_Cache}" Checked="CacheBox_Checked" Unchecked="CacheBox_Checked" x:Name="UseDatabase"/>
                 <MenuItem Header="{x:Static Loc:Language.Menu_Settings_RebuildDB}" Click="RebuildDBMenu_Click" MouseRightButtonDown="RebuildDBFullMenu_Click"/>
                 <MenuItem Header="{x:Static Loc:Language.Menu_Settings_PenumbraPath}" Click="SetPenumbraMenu_Click"/>
+                <MenuItem Header="{x:Static Loc:Language.Menu_Settings_TexToolsPath}" Click="SetTexToolsMenu_Click"/>
                 <MenuItem Header="{x:Static Loc:Language.Menu_Settings_ModPath}" Click="SetModArchiveMenu_Click"/>
                 <MenuItem Header="List orphaned entries" Click="OrphanedModsMenu_Click"/>
                 <MenuItem Header="Log-Window" Click="ShowLogWindowMenu_Click"/>
@@ -107,6 +109,8 @@
                     <MenuItem Header="{x:Static Loc:Language.Menu_Penumbra_Backup_Mod}" Click="ContextMenu_BackupMod_Click"/>
                     <MenuItem Header="{x:Static Loc:Language.Misc_Install_Backup}" Click="ContextMenu_InstallModBackup_Click"/>
                     <MenuItem/>
+                    <MenuItem Header="{x:Static Loc:Language.Context_Menu_DT_Upgrade}" Click="ContextMenu_UpgradeToDT_Click"/>
+                    <MenuItem/>
                     <MenuItem Header="{x:Static Loc:Language.Context_Menu_Delete}" Click="ContextMenu_Delete_Click" />
                 </ContextMenu>
             </Control:TreeViewFileExplorer.ContextMenu>
@@ -141,9 +145,11 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
             <fa:IconBlock Icon="Refresh" Grid.Column="0" Margin="8" FontSize="12" Foreground="{DynamicResource MaterialDesignBody}" PreviewMouseDown="Refresh_PreviewMouseDown"/>
             <Label x:Name="SelectedDir" Grid.Column="1"/>
+            <fa:IconBlock x:Name="IsForDT" Icon="ThumbTack" Grid.Column="2" Margin="8" FontSize="12" Foreground="{DynamicResource MaterialDesignBody}"/>
         </Grid>
     </Grid>
 </Window>

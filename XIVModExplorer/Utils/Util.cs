@@ -3,16 +3,20 @@
 * Licensed under the Mozilla Public License Version 2.0. See https://github.com/GiR-Zippo/XIV-Modexplorer/blob/main/LICENSE for full license information.
 */
 
+using ReverseMarkdown.Converters;
 using SharpCompress.Archives;
 using SharpCompress.Common;
+using SharpCompress.Readers;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using XIVModExplorer.Caching;
+using XIVModExplorer.HelperWindows;
 
 namespace XIVModExplorer.Utils
 {
@@ -181,7 +185,7 @@ namespace XIVModExplorer.Utils
             carchive.Dispose();
         }
 
-        public static void CreateMetaEntry(string current_Directory, string url, string Modname, string Description)
+        public static void CreateMetaEntry(string current_Directory, string url, string Modname, string Description, bool dtready = false)
         {
             var dirName = new DirectoryInfo(current_Directory).Name;
             string result = new DirectoryInfo(current_Directory).Parent.FullName;
@@ -197,7 +201,7 @@ namespace XIVModExplorer.Utils
                 }
             }
             var converter = new ReverseMarkdown.Converter();
-            Database.SaveMinimalData(url, Modname, converter.Convert(Description), pictureData, g);
+            Database.SaveMinimalData(url, Modname, converter.Convert(Description), pictureData, g, dtready);
         }
 
         /// <summary>
@@ -231,6 +235,89 @@ namespace XIVModExplorer.Utils
             string invalidRegStr = string.Format(@"([{0}]*\.+$)|([{0}]+)", invalidChars);
 
             return System.Text.RegularExpressions.Regex.Replace(name, invalidRegStr, "_");
+        }
+
+        /// <summary>
+        /// Upgrade mods in a directory to DT
+        /// </summary>
+        /// <param name="path"></param>
+        public static void UpgradeDownloadModsToDT(string path)
+        {
+            var extensions = new List<string> { ".7z", ".zip", ".rar" };
+            var files = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories)
+                                .Where(f => extensions
+                                .Any(extn => string.Compare(Path.GetExtension(f), extn, StringComparison.InvariantCultureIgnoreCase) == 0))
+                                .ToArray();
+
+            foreach (var file in files)
+            {
+                string pth = Path.GetDirectoryName(file) + "\\";
+                string fname = Path.GetFileNameWithoutExtension(file);
+                //create dir
+                Directory.CreateDirectory(pth + fname);
+                //ectract
+                var archive = ArchiveFactory.Open(file).ExtractAllEntries();
+                archive.WriteAllToDirectory(pth + fname, new ExtractionOptions() { Overwrite = true, ExtractFullPath=true });
+                archive.Dispose();
+                //delete the old archive
+                File.Delete(file);
+            }
+
+            //get mods
+            extensions = new List<string> { ".ttmp2", ".pmb" };
+            var innerfiles = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories)
+                                .Where(f => extensions
+                                .Any(extn => string.Compare(Path.GetExtension(f), extn, StringComparison.InvariantCultureIgnoreCase) == 0))
+                                .ToArray();
+            
+            foreach (string modfile in innerfiles)
+                File.Delete(UpgradeModToDT(modfile)); //delete the old ones
+
+        }
+
+        /// <summary>
+        /// upgrade mod to dt ([string] file with path)
+        /// </summary>
+        /// <param name="file"></param>
+        public static string UpgradeModToDT(string file)
+        {
+            string pth = Path.GetDirectoryName(file) + "\\";
+            string fname = Path.GetFileNameWithoutExtension(file);
+            string extention = Path.GetExtension(file);
+            File.Move(pth + fname + extention, pth + fname + "-EW" + extention);
+            Process p = new Process()
+            {
+                StartInfo =
+                {
+                    CreateNoWindow = true,
+                    WorkingDirectory = Configuration.GetValue("TextToolsPath")+"\\",
+                    FileName = Configuration.GetValue("TextToolsPath") + "\\ConsoleTools.exe",
+                    Arguments = @"/upgrade " +
+                                "\"" + pth + fname + "-EW" + extention + "\" " +
+                                "\"" + pth + fname +  extention + "\""
+                }
+            };
+            p.EnableRaisingEvents = true;
+            // redirect the output
+            p.StartInfo.RedirectStandardOutput = true;
+            p.StartInfo.RedirectStandardError = true;
+
+            // hookup the eventhandlers to capture the data that is received
+            p.OutputDataReceived += (sender, args) => LogWindow.Message(args.Data);
+            p.ErrorDataReceived += (sender, args) => LogWindow.Message(args.Data);
+
+            // direct start
+            p.StartInfo.UseShellExecute = false;
+
+            p.Start();
+
+            // start our event pumps
+            p.BeginOutputReadLine();
+            p.BeginErrorReadLine();
+
+            // until we are done
+            p.WaitForExit();
+            return pth + fname + "-EW" + extention;
         }
     }
 }

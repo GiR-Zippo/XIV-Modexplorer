@@ -22,6 +22,7 @@ using XIVModExplorer.Caching;
 using XIVModExplorer.HelperWindows;
 using XIVModExplorer.Penumbra;
 using XIVModExplorer.Scraping;
+using XIVModExplorer.Utils;
 
 namespace XIVModExplorer
 {
@@ -129,6 +130,8 @@ namespace XIVModExplorer
         /// <param name="archiveName"></param>
         public void PreviewArchive(string archiveName)
         {
+            IsForDT.Icon = FontAwesome.Sharp.IconChar.ThumbTack;
+
             if (!Configuration.GetBoolValue("UseDatabase"))
                 return;
 
@@ -139,6 +142,10 @@ namespace XIVModExplorer
             current_preview = archiveName;
             current_archive = "";
             ModEntry me = Database.Instance.FindData(Configuration.GetRelativeModPath(archiveName));
+            if (me == null)
+                return;
+
+            IsForDT.Icon = me.IsForDT ? FontAwesome.Sharp.IconChar.ThumbsUp : FontAwesome.Sharp.IconChar.ThumbsDown;
 
             ResetSlideTimer();
             pictures.Clear();
@@ -323,6 +330,12 @@ namespace XIVModExplorer
         /// </summary>
         private async void DownloadMenu_Click(object sender, RoutedEventArgs e)
         {
+            if (DLDTUp.IsChecked.Value && Configuration.GetValue("TextToolsPath").Count() < 1)
+            {
+                MessageWindow.Show("No Textools Path set", "Error");
+                return;
+            }
+
             SetRemoveTitleStatus(" - Downloading", true);
             toggleDownloadContext(false);
             var dlg = new FolderPicker();
@@ -333,7 +346,7 @@ namespace XIVModExplorer
                 string data = input.ShowDialog();
                 if (data != "")
                 {
-                    if (await scraper.DownloadMod(data, dlg.ResultName, DLArchive.IsChecked.Value, DLRDir.IsChecked.Value))
+                    if (await scraper.DownloadMod(data, dlg.ResultName, DLArchive.IsChecked.Value, DLRDir.IsChecked.Value, DLDTUp.IsChecked.Value))
                     {
                         FileTree.UpdateTreeView(selected_dir + "\\");
                         MessageWindow.Show(Locales.Language.Word_Finished);
@@ -409,6 +422,17 @@ namespace XIVModExplorer
             dlg.InputPath = "C:\\";
             if (dlg.ShowDialog(this) == true)
                 Configuration.SetValue("PenumbraPath", dlg.ResultPath);
+        }
+
+        /// <summary>
+        /// Set the textools folder
+        /// </summary>
+        private void SetTexToolsMenu_Click(object sender, RoutedEventArgs e)
+        {
+            var dlg = new FolderPicker();
+            dlg.InputPath = "C:\\";
+            if (dlg.ShowDialog(this) == true)
+                Configuration.SetValue("TextToolsPath", dlg.ResultPath);
         }
 
         /// <summary>
@@ -520,6 +544,12 @@ namespace XIVModExplorer
         /// <param name="e"></param>
         private async void ContextMenu_Download_Click(object sender, RoutedEventArgs e)
         {
+            if (DLDTUp.IsChecked.Value && Configuration.GetValue("TextToolsPath").Count() < 1)
+            {
+                MessageWindow.Show("No Textools Path set", "Error");
+                return;
+            }
+
             SetRemoveTitleStatus(" - Downloading", true);
             toggleDownloadContext(false);
 
@@ -537,7 +567,7 @@ namespace XIVModExplorer
                     }
                 }
 
-                if (await scraper.DownloadMod(data, selected_dir, DLArchive.IsChecked.Value, DLRDir.IsChecked.Value))
+                if (await scraper.DownloadMod(data, selected_dir, DLArchive.IsChecked.Value, DLRDir.IsChecked.Value, DLDTUp.IsChecked.Value))
                     MessageWindow.Show(Locales.Language.Word_Finished);
                 else
                     MessageWindow.Show(Locales.Language.Msg_Error_Fetch, Locales.Language.Word_Error);
@@ -695,6 +725,86 @@ namespace XIVModExplorer
                 return;
 
             PenumbraBackup.InstallModBackup(me.PenumbraName, Configuration.GetAbsoluteModPath(me.Filename));
+        }
+
+        /// <summary>
+        /// Updates the Mod to DT
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private async void ContextMenu_UpgradeToDT_Click(object sender, RoutedEventArgs e)
+        {
+            if (current_preview == "")
+                return;
+
+            if (Configuration.GetValue("TextToolsPath").Count() < 1)
+            {
+                MessageWindow.Show("No Textools Path set", "Error");
+                return;
+            }
+
+            if (!Configuration.GetBoolValue("UseDatabase"))
+                return;
+
+            ModEntry mod = Database.Instance.FindData(Configuration.GetRelativeModPath(current_preview));
+            if (mod == null)
+                return;
+
+            if (mod.IsForDT)
+            {
+                MessageWindow.Show("Already converted for DT", "Error");
+                return;
+            }
+
+            string selectedItem = current_preview;
+            string tempPath = App.TempPath + Path.GetFileNameWithoutExtension(selectedItem);
+            Directory.CreateDirectory(tempPath);
+            await Task.Run(() =>
+            {
+                LogWindow.Message($"[MainWindow] Upgrade to DT: mod decompressing {selectedItem}");
+                var archive = ArchiveFactory.Open(selectedItem);
+                try
+                {
+                    archive.ExtractAllEntries().WriteAllToDirectory(tempPath, new ExtractionOptions() { Overwrite = true, ExtractFullPath = true });
+                }
+                catch
+                {
+                    foreach (var entry in archive.Entries)
+                    {
+                        if (!entry.IsDirectory)
+                        {
+                                string entryName = string.Concat(entry.Key.Split(Path.GetInvalidFileNameChars()));
+                                string dir = Path.GetDirectoryName(entry.Key.Replace('/', '\\'));
+                                string filename = string.Concat(Path.GetFileName(entry.Key.Replace('/', '\\')).Split(Path.GetInvalidFileNameChars())); 
+                                if (!Directory.Exists(tempPath + "\\" + dir))
+                                    Directory.CreateDirectory(tempPath + "\\" + dir);
+
+                                var str = entry.OpenEntryStream();
+                                FileStream output = new FileStream(tempPath + "\\" + dir+ "\\" + filename, FileMode.Create);
+                                str.CopyTo(output);
+                                str.Close();
+                                output.Close();
+                        }
+                    }
+                }
+                archive.Dispose();
+
+                LogWindow.Message($"[MainWindow] Upgrade to DT: converting");
+                Util.UpgradeDownloadModsToDT(tempPath);
+
+                LogWindow.Message($"[MainWindow] Upgrade to DT: mod compressing {tempPath}");
+                Util.CompressToArchive(tempPath);
+                LogWindow.Message($"[MainWindow] Upgrade to DT: mod moving {tempPath}.zip to {selectedItem}");
+                File.Delete(selectedItem);
+                File.Move(tempPath + ".zip", selectedItem);
+
+                LogWindow.Message($"[MainWindow] Upgrade to DT: update cache");
+                mod.IsForDT = true;
+                Database.Instance.SaveData(mod);
+                LogWindow.Message($"[MainWindow] Upgrade to DT: Done");
+
+                MessageWindow.Show("Conversion done.", "Info");
+            });
         }
 
         /// <summary>

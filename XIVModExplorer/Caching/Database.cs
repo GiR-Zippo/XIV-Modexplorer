@@ -70,6 +70,7 @@ namespace XIVModExplorer.Caching
         public bool FoundInPenumbra { get; set; } = false;
         public string PenumbraName { get; set; } = "";
         public string PenumbraPath { get; set; } = "";
+        public bool IsForDT { get; set; } = false;
     }
 
     public sealed class Database : IDisposable
@@ -289,7 +290,7 @@ namespace XIVModExplorer.Caching
             }
         }
 
-        public static void SaveMinimalData(string url, string modname, string discription, byte[] pictureBytes, string file)
+        public static void SaveMinimalData(string url, string modname, string discription, byte[] pictureBytes, string file, bool dtready)
         {
             if (!Database.Initialized)
                 return;
@@ -301,7 +302,8 @@ namespace XIVModExplorer.Caching
                 ModName = modname,
                 Description = discription,
                 picture = pictureBytes,
-                Filename = relFile
+                Filename = relFile,
+                IsForDT = dtready
             };
 
             SHA1Managed managed = new SHA1Managed();

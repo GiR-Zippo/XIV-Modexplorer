@@ -194,6 +194,32 @@ namespace XIVModExplorer.Scraping.Internal
         }
 
         #region ExtDownload
+        public static KeyValuePair<string[], System.Collections.ObjectModel.ReadOnlyCollection<Cookie>> GetPixelDrainDownload(string url)
+        {
+            LogWindow.Message($"[Scraper] Using Pixeldrain reader");
+            List<string> downloadUrl = new List<string>();
+
+            var DriverService = EdgeDriverService.CreateDefaultService();
+            DriverService.HideCommandPromptWindow = true;
+
+            IWebDriver driver = new EdgeDriver(DriverService, new EdgeOptions());
+            driver.Manage().Window.Minimize();
+            driver.Navigate().GoToUrl(url);
+
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            wait.Until(ExpectedConditions.ElementIsVisible(By.Id("body")));
+
+            var htmlDoc = new HtmlDocument();
+            htmlDoc.LoadHtml(driver.PageSource);
+
+            downloadUrl.Add(@"https://pixeldrain.com/api/file/"+url.Split('/').Last()+"?download");
+            var cookies = driver.Manage().Cookies.AllCookies;
+
+            driver.Quit();
+            driver.Dispose();
+            return new KeyValuePair<string[], System.Collections.ObjectModel.ReadOnlyCollection<Cookie>>(downloadUrl.ToArray(), cookies);
+        }
+
         public static KeyValuePair<string[], System.Collections.ObjectModel.ReadOnlyCollection<Cookie>> GetGOFileDownloads(string url)
         {
             LogWindow.Message($"[Scraper] Using GOFile reader");

@@ -88,6 +88,15 @@ namespace XIVModExplorer.Locales {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade mod to DT ähnelt.
+        /// </summary>
+        public static string Context_Menu_DT_Upgrade {
+            get {
+                return ResourceManager.GetString("Context_Menu_DT_Upgrade", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Edit Metadata ähnelt.
         /// </summary>
         public static string Context_Menu_EditMeta {
@@ -138,6 +147,15 @@ namespace XIVModExplorer.Locales {
         public static string Menu_Download_Archive {
             get {
                 return ResourceManager.GetString("Menu_Download_Archive", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Upgrade for DT ähnelt.
+        /// </summary>
+        public static string Menu_Download_DTUpgrade {
+            get {
+                return ResourceManager.GetString("Menu_Download_DTUpgrade", resourceCulture);
             }
         }
         
@@ -264,6 +282,15 @@ namespace XIVModExplorer.Locales {
         public static string Menu_Settings_RebuildDB {
             get {
                 return ResourceManager.GetString("Menu_Settings_RebuildDB", resourceCulture);
+            }
+        }
+        
+        /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Set TexTools Path ähnelt.
+        /// </summary>
+        public static string Menu_Settings_TexToolsPath {
+            get {
+                return ResourceManager.GetString("Menu_Settings_TexToolsPath", resourceCulture);
             }
         }
         

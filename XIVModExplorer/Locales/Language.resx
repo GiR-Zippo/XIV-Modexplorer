@@ -126,6 +126,9 @@
   <data name="Context_Menu_Download" xml:space="preserve">
     <value>Download All</value>
   </data>
+  <data name="Context_Menu_DT_Upgrade" xml:space="preserve">
+    <value>Upgrade mod to DT</value>
+  </data>
   <data name="Context_Menu_EditMeta" xml:space="preserve">
     <value>Edit Metadata</value>
   </data>
@@ -143,6 +146,9 @@
   </data>
   <data name="Menu_Download_Archive" xml:space="preserve">
     <value>Archive</value>
+  </data>
+  <data name="Menu_Download_DTUpgrade" xml:space="preserve">
+    <value>Upgrade for DT</value>
   </data>
   <data name="Menu_Download_Remove" xml:space="preserve">
     <value>Remove Directory</value>
@@ -185,6 +191,9 @@
   </data>
   <data name="Menu_Settings_RebuildDB" xml:space="preserve">
     <value>Rebuild db</value>
+  </data>
+  <data name="Menu_Settings_TexToolsPath" xml:space="preserve">
+    <value>Set TexTools Path</value>
   </data>
   <data name="Metadata_Export_Json" xml:space="preserve">
     <value>Export as Json</value>

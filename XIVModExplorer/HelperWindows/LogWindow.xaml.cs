@@ -1,7 +1,5 @@
-﻿using OpenQA.Selenium.DevTools.V120.DOM;
-using System;
+﻿using System;
 using System.Collections.ObjectModel;
-using System.Collections.Specialized;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
@@ -51,7 +49,8 @@ namespace XIVModExplorer.HelperWindows
                 return;
             WindowDispatcher.Invoke(new Action(() =>
             {
-                LogEntries.Add(new LogEntry { DateTime = DateTime.Now, Message = message });
+                if (message != null)
+                    LogEntries.Add(new LogEntry { DateTime = DateTime.Now, Message = message });
             }));
         }
 

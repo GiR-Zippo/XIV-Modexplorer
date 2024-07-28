@@ -6,6 +6,7 @@
 using ImageMagick;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -60,7 +61,7 @@ namespace XIVModExplorer.Scraping
             WebService.Instance.OnRequestFinished -= Instance_RequestFinished;
         }
 
-        public async Task<bool> DownloadMod(string url, string path, bool archive = false, bool deldir = false)
+        public async Task<bool> DownloadMod(string url, string path, bool archive = false, bool deldir = false, bool dtupgrade = false)
         {
             current_downloadPath = "";
             ScanURLforData(url);
@@ -98,6 +99,8 @@ namespace XIVModExplorer.Scraping
                     await downloadMega(collectedData.DownloadUrl[0], path);
                 else if (collectedData.DownloadUrl[0].StartsWith("https://gofile.io"))
                     downloadGoFileIo(collectedData.DownloadUrl[0], path);
+                else if (collectedData.DownloadUrl[0].StartsWith("https://pixeldrain.com"))
+                    downloadPixeldrain(collectedData.DownloadUrl[0], path);
                 else
                     saveData(collectedData.DownloadUrl[0], path);
             else
@@ -154,7 +157,16 @@ namespace XIVModExplorer.Scraping
             DataReady.Clear();
             LogWindow.Message("[Scraper - DownloadMod] Download everything else done");
 
-            if (!archive || current_downloadPath == "")
+            if (current_downloadPath == "")
+                return true;
+
+            if (dtupgrade)
+            {
+                LogWindow.Message("[Scraper - DownloadMod] Do the DT Upgrade");
+                Util.UpgradeDownloadModsToDT(current_downloadPath);
+            }
+
+            if (!archive)
                 return true;
 
             await Task.Run(() =>
@@ -165,7 +177,7 @@ namespace XIVModExplorer.Scraping
 
                 //cache min data, if db is enabled
                 if (Configuration.GetBoolValue("UseDatabase"))
-                    Util.CreateMetaEntry(current_downloadPath, url, collectedData.Modname, collectedData.Description);
+                    Util.CreateMetaEntry(current_downloadPath, url, collectedData.Modname, collectedData.Description, true);
 
                 //delete the dir
                 if (deldir)
@@ -288,6 +300,21 @@ namespace XIVModExplorer.Scraping
                 Requester = WebService.Requester.DOWNLOAD,
                 Parameters = new KeyValuePair<string, KeyValuePair<bool, bool>>(path, new KeyValuePair<bool, bool>(createDir, touch_dlpath))
             });
+        }
+
+        private void downloadPixeldrain(string downloadUrl, string path, bool createDir = true, bool touch_dlpath = true)
+        {
+            var temp = InternalScraper.GetPixelDrainDownload(downloadUrl);
+            foreach (var url in temp.Key)
+            {
+                WebService.Instance.AddToQueue(new WebService.GetRequest()
+                {
+                    Url = url,
+                    Requester = WebService.Requester.DOWNLOAD,
+                    CookieJar = temp.Value,
+                    Parameters = new KeyValuePair<string, KeyValuePair<bool, bool>>(path, new KeyValuePair<bool, bool>(createDir, touch_dlpath))
+                });
+            }
         }
 
         private void downloadGoFileIo(string downloadUrl, string path, bool createDir = true, bool touch_dlpath = true)
