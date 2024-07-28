@@ -130,8 +130,6 @@ namespace XIVModExplorer
         /// <param name="archiveName"></param>
         public void PreviewArchive(string archiveName)
         {
-            IsForDT.Icon = FontAwesome.Sharp.IconChar.ThumbTack;
-
             if (!Configuration.GetBoolValue("UseDatabase"))
                 return;
 
@@ -143,7 +141,10 @@ namespace XIVModExplorer
             current_archive = "";
             ModEntry me = Database.Instance.FindData(Configuration.GetRelativeModPath(archiveName));
             if (me == null)
+            {
+                IsForDT.Icon = FontAwesome.Sharp.IconChar.ThumbTack;
                 return;
+            }
 
             IsForDT.Icon = me.IsForDT ? FontAwesome.Sharp.IconChar.ThumbsUp : FontAwesome.Sharp.IconChar.ThumbsDown;
 
