@@ -113,12 +113,12 @@ namespace XIVModExplorer.Scraping.Internal
             {
                 JObject o2 = (JObject)JToken.ReadFrom(reader);
                 int ix = 0;
-                collectedData.Modname =  o2["props"]["pageProps"]["bootstrapEnvelope"]["bootstrap"]["post"]["data"]["attributes"]["title"].Value<string>().TrimEnd();
-                collectedData.Description = o2["props"]["pageProps"]["bootstrapEnvelope"]["bootstrap"]["post"]["data"]["attributes"]["content"].Value<string>(); ;
+                collectedData.Modname =  o2["props"]["pageProps"]["bootstrapEnvelope"]["pageBootstrap"]["post"]["data"]["attributes"]["title"].Value<string>().TrimEnd();
+                collectedData.Description = o2["props"]["pageProps"]["bootstrapEnvelope"]["pageBootstrap"]["post"]["data"]["attributes"]["content"].Value<string>(); ;
 
-                foreach (var d in o2["props"]["pageProps"]["bootstrapEnvelope"]["bootstrap"]["post"]["included"])
+                foreach (var d in o2["props"]["pageProps"]["bootstrapEnvelope"]["pageBootstrap"]["post"]["included"])
                 {
-                    var p = o2["props"]["pageProps"]["bootstrapEnvelope"]["bootstrap"]["post"]["included"][ix];
+                    var p = o2["props"]["pageProps"]["bootstrapEnvelope"]["pageBootstrap"]["post"]["included"][ix];
                     if (p["type"].Value<string>().ToString() == "attachment")
                         collectedData.DownloadUrl.Add(p["attributes"]["url"].Value<string>());
                     if (p["type"].Value<string>().ToString() == "media")
