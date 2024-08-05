@@ -4,16 +4,30 @@
 */
 
 using Neo.IronLua;
+using Newtonsoft.Json;
 using SharpCompress;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text.RegularExpressions;
 using XIVModExplorer.HelperWindows;
 
 namespace XIVModExplorer.Scraping
 {
     public class LuaScraper : IDisposable
     {
+        private static string GetJsonToken(string data, string token)
+        {
+            dynamic jData = JsonConvert.DeserializeObject(data);
+            var f = jData[token];
+            return JsonConvert.SerializeObject(f);
+        }
+
+        private static string Unescape(string data)
+        {
+            return Regex.Unescape(data);
+        }
+
         private static void Print(object[] texts)
         {
             foreach (object o in texts)
@@ -23,6 +37,10 @@ namespace XIVModExplorer.Scraping
 
         private static LuaTable Split(string source, string delim)
         {
+            //in case we've got lua syntax
+            Regex regEx = new Regex(@"\[,(.?)\]");
+            if (regEx.IsMatch(delim))
+                delim = regEx.Replace(delim, regEx.Match(delim).Groups[1].Value);
             LuaTable tbl = new LuaTable();
             source.Split(new string[] { delim }, StringSplitOptions.RemoveEmptyEntries).ForEach(n => tbl.Add(n));
             return tbl;
@@ -44,6 +62,8 @@ namespace XIVModExplorer.Scraping
             {
                 string text = File.ReadAllText(luafile);
                 dynamic env = lua.CreateEnvironment<LuaGlobal>();
+                env.getJsonToken = new Func<string, string, string>(GetJsonToken);
+                env.unescape = new Func<string, string>(Unescape);
                 env.print = new Action<object[]>(Print);
                 env.split = new Func<string, string, LuaTable>(Split);
                 env.HtmlData = html;
@@ -77,6 +97,8 @@ namespace XIVModExplorer.Scraping
                 Console.WriteLine("\r\nStarting Testbench");
                 string text = File.ReadAllText(luafile);
                 dynamic env = lua.CreateEnvironment<LuaGlobal>(); // Create a environment
+                env.getJsonToken = new Func<string, string, string>(GetJsonToken);
+                env.unescape = new Func<string, string>(Unescape);
                 env.print = new Action<object[]>(Print);
                 env.split = new Func<string, string, LuaTable>(Split);
                 env.HtmlData = File.ReadAllText(html);
