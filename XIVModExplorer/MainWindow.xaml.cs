@@ -616,7 +616,7 @@ namespace XIVModExplorer
                         //Extract normal ttmp2 and pmb
                         if (!reader.Entry.IsDirectory)
                         {
-                            if (reader.Entry.Key.EndsWith(".ttmp2") || reader.Entry.Key.EndsWith(".pmp"))
+                            if (reader.Entry.Key.EndsWith(".ttmp") || reader.Entry.Key.EndsWith(".ttmp2") || reader.Entry.Key.EndsWith(".pmp"))
                             {
                                 try
                                 {
