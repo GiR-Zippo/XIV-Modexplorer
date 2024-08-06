@@ -331,6 +331,15 @@ namespace XIVModExplorer.Locales {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Try Read from Mod ähnelt.
+        /// </summary>
+        public static string Metadata_ReadAffect {
+            get {
+                return ResourceManager.GetString("Metadata_ReadAffect", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Reread from archive ähnelt.
         /// </summary>
         public static string Metadata_Reread {

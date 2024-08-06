@@ -185,7 +185,7 @@ namespace XIVModExplorer.Utils
             carchive.Dispose();
         }
 
-        public static void CreateMetaEntry(string current_Directory, string url, string Modname, string Description, bool dtready = false)
+        public static void CreateMetaEntry(string current_Directory, string url, string Modname, string Description, UInt32 modflag = 0, bool dtready = false)
         {
             var dirName = new DirectoryInfo(current_Directory).Name;
             string result = new DirectoryInfo(current_Directory).Parent.FullName;
@@ -201,7 +201,7 @@ namespace XIVModExplorer.Utils
                 }
             }
             var converter = new ReverseMarkdown.Converter();
-            Database.SaveMinimalData(url, Modname, converter.Convert(Description), pictureData, g, dtready);
+            Database.SaveMinimalData(url, Modname, converter.Convert(Description), pictureData, g, modflag, dtready);
         }
 
         /// <summary>
@@ -264,7 +264,7 @@ namespace XIVModExplorer.Utils
             }
 
             //get mods
-            extensions = new List<string> { ".ttmp2", ".pmb" };
+            extensions = new List<string> { ".ttmp", ".ttmp2", ".pmb" };
             var innerfiles = Directory.GetFiles(path, "*.*", SearchOption.AllDirectories)
                                 .Where(f => extensions
                                 .Any(extn => string.Compare(Path.GetExtension(f), extn, StringComparison.InvariantCultureIgnoreCase) == 0))
@@ -272,7 +272,6 @@ namespace XIVModExplorer.Utils
             
             foreach (string modfile in innerfiles)
                 File.Delete(UpgradeModToDT(modfile)); //delete the old ones
-
         }
 
         /// <summary>

@@ -6,7 +6,6 @@
 using LiteDB;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
@@ -290,7 +289,7 @@ namespace XIVModExplorer.Caching
             }
         }
 
-        public static void SaveMinimalData(string url, string modname, string discription, byte[] pictureBytes, string file, bool dtready)
+        public static void SaveMinimalData(string url, string modname, string discription, byte[] pictureBytes, string file, UInt32 modflag, bool dtready)
         {
             if (!Database.Initialized)
                 return;
@@ -303,6 +302,7 @@ namespace XIVModExplorer.Caching
                 Description = discription,
                 picture = pictureBytes,
                 Filename = relFile,
+                ModTypeFlag = modflag,
                 IsForDT = dtready
             };
 

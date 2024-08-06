@@ -207,6 +207,9 @@
   <data name="Metadata_PenumbraPath" xml:space="preserve">
     <value>Penumbra Mod-Pfad</value>
   </data>
+  <data name="Metadata_ReadAffect" xml:space="preserve">
+    <value>Lese von Mod</value>
+  </data>
   <data name="Metadata_Reread" xml:space="preserve">
     <value>Archiv erneut lesen</value>
   </data>

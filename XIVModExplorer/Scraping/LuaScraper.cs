@@ -28,6 +28,11 @@ namespace XIVModExplorer.Scraping
             return Regex.Unescape(data);
         }
 
+        private static string HtmlNormalize(string html)
+        {
+            return System.Web.HttpUtility.HtmlDecode(html);
+        }
+
         private static void Print(object[] texts)
         {
             foreach (object o in texts)
@@ -50,6 +55,8 @@ namespace XIVModExplorer.Scraping
         public List<string> Pictures { get; set; } = new List<string>();
         public string Content { get; set; } = "";
         public List<string> DownloadLink { get; set; } = new List<string>();
+        public List<string> Replaces { get; set; } = new List<string>();
+        public string ExternalSite { get; set; } = "";
 
         public LuaScraper()
         {
@@ -64,6 +71,7 @@ namespace XIVModExplorer.Scraping
                 dynamic env = lua.CreateEnvironment<LuaGlobal>();
                 env.getJsonToken = new Func<string, string, string>(GetJsonToken);
                 env.unescape = new Func<string, string>(Unescape);
+                env.normalizeHtml = new Func<string, string>(HtmlNormalize);
                 env.print = new Action<object[]>(Print);
                 env.split = new Func<string, string, LuaTable>(Split);
                 env.HtmlData = html;
@@ -73,10 +81,13 @@ namespace XIVModExplorer.Scraping
                     env.dochunk(chunk);
                     ModName = env.ModName;
                     Content = env.Content;
+                    ExternalSite = env.ExternalSite;
                     foreach (var x in env.Downloads as LuaTable)
                         DownloadLink.Add((string)x.Value);
                     foreach (var x in env.Images as LuaTable)
                         Pictures.Add((string)x.Value);
+                    foreach (var x in env.Replaces as LuaTable)
+                        Replaces.Add((string)x.Value);
                 }
                 catch (Exception e)
                 {
@@ -99,6 +110,7 @@ namespace XIVModExplorer.Scraping
                 dynamic env = lua.CreateEnvironment<LuaGlobal>(); // Create a environment
                 env.getJsonToken = new Func<string, string, string>(GetJsonToken);
                 env.unescape = new Func<string, string>(Unescape);
+                env.normalizeHtml = new Func<string, string>(HtmlNormalize);
                 env.print = new Action<object[]>(Print);
                 env.split = new Func<string, string, LuaTable>(Split);
                 env.HtmlData = File.ReadAllText(html);
@@ -118,6 +130,11 @@ namespace XIVModExplorer.Scraping
                     Console.WriteLine("------- Found picture links -------");
                     foreach (var x in env.Images as LuaTable)
                         Console.WriteLine((string)x.Value);
+                    Console.WriteLine("------- Found  Replacements -------");
+                    foreach (var x in env.Replaces as LuaTable)
+                        Console.WriteLine((string)x.Value);
+                    Console.WriteLine("------- Found External Site --------");
+                        Console.WriteLine(env.ExternalSite);
                 }
                 catch (Exception e)
                 {

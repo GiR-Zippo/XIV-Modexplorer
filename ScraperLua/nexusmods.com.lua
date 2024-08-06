@@ -6,6 +6,8 @@ Images = {}
 ModName = "";
 Downloads = {}
 Content = "";
+Replaces = {};
+ExternalSite = "";
 
 local lines = {}
 

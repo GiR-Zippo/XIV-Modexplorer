@@ -5,6 +5,8 @@ Images = {};
 ModName = "";
 Downloads = {};
 Content = "";
+Replaces = {};
+ExternalSite = "";
 
 local lines = {}
 
@@ -59,7 +61,34 @@ function GetDownload()
     for _, line in pairs(lines) do
         if string.find(line, '<a class=[,"]elementor%-button elementor%-button%-link elementor%-size%-lg[,"] href=[,"]') then
             dl = split(line, 'href="')[2]
-            table.insert(Downloads, split(dl, '"')[1]);
+            if string.find(line, 'glamourdresser.com') then
+                table.insert(Downloads, split(dl, '"')[1]);
+            elseif string.find(line, 'mega.nz') then
+                table.insert(Downloads, split(dl, '"')[1]);
+            elseif string.find(line, 'drive.google.com') then
+                table.insert(Downloads, split(dl, '"')[1]);
+            else
+                ExternalSite = split(dl, '"')[1];
+            end
+
+        end
+    end
+end
+
+function GetAffectReplace()
+    for _, line in pairs(lines) do
+        if string.find(line, 'Affects: ') then
+            line = split(line, 'Affects: ')[2]
+            line = split(line, '</span>')[1]
+            for _, item in pairs(split(line, ',')) do
+                rep = normalizeHtml(item)
+                rep = string.gsub(rep, '^%s*(.-)%s*$', '%1')
+                if string.find(rep, '/') then
+                    rep = split(rep, '/')[1]
+                end
+                table.insert(Replaces, rep)
+            end
+            return
         end
     end
 end
@@ -74,6 +103,7 @@ function main()
     GetPictures();
     GetContent();
     GetDownload();
+    GetAffectReplace();
 end
 
 main();

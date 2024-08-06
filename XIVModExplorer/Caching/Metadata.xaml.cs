@@ -257,6 +257,7 @@ namespace XIVModExplorer.Caching
             C_Weapon.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.WEAPON) == (UInt32)Type.WEAPON;
             C_Head.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.HEAD) == (UInt32)Type.HEAD;
             C_Top.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.TOP) == (UInt32)Type.TOP;
+            C_Hands.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.HANDS) == (UInt32)Type.HANDS;
             C_Bottom.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.BOTTOM) == (UInt32)Type.BOTTOM;
             C_Shoe.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.SHOE) == (UInt32)Type.SHOE;
             C_Ear.IsChecked = (modentry.ModTypeFlag & (UInt32)Type.EAR) == (UInt32)Type.EAR;
@@ -350,6 +351,16 @@ namespace XIVModExplorer.Caching
             modentry.Url = ModUrl.Text;
             Database.Instance.SaveData(modentry);
         }
+
+        private void ReadAffectsFromMod_Click(object sender, RoutedEventArgs e)
+        {
+            UInt32 retval = ItemLookup.GetAffectedItems(Configuration.GetAbsoluteModPath(modentry.Filename));
+            if (retval == 0)
+                return;
+            modentry.ModTypeFlag = retval;
+            DisplayModInfo();
+        }
+        
 
         /// <summary>
         /// Reread the whole archive

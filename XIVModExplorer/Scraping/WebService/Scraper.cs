@@ -6,7 +6,6 @@
 using ImageMagick;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
@@ -15,6 +14,7 @@ using System.Net;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using XIVModExplorer.Caching;
 using XIVModExplorer.HelperWindows;
 using XIVModExplorer.Scraping.Internal;
 using XIVModExplorer.Utils;
@@ -27,6 +27,7 @@ namespace XIVModExplorer.Scraping
         public string Modname { get; set; } = "";
         public string Description { get; set; } = "";
         public List<string> DownloadUrl { get; set; } = new List<string>();
+        public List<string> Replaces { get; set; } = new List<string>();
         public string ExternalSite { get; set; } = ""; //in case the mod refs to patreon, coomer...
         
         public void Dispose()
@@ -177,8 +178,13 @@ namespace XIVModExplorer.Scraping
 
                 //cache min data, if db is enabled
                 if (Configuration.GetBoolValue("UseDatabase"))
-                    Util.CreateMetaEntry(current_downloadPath, url, collectedData.Modname, collectedData.Description, true);
-
+                {
+                    //get the modtype if we have any
+                    UInt32 modflag = 0;
+                    foreach (string item in collectedData.Replaces)
+                        modflag |= (UInt32)ItemLookup.GetItem(item);
+                    Util.CreateMetaEntry(current_downloadPath, url, collectedData.Modname, collectedData.Description, modflag, true);
+                }
                 //delete the dir
                 if (deldir)
                 {
@@ -368,9 +374,7 @@ namespace XIVModExplorer.Scraping
             var html = request.ResponseBody.ReadAsStringAsync().Result;
             var lines = html.Split("\r\n".ToCharArray(), StringSplitOptions.RemoveEmptyEntries);
             LogWindow.Message($"[Scraper] Searching for data at {request.Host}");
-            if (request.Host.Contains("xivmodarchive.com"))
-                collectedData = InternalScraper.ReadXIVArchive(lines);
-            else if (request.Host.Contains("patreon.com"))
+            if (request.Host.Contains("patreon.com"))
                 collectedData = InternalScraper.ReadPatreon(html);
             else if (request.Host.Contains("ko-fi.com"))
                 collectedData = InternalScraper.ReadKofi(lines);
@@ -397,11 +401,14 @@ namespace XIVModExplorer.Scraping
                     return;
                 }
 
+                //Set the collected data
                 collectedData = new CollectedData();
                 collectedData.Modname = l.ModName;
                 collectedData.Images = new List<string>(l.Pictures);
                 collectedData.Description = l.Content;
                 collectedData.DownloadUrl = new List<string>(l.DownloadLink);
+                collectedData.Replaces = new List<string>(l.Replaces);
+                collectedData.ExternalSite = l.ExternalSite;
                 l.Dispose();
             }
             request.Dispose();

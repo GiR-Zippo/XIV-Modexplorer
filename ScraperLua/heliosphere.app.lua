@@ -5,6 +5,8 @@ Images = {};
 ModName = "";
 Downloads = {};
 Content = "";
+Replaces = {};
+ExternalSite = "";
 
 local lines = {}
 
@@ -12,15 +14,26 @@ local lines = {}
 function GetJson()
 	for _, line in pairs(lines) do
 		if string.find(line, '<script type=[,"]application/json') then
-			jData = split(line, '[,"]>')[2]
-			jData = split(jData, '</script>')[1]
+			jData = split(line, '[,"]>{')[2]
+			jData = "{" .. split(jData, '</script>')[1]
             j = getJsonToken(jData, "body") --get the body
             j = unescape(j) -- unescape it (weird things are going on)
             j = j:sub(2,#j-1) -- remove the " start and end
             j = getJsonToken(j, "data") -- get the data section
             j = getJsonToken(j, "package") -- get the package section
             ModName = getJsonToken(j, "name") -- get the name of the mod
-            Content = unescape(getJsonToken(unescape(j), "description")) -- get the description of the mod
+            Content = unescape(getJsonToken(j, "description")) -- get the description of the mod
+
+            --Get what is affected
+            rep =  getJsonToken(j, "variants")
+            rep = rep:sub(2,#rep-1)
+            rep =  getJsonToken(rep, "versions")
+            rep = rep:sub(2,#rep-1)
+            rep =  getJsonToken(rep, "affects")
+            rep = rep:sub(2,#rep-1)
+            for _, item in pairs(split(rep, ",")) do
+                table.insert(Replaces,item)
+            end
 		end
 	end
 end
@@ -54,8 +67,8 @@ end
 function main()
     print("heliosphere.app");
     HtmlData = HtmlData:gsub("[\r]", "") -- strip the \r
-    for _, line in pairs(split(HtmlData, "\n")) do
-        table.insert(lines, line)
+    for s in HtmlData:gmatch("[^\r\n]+") do
+        table.insert(lines, s)
     end
 	GetJson();
     GetPictures();
