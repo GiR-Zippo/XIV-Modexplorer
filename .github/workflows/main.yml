@@ -78,5 +78,5 @@ jobs:
         with:
           upload_url: ${{steps.create-new-release.outputs.upload_url }}
           asset_path: ./XIVModExplorer/bin/x64/Release/latest.zip
-          asset_name: latest.zip
+          asset_name: XIVModExplorer${{steps.get-version.outputs.version}}.zip
           asset_content_type: application/zip
