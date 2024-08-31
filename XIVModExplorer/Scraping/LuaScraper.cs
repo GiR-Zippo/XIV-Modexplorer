@@ -23,6 +23,19 @@ namespace XIVModExplorer.Scraping
             return JsonConvert.SerializeObject(f);
         }
 
+        private static LuaTable GetJsonTokenList(string data, string token)
+        {
+            dynamic jData = JsonConvert.DeserializeObject(data);
+            var f = jData[token];
+            List<string> tbl = new List<string>();
+            foreach (var content in f)
+                tbl.Add(JsonConvert.SerializeObject(content));
+
+            LuaTable ltbl = new LuaTable();
+            tbl.ForEach(n => ltbl.Add(n));
+            return ltbl;
+        }
+
         private static string Unescape(string data)
         {
             return Regex.Unescape(data);
@@ -70,6 +83,7 @@ namespace XIVModExplorer.Scraping
                 string text = File.ReadAllText(luafile);
                 dynamic env = lua.CreateEnvironment<LuaGlobal>();
                 env.getJsonToken = new Func<string, string, string>(GetJsonToken);
+                env.getJsonTokenList = new Func<string, string, LuaTable>(GetJsonTokenList);
                 env.unescape = new Func<string, string>(Unescape);
                 env.normalizeHtml = new Func<string, string>(HtmlNormalize);
                 env.print = new Action<object[]>(Print);
@@ -109,6 +123,7 @@ namespace XIVModExplorer.Scraping
                 string text = File.ReadAllText(luafile);
                 dynamic env = lua.CreateEnvironment<LuaGlobal>(); // Create a environment
                 env.getJsonToken = new Func<string, string, string>(GetJsonToken);
+                env.getJsonTokenList = new Func<string, string, LuaTable>(GetJsonTokenList);
                 env.unescape = new Func<string, string>(Unescape);
                 env.normalizeHtml = new Func<string, string>(HtmlNormalize);
                 env.print = new Action<object[]>(Print);

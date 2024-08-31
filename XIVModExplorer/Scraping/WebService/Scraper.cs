@@ -378,8 +378,6 @@ namespace XIVModExplorer.Scraping
                 collectedData = InternalScraper.ReadPatreon(html);
             else if (request.Host.Contains("ko-fi.com"))
                 collectedData = InternalScraper.ReadKofi(lines);
-            else if (request.Host.Contains("aetherlink.app"))
-                collectedData = InternalScraper.ReadAetherlink(html);
             else
             {
                 string strExeFilePath = System.Reflection.Assembly.GetExecutingAssembly().Location;

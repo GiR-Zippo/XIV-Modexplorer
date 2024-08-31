@@ -373,6 +373,18 @@ namespace XIVModExplorer.Caching
         }
 
         /// <summary>
+        /// Set the DT compat flag
+        /// </summary>
+        private void SetDTCompat_Click(object sender, RoutedEventArgs e)
+        {
+            if (modentry == null)
+                return;
+            modentry.IsForDT = true;
+            Database.Instance.SaveData(modentry);
+        }
+        
+
+        /// <summary>
         /// Trigger the penumbra path jobby
         /// </summary>
         private void PenumbraButton_Click(object sender, RoutedEventArgs e)

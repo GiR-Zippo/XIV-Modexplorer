@@ -5,11 +5,9 @@
 
 using System;
 using System.Collections.Concurrent;
-using System.Data;
 using System.IO;
 using System.Timers;
 using XIVModExplorer.Caching;
-using XIVModExplorer.Utils;
 
 namespace XIVModExplorer
 {

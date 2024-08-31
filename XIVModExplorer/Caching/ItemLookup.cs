@@ -26,6 +26,14 @@ namespace XIVModExplorer.Caching
         /// <returns></returns>
         public static Type GetItem(string Search)
         {
+            if (Search == "")
+                return Type.NONE;
+
+            return getItem(Search);
+        }
+
+        private static Type getItem(string Search)
+        { 
             if (!File.Exists("Item.csv"))
                 return Type.NONE;
 

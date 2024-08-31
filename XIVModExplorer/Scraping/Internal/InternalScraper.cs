@@ -88,32 +88,6 @@ namespace XIVModExplorer.Scraping.Internal
             return collectedData;
         }
 
-        /// <summary>
-        /// read from aetherlink
-        /// </summary>
-        /// <param name="lines"></param>
-        public static CollectedData ReadAetherlink(string html)
-        {
-            LogWindow.Message($"[Scraper] Using Aetherlink reader");
-            CollectedData collectedData = new CollectedData();
-            string[] term = { "<script id=\"__NEXT_DATA__\" type=\"application/json\">" };
-            var xx = html.Split(term, StringSplitOptions.RemoveEmptyEntries)[1].Replace("</script></body></html>", "");
-            TextReader dr = new StringReader(xx);
-            using (JsonTextReader reader = new JsonTextReader(dr))
-            {
-                JObject o2 = (JObject)JToken.ReadFrom(reader);
-                collectedData.Modname = o2["props"]["pageProps"]["mod"]["meta"]["name"]["short"].Value<string>().TrimEnd();
-                collectedData.Description = o2["props"]["pageProps"]["mod"]["meta"]["description"]["html"].Value<string>();
-
-                foreach (var d in o2["props"]["pageProps"]["downloads"])
-                    collectedData.DownloadUrl.Add(d["url"].Value<string>());
-                foreach (var d in o2["props"]["pageProps"]["slides"])
-                    collectedData.Images.Add(d["url"].Value<string>());
-            }
-            dr.Close();
-            return collectedData;
-        }
-
         #region ExtDownload
         public static KeyValuePair<string[], System.Collections.ObjectModel.ReadOnlyCollection<Cookie>> GetPixelDrainDownload(string url)
         {
