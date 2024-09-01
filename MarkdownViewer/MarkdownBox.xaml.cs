@@ -292,6 +292,8 @@ namespace MarkdownViewer
                     return GetSubscriptInline(subscript);
                 case SuperscriptTextInline superscript:
                     return GetSuperscriptInline(superscript);
+                case EmojiInline emoji:
+                    return GetEmojiInline(emoji);
                 default:
                     throw new NotImplementedException();
             }
@@ -399,6 +401,11 @@ namespace MarkdownViewer
                 superscriptElement.Inlines.Add(GetInline(inline));
             }
             return superscriptElement;
+        }
+
+        private Inline GetEmojiInline(EmojiInline superscript)
+        {
+            return new Run(superscript.Text);
         }
     }
 }

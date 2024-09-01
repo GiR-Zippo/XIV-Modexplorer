@@ -172,6 +172,27 @@ namespace XIVModExplorer.Scraping
 
         private async Task GetHtmlAsync(GetRequest request)
         {
+            //check if we have a direct download
+            if (request.Url.EndsWith(".png") ||
+                request.Url.EndsWith(".jpg") ||
+                request.Url.EndsWith(".webm") ||
+                request.Url.EndsWith(".7z") ||
+                request.Url.EndsWith(".zip") ||
+                request.Url.EndsWith(".rar") ||
+                request.Url.EndsWith(".pmp") ||
+                request.Url.EndsWith(".ttmp") ||
+                request.Url.EndsWith(".ttmp2"))
+            {
+                DirectDownloader directDownloader = new DirectDownloader(request, httpClientHandler.CookieContainer);
+                directDownloader.Download();
+                directDownloader.Dispose();
+                if (request.ResponseCode == HttpStatusCode.OK)
+                {
+                    OnRequestFinished(this, request);
+                    return;
+                }
+            }
+
             foreach (Cookie co in httpClientHandler.CookieContainer.GetCookies(new Uri(request.Url)))
             {
                 co.Expires = DateTime.Now.Subtract(TimeSpan.FromDays(1));

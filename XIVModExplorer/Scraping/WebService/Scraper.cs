@@ -80,10 +80,11 @@ namespace XIVModExplorer.Scraping
                 return false;
             }
 
-            LogWindow.Message("[Scraper - DownloadMod] It's an external site, let's get the data there");
             if (collectedData.ExternalSite != "")
-                return await DownloadMod(collectedData.ExternalSite, path, archive, deldir);
-
+            {
+                LogWindow.Message("[Scraper - DownloadMod] It's an external site, let's get the data there");
+                return await DownloadMod(collectedData.ExternalSite, path, archive, deldir, dtupgrade);
+            }
             //no download url, no download
             if (collectedData.DownloadUrl.Count() == 0)
             {
