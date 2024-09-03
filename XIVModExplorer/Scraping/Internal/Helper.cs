@@ -13,6 +13,9 @@ namespace XIVModExplorer.Scraping.Internal
 {
     public static class Helper
     {
+        public static string UserAgent { get; set; } = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0";
+        public static string Accept { get; set; } = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
+
         #region dirty little helpers
         public static bool ArrayStartsWith(byte[] source, byte[] pattern)
         {

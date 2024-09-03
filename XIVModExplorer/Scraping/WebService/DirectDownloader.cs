@@ -1,4 +1,9 @@
-﻿using Downloader;
+﻿/*
+* Copyright(c) 2024 GiR-Zippo
+* Licensed under the Mozilla Public License Version 2.0. See https://github.com/GiR-Zippo/XIV-Modexplorer/blob/main/LICENSE for full license information.
+*/
+
+using Downloader;
 using System;
 using System.IO;
 using System.Net;
@@ -14,8 +19,6 @@ namespace XIVModExplorer.Scraping
         DownloadService downloader { get; set; }
 
         public GetRequest Request { get; set; }
-
-        ProgressWindow pgWnd { get; set; }
 
         public DirectDownloader(GetRequest request, CookieContainer cookies)
         {

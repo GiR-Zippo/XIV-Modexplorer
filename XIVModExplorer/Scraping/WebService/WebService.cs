@@ -9,6 +9,7 @@ using System.Net;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
+using XIVModExplorer.Scraping.Internal;
 
 namespace XIVModExplorer.Scraping
 {
@@ -28,8 +29,8 @@ namespace XIVModExplorer.Scraping
             public string Url { get; set; } = "";
             public Requester Requester { get; set; } = Requester.NONE;
             public object Parameters { get; set; } = null;
-            public string UserAgent { get; set; } = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:128.0) Gecko/20100101 Firefox/128.0";
-            public string Accept { get; set; } = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
+            public string UserAgent { get; set; } = Helper.UserAgent;
+            public string Accept { get; set; } = Helper.Accept;
 
             public HttpContent ResponseBody { get; set; } = null;
 
@@ -53,8 +54,8 @@ namespace XIVModExplorer.Scraping
             public string Url { get; set; } = "";
             public Requester Requester { get; set; } = Requester.NONE;
             public object Parameters { get; set; } = null;
-            public string UserAgent { get; set; } = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:129.0) Gecko/20100101 Firefox/129.0";
-            public string Accept { get; set; } = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
+            public string UserAgent { get; set; } = Helper.UserAgent;
+            public string Accept { get; set; } = Helper.Accept;
 
             public HttpContent Content { get; set; } = null;
 

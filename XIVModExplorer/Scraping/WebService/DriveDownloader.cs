@@ -1,33 +1,20 @@
-﻿using System;
+﻿/*
+* Copyright(c) 2024 GiR-Zippo
+* Licensed under the Mozilla Public License Version 2.0. See https://github.com/GiR-Zippo/XIV-Modexplorer/blob/main/LICENSE for full license information.
+*/
+
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Diagnostics;
 using System.IO;
 using System.Net;
 using System.Text;
+using HtmlAgilityPack;
 using XIVModExplorer.Scraping.Internal;
+using XIVModExplorer.HelperWindows;
 
 namespace XIVModExplorer.Scraping
 {
-    /* EXAMPLE USAGE
-        FileDownloader fileDownloader = new FileDownloader();
-
-        // This callback is triggered for DownloadFileAsync only
-        fileDownloader.DownloadProgressChanged += ( sender, e ) => Console.WriteLine( "Progress changed " + e.BytesReceived + " " + e.TotalBytesToReceive );
-        // This callback is triggered for both DownloadFile and DownloadFileAsync
-        fileDownloader.DownloadFileCompleted += ( sender, e ) => 
-        {
-            if( e.Cancelled )
-                Console.WriteLine( "Download cancelled" );
-            else if( e.Error != null )
-                Console.WriteLine( "Download failed: " + e.Error );
-            else
-                Console.WriteLine( "Download completed" );
-        };
-
-        fileDownloader.DownloadFileAsync( "https://INSERT_DOWNLOAD_LINK_HERE", @"C:\downloadedFile.txt" );
-    */
-
     public partial class Scraper
     {
         /// <summary>
@@ -36,83 +23,137 @@ namespace XIVModExplorer.Scraping
         /// <param name="url"></param>
         /// <param name="path"></param>
         /// <returns></returns>
-        private static string downloadGoogleDrive(string url, string path, bool createDir = true)
+        private void downloadGoogleDrive(string url, string path, bool createDir = true)
         {
-            if (!url.Contains("file/d/"))
+            if (url.Contains("/drive/folders"))
             {
-                Debug.WriteLine("it's afolder");
-                return "";
-            }
-            string urlAddress = "https://drive.google.com/uc?id=" +
-                               url.Split(new string[] { "file/d/" }, StringSplitOptions.RemoveEmptyEntries)[1]
-                                  .Split(new string[] { "/view" }, StringSplitOptions.RemoveEmptyEntries)[0] +
-                                "&export=download";
-            HttpWebResponse response;
-            try
-            {
-                HttpWebRequest request = (HttpWebRequest)WebRequest.Create(urlAddress);
-                request.UserAgent = @"Mozilla/5.0 (Windows NT 10.0; Win64; x64)";
-                //AppleWebKit/537.36 (KHTML, like Gecko) Chrome/51.0.2704.106 Safari/537.36";
-                request.Accept = "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8";
-                request.Proxy.Credentials = System.Net.CredentialCache.DefaultCredentials;
-                response = (HttpWebResponse)request.GetResponse();
-            }
-            catch (WebException)
-            {
-                return "";
-            }
+                HttpWebResponse folderlist;
+                try
+                {
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                    request.UserAgent = Helper.UserAgent;
+                    request.Accept = Helper.Accept;
+                    request.Proxy.Credentials = CredentialCache.DefaultCredentials;
+                    folderlist = (HttpWebResponse)request.GetResponse();
+                }
+                catch (WebException)
+                {
+                    current_downloadPath = "";
+                    DataReady.Add("url");
+                    return;
+                }
 
-            //Debug.WriteLine(response.Headers["Content-Type"]);
-            if (response.Headers["Content-Type"].Contains("text/html;"))
-            {
-                StreamReader sr = new StreamReader(response.GetResponseStream());
-                var html = sr.ReadToEnd();
-                var fileName = Helper.ReplaceInvalidChars(html.Split(new string[] { "uc-name-size" }, StringSplitOptions.RemoveEmptyEntries)[4].Split('>')[2].Split('<')[0]);
-                string extension = Path.GetExtension(fileName);
+                StreamReader sr = new StreamReader(folderlist.GetResponseStream());
+                var htmlDoc = new HtmlDocument();
+                htmlDoc.LoadHtml(sr.ReadToEnd());
+                var f = htmlDoc.DocumentNode.SelectNodes("//*[text()[contains(., '.ttmp') or contains(., '.pmp')]]");
 
                 string folderName = "";
-                //create a new direcory
-                if (createDir)
+                FileDownloader fileDownloader = new FileDownloader();
+                foreach (HtmlNode node in f)
                 {
-                    folderName = fileName.Substring(0, fileName.Length - extension.Length) + "\\";
-                    if (!Directory.Exists(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length)))
-                        Directory.CreateDirectory(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length));
+                    if (node.Name != "div")
+                        continue;
+                    string iName = node.InnerHtml;
+
+                    if (createDir && folderName == "")
+                    {
+                        folderName = Path.GetFileNameWithoutExtension(iName);
+                        if (!Directory.Exists(path + "\\" + folderName))
+                            Directory.CreateDirectory(path + "\\" + folderName);
+                    }
+
+                    var dlId = node.ParentNode.ParentNode.ParentNode.ParentNode.ParentNode.GetAttributeValue("data-id", "");
+                    LogWindow.Message("[Scraper - gDrive] Downloading: " + iName);
+                    fileDownloader.DownloadFile("https://drive.usercontent.google.com/download?id=" + dlId + "&export=download&confirm=t", path + "\\" + folderName + "\\" + iName);
+                    LogWindow.Message("[Scraper - gDrive] Done downloading: " + iName);
                 }
+
                 sr.Close();
-                sr.DiscardBufferedData();
-                sr.Dispose();
-                DriveDownloader fileDownloader = new DriveDownloader();
-                fileDownloader.DownloadFile(urlAddress, path + "\\" + fileName);
-                return path + "\\" + folderName;
+                fileDownloader.Dispose();
+                current_downloadPath = path + "\\" + folderName;
+                DataReady.Add("url");
+                return;
             }
-            //If this is a already a binary, save the stream
-            else if (response.Headers["Content-Type"].Contains("application/x-7z-compressed"))
+            else if (url.Contains("file/d/"))
             {
-                string fileName = response.Headers["Content-Disposition"].Substring(response.Headers["Content-Disposition"].IndexOf("filename=") + 9).Replace("\"", "").Split(';')[0];
-                fileName = Helper.ReplaceInvalidChars(Uri.UnescapeDataString(fileName));
-
-                string folderName = "";
-                //create a new direcory
-                if (createDir)
+                url = url.Replace("/view?usp=sharing", "&export=download&confirm=t");
+                url = url.Replace("https://drive.google.com/file/d/", "https://drive.usercontent.google.com/download?id=");
+                HttpWebResponse response;
+                try
                 {
-                    string extension = Path.GetExtension(fileName);
-                    folderName = fileName.Substring(0, fileName.Length - extension.Length);
-                    if (!Directory.Exists(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length)))
-                        Directory.CreateDirectory(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length));
+                    HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
+                    request.UserAgent = Helper.UserAgent;
+                    request.Accept = Helper.Accept;
+                    request.Proxy.Credentials = CredentialCache.DefaultCredentials;
+                    response = (HttpWebResponse)request.GetResponse();
+                }
+                catch (WebException)
+                {
+                    current_downloadPath = "";
+                    DataReady.Add("url");
+                    return;
                 }
 
-                BinaryWriter binWriter = new BinaryWriter(File.Open(path + "\\" + folderName + fileName, FileMode.Create));
-                response.GetResponseStream().CopyTo(binWriter.BaseStream);
-                binWriter.Close();
-                binWriter.Dispose();
-                response.Dispose();
-                return path + "\\" + folderName;
+                //If this is a binary, save the stream
+                if (response.ContentType.Contains("application"))
+                {
+                    string fileName = response.Headers["Content-Disposition"].Substring(response.Headers["Content-Disposition"].IndexOf("filename=") + 9).Replace("\"", "").Split(';')[0];
+                    fileName = Helper.ReplaceInvalidChars(Uri.UnescapeDataString(fileName));
+
+                    string folderName = "";
+                    //create a new direcory
+                    if (createDir)
+                    {
+                        string extension = Path.GetExtension(fileName);
+                        folderName = fileName.Substring(0, fileName.Length - extension.Length);
+                        if (!Directory.Exists(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length)))
+                            Directory.CreateDirectory(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length));
+                    }
+
+                    BinaryWriter binWriter = new BinaryWriter(File.Open(path + "\\" + folderName + "\\" + fileName, FileMode.Create));
+                    response.GetResponseStream().CopyTo(binWriter.BaseStream);
+                    binWriter.Close();
+                    binWriter.Dispose();
+                    response.Dispose();
+                    current_downloadPath = path + "\\" + folderName;
+                    DataReady.Add("url");
+                    return;
+                }
+
+                //TODO
+                else if(response.Headers["Content-Type"].Contains("text/html;"))
+                {
+                    StreamReader sr = new StreamReader(response.GetResponseStream());
+                    var html = sr.ReadToEnd();
+                    var fileName = Helper.ReplaceInvalidChars(html.Split(new string[] { "uc-name-size" }, StringSplitOptions.RemoveEmptyEntries)[4].Split('>')[2].Split('<')[0]);
+                    string extension = Path.GetExtension(fileName);
+
+                    string folderName = "";
+                    //create a new direcory
+                    if (createDir)
+                    {
+                        folderName = fileName.Substring(0, fileName.Length - extension.Length) + "\\";
+                        if (!Directory.Exists(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length)))
+                            Directory.CreateDirectory(path + "\\" + fileName.Substring(0, fileName.Length - extension.Length));
+                    }
+                    sr.Close();
+                    sr.DiscardBufferedData();
+                    sr.Dispose();
+                    FileDownloader fileDownloader = new FileDownloader();
+                    fileDownloader.DownloadFile(url, path + "\\" + fileName);
+                    current_downloadPath = path + "\\" + folderName;
+                    DataReady.Add("url");
+                    return;
+                }
             }
-            return "";
+            current_downloadPath = "";
+            DataReady.Add("url");
+            return;
         }
     }
 
-    public class DriveDownloader : IDisposable
+    public class FileDownloader : IDisposable
     {
         private const string GOOGLE_DRIVE_DOMAIN = "drive.google.com";
         private const string GOOGLE_DRIVE_DOMAIN2 = "https://drive.google.com";
@@ -246,7 +287,7 @@ namespace XIVModExplorer.Scraping
         public event DownloadProgressChangedEventHandler DownloadProgressChanged;
         public event AsyncCompletedEventHandler DownloadFileCompleted;
 
-        public DriveDownloader()
+        public FileDownloader()
         {
             webClient = new CookieAwareWebClient();
             webClient.DownloadProgressChanged += DownloadProgressChangedCallback;
@@ -305,7 +346,7 @@ namespace XIVModExplorer.Scraping
                 webClient.DownloadFileAsync(downloadAddress, downloadPath, userToken);
         }
 
-        private void DownloadProgressChangedCallback(object sender, DownloadProgressChangedEventArgs e)
+        private void DownloadProgressChangedCallback(object sender, System.Net.DownloadProgressChangedEventArgs e)
         {
             if (DownloadProgressChanged != null)
             {
@@ -373,6 +414,28 @@ namespace XIVModExplorer.Scraping
                     downloadAddress = new Uri("https://drive.google.com" + content.Substring(linkIndex, linkEnd - linkIndex).Replace("&amp;", "&"));
                     return false;
                 }
+            }
+
+            int formIndex = content.LastIndexOf("<form id=\"download-form\"");
+            if (formIndex >= 0)
+            {
+                int formEndIndex = content.IndexOf("</form>", formIndex + 10);
+                int inputIndex = formIndex;
+                StringBuilder sb = new StringBuilder().Append("https://drive.usercontent.google.com/download");
+                bool isFirstArgument = true;
+                while ((inputIndex = content.IndexOf("<input type=\"hidden\"", inputIndex + 10)) >= 0 && inputIndex < formEndIndex)
+                {
+                    linkIndex = content.IndexOf("name=", inputIndex + 10) + 6;
+                    sb.Append(isFirstArgument ? '?' : '&').Append(content, linkIndex, content.IndexOf('"', linkIndex) - linkIndex).Append('=');
+
+                    linkIndex = content.IndexOf("value=", linkIndex) + 7;
+                    sb.Append(content, linkIndex, content.IndexOf('"', linkIndex) - linkIndex);
+
+                    isFirstArgument = false;
+                }
+
+                downloadAddress = new Uri(sb.ToString());
+                return false;
             }
 
             return true;

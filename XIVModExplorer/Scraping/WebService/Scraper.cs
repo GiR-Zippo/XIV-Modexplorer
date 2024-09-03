@@ -95,9 +95,9 @@ namespace XIVModExplorer.Scraping
             //Check if it's a filehoster and try download
             LogWindow.Message("[Scraper - DownloadMod] Download binary data...");
             if (!Helper.IsSameDomain(url, collectedData.DownloadUrl[0]))
-                /*if (_downloadUrl.Contains("drive.google"))
-                    newPath = downloadGoogleDrive(_downloadUrl[0], path);
-                else*/ if (collectedData.DownloadUrl[0].Contains("mega.nz"))
+                if (collectedData.DownloadUrl[0].Contains("drive.google"))
+                    downloadGoogleDrive(collectedData.DownloadUrl[0], path);
+                else if (collectedData.DownloadUrl[0].Contains("mega.nz"))
                     await downloadMega(collectedData.DownloadUrl[0], path);
                 else if (collectedData.DownloadUrl[0].StartsWith("https://gofile.io"))
                     downloadGoFileIo(collectedData.DownloadUrl[0], path);
@@ -520,9 +520,6 @@ namespace XIVModExplorer.Scraping
             binWriter.Close();
             binWriter.Dispose();
             LogWindow.Message($"[Scraper] Saving binary data done");
-            //var res = request.ResponseBody.ReadAsStreamAsync().Result;
-            //res.CopyTo(File.Open(Param.Key + "\\" + result + fileName, FileMode.Create));
-            //res.Close();
 
             if (untouch_dlpath)
                 current_downloadPath = Param.Key + "\\" + result;

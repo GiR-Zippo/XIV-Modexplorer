@@ -15,7 +15,7 @@ namespace XIVModExplorer.Scraping
 {
     public partial class Scraper
     {
-        public Task downloadMega(string url, string path, bool createDir = true)
+        private Task downloadMega(string url, string path, bool createDir = true)
         {
             LogWindow.Message("[MegaDownloader] Starting...");
             MegaApiClient client = new MegaApiClient();
