@@ -148,6 +148,7 @@ namespace XIVModExplorer
 
             IsForDT.Icon = me.IsForDT ? FontAwesome.Sharp.IconChar.ThumbsUp : FontAwesome.Sharp.IconChar.ThumbsDown;
 
+            resetAffectIcons();
             ResetSlideTimer();
             pictures.Clear();
             Description.Text = "";
@@ -161,6 +162,7 @@ namespace XIVModExplorer
 
             ModName.Content = me.ModName;
             ModUrl.Content = me.Url;
+            setAffectIcons(me);
             MarkdownScroll.Visibility = Visibility.Visible;
             MarkdownContent.Text = me.Description;
             if (me.picture == null)
@@ -921,6 +923,32 @@ namespace XIVModExplorer
                 fi.IsEnabled = visible;
             }
 
+        }
+
+        private void resetAffectIcons()
+        {
+            HeadIcon.Visibility = Visibility.Hidden;
+            TopIcon.Visibility = Visibility.Hidden;
+            HandsIcon.Visibility = Visibility.Hidden;
+            BottomIcon.Visibility = Visibility.Hidden;
+            ShoesIcon.Visibility = Visibility.Hidden;
+            NeckIcon.Visibility = Visibility.Hidden;
+            WristIcon.Visibility = Visibility.Hidden;
+            EarIcon.Visibility = Visibility.Hidden;
+            RingIcon.Visibility = Visibility.Hidden;
+        }
+
+        private void setAffectIcons(ModEntry me)
+        {
+            HeadIcon.Visibility = (me.ModTypeFlag & (UInt32)Caching.Type.HEAD) == (UInt32)Caching.Type.HEAD ? Visibility.Visible : Visibility.Hidden;
+            TopIcon.Visibility = (me.ModTypeFlag & (UInt32)Caching.Type.TOP) == (UInt32)Caching.Type.TOP ? Visibility.Visible : Visibility.Hidden;
+            HandsIcon.Visibility = (me.ModTypeFlag & (UInt32)Caching.Type.HANDS) == (UInt32)Caching.Type.HANDS ? Visibility.Visible : Visibility.Hidden;
+            BottomIcon.Visibility = (me.ModTypeFlag & (UInt32)Caching.Type.BOTTOM) == (UInt32)Caching.Type.BOTTOM ? Visibility.Visible : Visibility.Hidden;
+            ShoesIcon.Visibility = (me.ModTypeFlag & (UInt32)Caching.Type.SHOE) == (UInt32)Caching.Type.SHOE ? Visibility.Visible : Visibility.Hidden;
+            NeckIcon.Visibility = (me.ModTypeFlag & (UInt32)Caching.Type.NECK) == (UInt32)Caching.Type.NECK ? Visibility.Visible : Visibility.Hidden;
+            WristIcon.Visibility = (me.ModTypeFlag & (UInt32)Caching.Type.ARM) == (UInt32)Caching.Type.ARM ? Visibility.Visible : Visibility.Hidden;
+            EarIcon.Visibility = (me.ModTypeFlag & (UInt32)Caching.Type.EAR) == (UInt32)Caching.Type.EAR ? Visibility.Visible : Visibility.Hidden;
+            RingIcon.Visibility = (me.ModTypeFlag & (UInt32)Caching.Type.FINGER) == (UInt32)Caching.Type.FINGER ? Visibility.Visible : Visibility.Hidden;
         }
 
         #region SearchMode
