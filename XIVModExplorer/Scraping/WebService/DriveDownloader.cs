@@ -46,7 +46,9 @@ namespace XIVModExplorer.Scraping
                 StreamReader sr = new StreamReader(folderlist.GetResponseStream());
                 var htmlDoc = new HtmlDocument();
                 htmlDoc.LoadHtml(sr.ReadToEnd());
-                var f = htmlDoc.DocumentNode.SelectNodes("//*[text()[contains(., '.ttmp') or contains(., '.pmp')]]");
+                var f = htmlDoc.DocumentNode.SelectNodes("//*[text()[contains(., '.ttmp') or contains(., '.pmp') or contains(., '.pose')]]");
+                if (f.Count == 0)
+                    return;
 
                 string folderName = "";
                 FileDownloader fileDownloader = new FileDownloader();
@@ -77,7 +79,8 @@ namespace XIVModExplorer.Scraping
             }
             else if (url.Contains("file/d/"))
             {
-                url = url.Replace("/view?usp=sharing", "&export=download&confirm=t");
+                url = url.TrimEnd('/').Remove(url.LastIndexOf('/'));
+                url = url + "&export=download&confirm=t";
                 url = url.Replace("https://drive.google.com/file/d/", "https://drive.usercontent.google.com/download?id=");
                 HttpWebResponse response;
                 try

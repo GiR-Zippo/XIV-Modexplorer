@@ -1,8 +1,11 @@
 ﻿using Newtonsoft.Json;
 using System;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Net;
+using System.Runtime.Remoting.Contexts;
 using System.Text;
+using System.Web;
 using XIVModExplorer.Caching;
 
 
@@ -85,10 +88,10 @@ namespace XIVModExplorer.RestApi
 
                 try
                 {
-                    if (request.Url.LocalPath.StartsWith("/api/list"))
-                        GetModList(request.Url.LocalPath, context.Response);
-                    else if (request.Url.LocalPath.StartsWith("/api/item"))
-                        GetModItem(request.Url.LocalPath, context.Response);
+                    if (request.Url.AbsolutePath.StartsWith("/api/list"))
+                        GetModList(request.Url.AbsolutePath, request.Url.Query, context.Response);
+                    else if (request.Url.AbsolutePath.StartsWith("/api/item"))
+                        GetModItem(request.Url.AbsolutePath, context.Response);
                     else
                     {
 
@@ -129,14 +132,29 @@ namespace XIVModExplorer.RestApi
             response.OutputStream.Close();
         }
 
-        private void GetModList(string localPath, HttpListenerResponse response)
+        private void GetModList(string localPath, string queries, HttpListenerResponse response)
         {
-            int idx_page = Convert.ToInt32(localPath.Split('=')[1]);
-            byte[] output = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(Database.Instance.GetModListAsync().Result.GetRange(idx_page * 12, 12).ToList()));
-            response.StatusCode = (int)HttpStatusCode.OK;
-            response.ContentType = "application/json";
-            response.OutputStream.Write(output, 0, output.Length);
-            response.OutputStream.Close();
+            var queryString = HttpUtility.ParseQueryString(queries);
+            if (queryString.HasKeys())
+            {
+                UInt32 type = Convert.ToUInt32(queryString.GetValues("cat")[0]);
+                Console.WriteLine(queryString["cot"]);
+                int idx_page = Convert.ToInt32(localPath.Split('=')[1]);
+                byte[] output = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(Database.Instance.FindModsAsync("","", type, 0, "").Result.ToList()));
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.ContentType = "application/json";
+                response.OutputStream.Write(output, 0, output.Length);
+                response.OutputStream.Close();
+            }
+            else
+            {
+                int idx_page = Convert.ToInt32(localPath.Split('=')[1]);
+                byte[] output = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(Database.Instance.GetModListAsync().Result.GetRange(idx_page * 12, 12).ToList()));
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.ContentType = "application/json";
+                response.OutputStream.Write(output, 0, output.Length);
+                response.OutputStream.Close();
+            }
         }
     }
 }
