@@ -71,6 +71,9 @@ namespace XIVModExplorer
 
             logwindowThread.SetApartmentState(ApartmentState.STA); // needs to be STA or throws exception
             logwindowThread.Start();
+
+            //Check DB for updates
+            Database.Instance.UpdateDB();
         }
 
         #region Events
@@ -139,7 +142,7 @@ namespace XIVModExplorer
             LogWindow.Message($"[MainWindow] Previewing archive {archiveName}");
             current_preview = archiveName;
             current_archive = "";
-            ModEntry me = Database.Instance.FindData(Configuration.GetRelativeModPath(archiveName));
+            ModEntry me = Database.Instance.GetModByFilename(Configuration.GetRelativeModPath(archiveName));
             if (me == null)
             {
                 IsForDT.Icon = FontAwesome.Sharp.IconChar.ThumbTack;
@@ -165,11 +168,10 @@ namespace XIVModExplorer
             setAffectIcons(me);
             MarkdownScroll.Visibility = Visibility.Visible;
             MarkdownContent.Text = me.Description;
-            if (me.picture == null)
+            if (me.PreviewPicture == "")
                 return;
 
-            MemoryStream str = new MemoryStream(me.picture);
-            JpegBitmapDecoder jpegDecoder = new JpegBitmapDecoder(str, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.None);
+            JpegBitmapDecoder jpegDecoder = new JpegBitmapDecoder(Database.Instance.LoadPictureStream(me.PreviewPicture), BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.None);
             Img.Source = jpegDecoder.Frames[0];
         }
 
@@ -184,6 +186,29 @@ namespace XIVModExplorer
 
             LogWindow.Message($"[MainWindow] Opening archive {archiveName}");
             current_archive = archiveName;
+
+            Task.Run(() =>
+            {
+                //Check if this archive was moved
+                if (Configuration.GetBoolValue("UseDatabase"))
+                {
+                    string cmodpath = current_archive.Replace(Configuration.GetValue("ModArchivePath"), "");
+                    cmodpath = cmodpath.Replace("\\", "/");
+                    if (Database.Instance.GetModByFilename(cmodpath) != null)
+                        return;
+
+                    byte[] hash = Util.GetSHA1FromFile(current_archive);
+                    var me = Database.Instance.GetModByHash(hash);
+                    if (me != null)
+                    {
+                        if (MessageBox.Show("Update old location: " + me.Filename + "\r\nTo new location: " + cmodpath, "File moved?", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+                        {
+                            me.Filename = cmodpath;
+                            Database.Instance.SaveData(me);
+                        }
+                    }
+                }
+            });
 
             ResetSlideTimer();
             pictures.Clear();
@@ -701,7 +726,7 @@ namespace XIVModExplorer
             if (!Configuration.GetBoolValue("UseDatabase"))
                 return;
 
-            ModEntry me = Database.Instance.FindData(Configuration.GetRelativeModPath(current_preview));
+            ModEntry me = Database.Instance.GetModByFilename(Configuration.GetRelativeModPath(current_preview));
             if (me == null)
                 return;
 
@@ -723,7 +748,7 @@ namespace XIVModExplorer
             if (!Configuration.GetBoolValue("UseDatabase"))
                 return;
 
-            ModEntry me = Database.Instance.FindData(Configuration.GetRelativeModPath(current_preview));
+            ModEntry me = Database.Instance.GetModByFilename(Configuration.GetRelativeModPath(current_preview));
             if (me == null)
                 return;
 
@@ -749,7 +774,7 @@ namespace XIVModExplorer
             if (!Configuration.GetBoolValue("UseDatabase"))
                 return;
 
-            ModEntry mod = Database.Instance.FindData(Configuration.GetRelativeModPath(current_preview));
+            ModEntry mod = Database.Instance.GetModByFilename(Configuration.GetRelativeModPath(current_preview));
             if (mod == null)
                 return;
 
@@ -803,9 +828,11 @@ namespace XIVModExplorer
 
                 LogWindow.Message($"[MainWindow] Upgrade to DT: update cache");
                 mod.IsForDT = true;
+                mod.HashSha1 = Util.GetSHA1FromFile(selectedItem);
+                mod.ModificationDate = File.GetLastWriteTime(selectedItem);
                 Database.Instance.SaveData(mod);
-                LogWindow.Message($"[MainWindow] Upgrade to DT: Done");
 
+                LogWindow.Message($"[MainWindow] Upgrade to DT: Done");
                 MessageWindow.Show("Conversion done.", "Info");
             });
         }
@@ -927,6 +954,7 @@ namespace XIVModExplorer
 
         private void resetAffectIcons()
         {
+            PenumbraIcon.Visibility = Visibility.Hidden;
             HeadIcon.Visibility = Visibility.Hidden;
             TopIcon.Visibility = Visibility.Hidden;
             HandsIcon.Visibility = Visibility.Hidden;
@@ -940,6 +968,7 @@ namespace XIVModExplorer
 
         private void setAffectIcons(ModEntry me)
         {
+            PenumbraIcon.Visibility = me.PenumbraPath != null && me.PenumbraPath != "" ? Visibility.Visible : Visibility.Hidden;
             HeadIcon.Visibility = (me.ModTypeFlag & (UInt32)Caching.Type.HEAD) == (UInt32)Caching.Type.HEAD ? Visibility.Visible : Visibility.Hidden;
             TopIcon.Visibility = (me.ModTypeFlag & (UInt32)Caching.Type.TOP) == (UInt32)Caching.Type.TOP ? Visibility.Visible : Visibility.Hidden;
             HandsIcon.Visibility = (me.ModTypeFlag & (UInt32)Caching.Type.HANDS) == (UInt32)Caching.Type.HANDS ? Visibility.Visible : Visibility.Hidden;
@@ -1003,9 +1032,11 @@ namespace XIVModExplorer
                 ModUrl.Content = item.Url;
                 MarkdownScroll.Visibility = Visibility.Visible;
                 MarkdownContent.Text = item.Description;
-                MemoryStream str = new MemoryStream(item.picture);
-                JpegBitmapDecoder jpegDecoder = new JpegBitmapDecoder(str, BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.None);
 
+                if (item.PreviewPicture == "")
+                    return;
+
+                JpegBitmapDecoder jpegDecoder = new JpegBitmapDecoder(Database.Instance.LoadPictureStream(item.PreviewPicture), BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.None);
                 Img.Source = jpegDecoder.Frames[0];
             }
         }

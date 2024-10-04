@@ -82,7 +82,7 @@ namespace XIVModExplorer.Caching
             this.Show();
             this.Visibility = Visibility.Visible;
 
-            modentry = Database.Instance.FindData(Configuration.GetRelativeModPath(filename));
+            modentry = Database.Instance.GetModByFilename(Configuration.GetRelativeModPath(filename));
             if (modentry == null)
                 TryGetMetaDataFromArchive(filename);
             else
@@ -97,18 +97,19 @@ namespace XIVModExplorer.Caching
             penumbra.OnModRequestFinished += Instance_ModRequest;
         }
 
-        private void Instance_ModRequest(object sender, object e)
+        private void Instance_ModRequest(object sender, Dictionary<string,string> e)
         {
             this.Dispatcher.BeginInvoke((Action)(() =>
             {
                 LeftTab.SelectedIndex = 0;
-                var l = e as List<Entry>;
                 Dictionary<string, string> tempDict = new Dictionary<string, string>();
 
-                foreach (var ent in l)
+                foreach (var ent in e)
                 {
-                    var ret = Utils.StringOperations.CalculateSimilarity(modentry.ModName, ent.Item1);
-                    tempDict.Add(ent.Item1, ret.ToString());
+                    var ret = Utils.StringOperations.CalculateSimilarity(modentry.ModName, ent.Value);
+                    if (tempDict.ContainsKey(ent.Key))
+                        continue;
+                    tempDict.Add(ent.Key, ret.ToString());
 
                 }
                 tempDict = tempDict.OrderByDescending(obj => obj.Value).ToDictionary(obj => obj.Key, obj => obj.Key);
@@ -178,7 +179,7 @@ namespace XIVModExplorer.Caching
                 TitleText.Text = TitleText.Text.Replace(" - Building Hash", "");
 
                 //Check if the hash is already in DB
-                var tEntry = Database.Instance.DoesHashExists(modentry.HashSha1);
+                var tEntry = Database.Instance.GetModByHash(modentry.HashSha1);
                 if (tEntry != null)
                 {
                     var result = MessageBox.Show(Locales.Language.Metadata_SameHashFound, Locales.Language.Word_Warning, MessageBoxButton.YesNo, MessageBoxImage.Question);
@@ -304,7 +305,7 @@ namespace XIVModExplorer.Caching
         /// </summary>
         private void Save_Click(object sender, RoutedEventArgs e)
         {
-            if (modentry.picture == null)
+            if (modentry.PreviewPicture == "")
             {
                 MessageWindow.Show(Locales.Language.Msg_No_Pic_Selected, Locales.Language.Word_Error);
                 return;
@@ -382,7 +383,6 @@ namespace XIVModExplorer.Caching
             modentry.IsForDT = true;
             Database.Instance.SaveData(modentry);
         }
-        
 
         /// <summary>
         /// Trigger the penumbra path jobby
@@ -427,7 +427,7 @@ namespace XIVModExplorer.Caching
             using (var fx = new MemoryStream())
             {
                 jpegEncoder.Save(fx);
-                modentry.picture = fx.GetBuffer();
+                modentry.PreviewPicture = Database.Instance.SavePicture(modentry.Id, modentry.Filename, fx.GetBuffer());
             }
         }
 

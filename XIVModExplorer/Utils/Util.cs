@@ -15,6 +15,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using XIVModExplorer.Caching;
 using XIVModExplorer.HelperWindows;
 
@@ -169,6 +170,15 @@ namespace XIVModExplorer.Utils
 
     public static class Util
     {
+        public static byte[] GetSHA1FromFile(string filename)
+        {
+            SHA1Managed managed = new SHA1Managed();
+            using (FileStream stream = File.OpenRead(filename))
+            {
+                return managed.ComputeHashAsync(stream).Result;
+            }
+        }
+
         /// <summary>
         /// Compress a directory as a Zip-file
         /// </summary>

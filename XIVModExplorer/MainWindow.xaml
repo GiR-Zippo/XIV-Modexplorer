@@ -162,17 +162,19 @@
                     <ColumnDefinition Width="15"/>
                     <ColumnDefinition Width="15"/>
                     <ColumnDefinition Width="15"/>
+                    <ColumnDefinition Width="15"/>
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
-                <Image x:Name="HeadIcon"   Grid.Column="1" Source="/Images/Head.png"   Height="12" Visibility="Hidden" ToolTip="Head"/>
-                <Image x:Name="TopIcon"    Grid.Column="2" Source="/Images/Top.png"    Height="12" Visibility="Hidden" ToolTip="Top"/>
-                <Image x:Name="HandsIcon"  Grid.Column="3" Source="/Images/Hands.png"  Height="12" Visibility="Hidden" ToolTip="Hands"/>
-                <Image x:Name="BottomIcon" Grid.Column="4" Source="/Images/Bottom.png" Height="12" Visibility="Hidden" ToolTip="Bottom"/>
-                <Image x:Name="ShoesIcon"  Grid.Column="5" Source="/Images/Shoes.png"  Height="12" Visibility="Hidden" ToolTip="Feet"/>
-                <Image x:Name="NeckIcon"   Grid.Column="6" Source="/Images/Neck.png"   Height="12" Visibility="Hidden" ToolTip="Neck"/>
-                <Image x:Name="WristIcon"  Grid.Column="7" Source="/Images/Wrist.png"  Height="12" Visibility="Hidden" ToolTip="Wrist"/>
-                <Image x:Name="EarIcon"    Grid.Column="8" Source="/Images/Ear.png"    Height="12" Visibility="Hidden" ToolTip="Ear"/>
-                <Image x:Name="RingIcon"   Grid.Column="9" Source="/Images/Ring.png"   Height="12" Visibility="Hidden" ToolTip="Ring"/>
+                <Image x:Name="PenumbraIcon" Grid.Column="1"  Source="/Images/PInstalled.png" Height="12" Visibility="Hidden" ToolTip="Penumbra"/>
+                <Image x:Name="HeadIcon"     Grid.Column="2"  Source="/Images/Head.png"       Height="12" Visibility="Hidden" ToolTip="Head"/>
+                <Image x:Name="TopIcon"      Grid.Column="3"  Source="/Images/Top.png"        Height="12" Visibility="Hidden" ToolTip="Top"/>
+                <Image x:Name="HandsIcon"    Grid.Column="4"  Source="/Images/Hands.png"      Height="12" Visibility="Hidden" ToolTip="Hands"/>
+                <Image x:Name="BottomIcon"   Grid.Column="5"  Source="/Images/Bottom.png"     Height="12" Visibility="Hidden" ToolTip="Bottom"/>
+                <Image x:Name="ShoesIcon"    Grid.Column="6"  Source="/Images/Shoes.png"      Height="12" Visibility="Hidden" ToolTip="Feet"/>
+                <Image x:Name="NeckIcon"     Grid.Column="7"  Source="/Images/Neck.png"       Height="12" Visibility="Hidden" ToolTip="Neck"/>
+                <Image x:Name="WristIcon"    Grid.Column="8"  Source="/Images/Wrist.png"      Height="12" Visibility="Hidden" ToolTip="Wrist"/>
+                <Image x:Name="EarIcon"      Grid.Column="9"  Source="/Images/Ear.png"        Height="12" Visibility="Hidden" ToolTip="Ear"/>
+                <Image x:Name="RingIcon"     Grid.Column="10" Source="/Images/Ring.png"       Height="12" Visibility="Hidden" ToolTip="Ring"/>
             </Grid>
             <fa:IconBlock x:Name="IsForDT" Icon="ThumbTack" Grid.Column="3" Margin="8" FontSize="12" Foreground="{DynamicResource MaterialDesignBody}"/>
         </Grid>

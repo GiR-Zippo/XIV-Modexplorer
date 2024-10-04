@@ -8,12 +8,28 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Security.Cryptography;
 using System.Threading.Tasks;
 using XIVModExplorer.HelperWindows;
+using XIVModExplorer.Utils;
 
 namespace XIVModExplorer.Caching
 {
+    internal static class Constants
+    {
+        internal const string SCHEMA_TABLE_NAME = "schema";
+        internal const byte SCHEMA_VERSION = 1;
+        internal const byte SCHEMA_SUBVERSION = 1;
+    }
+
+    [Serializable]
+    public sealed class LiteDBSchema
+    {
+        [BsonId]
+        public Guid Id { get; set; }
+        public byte Version { get; set; } = Constants.SCHEMA_VERSION;
+        public byte Subversion { get; set; } = Constants.SCHEMA_SUBVERSION;
+    }
+
     public enum Type
     {
         NONE    = 0b00000000000000000000000000000000,
@@ -60,7 +76,7 @@ namespace XIVModExplorer.Caching
         public UInt32 ModTypeFlag { get; set; } = 0;
         public UInt32 AccModTypeFlag { get; set; } = 0;
         public string Description { get; set; } = "";
-        public byte[] picture { get; set; } = null;
+        public string PreviewPicture { get; set; } = "";
         public string Url { get; set; } = "";
         public string Filename { get; set; } = "";
         public byte[] HashSha1 { get; set; } = null;
@@ -231,11 +247,6 @@ namespace XIVModExplorer.Caching
             return list;
         }
 
-        public ModEntry FindData(string filename)
-        {
-            return dbi.GetCollection<ModEntry>().FindOne(n=> n.Filename.Equals(filename));
-        }
-
         public async Task<List<ModEntry>> GetModListAsync()
         {
             List<ModEntry> list = new List<ModEntry>();
@@ -249,25 +260,20 @@ namespace XIVModExplorer.Caching
 
         public ModEntry GetModByIdAsync(string Id)
         {
-            foreach (var p in dbi.GetCollection<ModEntry>().Find(n => n.HashSha1 != null))
-            {
-                if (p.Id == Guid.Parse(Id))
-                    return p;
-            }
-            return null;
+            return dbi.GetCollection<ModEntry>().FindOne(n => n.Id == Guid.Parse(Id));
+        }
+
+        public ModEntry GetModByFilename(string filename)
+        {
+            return dbi.GetCollection<ModEntry>().FindOne(n => n.Filename.Equals(filename));
         }
 
         public ModEntry GetModByUrl(string url)
         {
-            foreach (var p in dbi.GetCollection<ModEntry>().Find(n => n.HashSha1 != null && n.Url != null))
-            {
-                if (p.Url.Equals(url))
-                    return p;
-            }
-            return null;
+            return dbi.GetCollection<ModEntry>().FindOne(n => n.Url.Equals(url));
         }
 
-        public ModEntry DoesHashExists(byte[] hash)
+        public ModEntry GetModByHash(byte[] hash)
         {
             foreach (var p in dbi.GetCollection<ModEntry>().Find(n => n.HashSha1 != null))
             {
@@ -300,19 +306,123 @@ namespace XIVModExplorer.Caching
                 Url = url,
                 ModName = modname,
                 Description = discription,
-                picture = pictureBytes,
                 Filename = relFile,
                 ModTypeFlag = modflag,
                 IsForDT = dtready
             };
-
-            SHA1Managed managed = new SHA1Managed();
-            using (FileStream stream = File.OpenRead(file))
-            {
-                mod.HashSha1 = managed.ComputeHashAsync(stream).Result;
-                mod.ModificationDate = File.GetLastWriteTime(file);
-            }
+            mod.HashSha1 = Util.GetSHA1FromFile(file);
+            mod.ModificationDate = File.GetLastWriteTime(file);
+            Database.Instance.SaveData(mod);
+            //it was so nice, we save it twice
+            mod.PreviewPicture = Database.Instance.SavePicture(mod.Id, mod.Filename, pictureBytes);
             Database.Instance.SaveData(mod);
         }
+
+        #region PictureFileStore
+        private string getPictureId(Guid Guid, string filename)
+        {
+            return "$/" + Guid.ToString() + "/" + Path.GetFileNameWithoutExtension(filename) + "/preview-0.jpg";
+        }
+
+        public byte[] LoadPicture(Guid Guid, string filename)
+        {
+            string dataid = getPictureId(Guid, filename);
+            var file = dbi.FileStorage.FindById(dataid);
+            byte[] buffer = new byte[file.Length];
+            file.OpenRead().Read(buffer, 0, (int)file.Length);
+            return buffer;
+        }
+
+        public Stream LoadPictureStream(string pictureId)
+        {
+            var file = dbi.FileStorage.FindById(pictureId);
+            return file.OpenRead();
+        }
+
+        public string SavePicture(Guid Guid, string filename, byte[] pictureBytes)
+        {
+            if (pictureBytes == null)
+                return "";
+            var dbfs = dbi.FileStorage;
+            string dataid = getPictureId(Guid, filename);
+            dbfs.Upload(dataid, "preview-0.jpg", new MemoryStream(pictureBytes));
+            return dataid;
+        }
+
+        public void DeletePicture(Guid Guid, string filename)
+        {
+            string dataid = getPictureId(Guid, filename);
+            dbi.FileStorage.Delete(dataid);
+        }
+        #endregion
+
+
+        #region UpdateDB
+        public void UpdateDB()
+        {
+            //ask if our db has a version number
+            if (dbi.CollectionExists(Constants.SCHEMA_TABLE_NAME))
+            {
+                var schemaData = dbi.GetCollection<LiteDBSchema>(Constants.SCHEMA_TABLE_NAME);
+                LiteDBSchema result = schemaData.FindOne(static x => true);
+                if (result.Version == Constants.SCHEMA_VERSION && result.Subversion == Constants.SCHEMA_SUBVERSION)
+                    return; //nothing to do
+
+                //update-plan
+                switch (result.Subversion)
+                {
+                    case 0:
+                        UpdateDBAtoB();
+                        goto case 1; //betreutes programmieren.
+                    case 1:
+                        break;
+                    default:
+                        break;
+                }
+
+                result.Subversion = Constants.SCHEMA_SUBVERSION;
+                schemaData.Update(result);
+            }
+            else //no schema, null problema
+            {
+                //Do the full update
+                FullDBUpdate();
+
+                var schemaData = dbi.GetCollection<LiteDBSchema>(Constants.SCHEMA_TABLE_NAME);
+                var schema = new LiteDBSchema();
+                schemaData.Insert(schema);
+            }
+            return;
+        }
+
+        private void FullDBUpdate()
+        {
+            UpdateDBAtoB();
+        }
+
+        private void UpdateDBAtoB()
+        {
+            using (var bsonReader = dbi.Execute("SELECT _id, Filename, picture FROM ModEntry"))
+            {
+                while (bsonReader.Read())
+                {
+                    var ret = bsonReader.Current;
+                    Guid guid = ret["_id"];
+                    string Filename = ret["Filename"];
+                    byte[] picture = ret["picture"];
+                    
+                    //Get the mod and update
+                    ModEntry me = dbi.GetCollection<ModEntry>().FindOne(n => n.Id == guid);
+                    if (me == null)
+                        continue;
+                    me.PreviewPicture = SavePicture(guid, Filename, picture);
+                    SaveData(me);
+                }
+
+                var col = dbi.GetCollection<ModEntry>();
+                col.DropIndex("picture");
+            }
+        }
+        #endregion
     }
 }

@@ -362,8 +362,13 @@ namespace MarkdownViewer
         {
             var hyperlinkElement = new Hyperlink();
             hyperlinkElement.Inlines.Add(hyperlink.Text);
-            hyperlinkElement.NavigateUri = new Uri(hyperlink.Url);
-            hyperlinkElement.RequestNavigate += Hlink_RequestNavigate;
+            try
+            {
+                hyperlinkElement.NavigateUri = new Uri(hyperlink.Url);
+                hyperlinkElement.RequestNavigate += Hlink_RequestNavigate;
+            }
+            catch
+            { }
             return hyperlinkElement;
         }
 

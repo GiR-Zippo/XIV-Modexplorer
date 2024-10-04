@@ -92,6 +92,8 @@ namespace XIVModExplorer.RestApi
                         GetModList(request.Url.AbsolutePath, request.Url.Query, context.Response);
                     else if (request.Url.AbsolutePath.StartsWith("/api/item"))
                         GetModItem(request.Url.AbsolutePath, context.Response);
+                    else if (request.Url.AbsolutePath.StartsWith("/api/picture"))
+                        GetModPicture(request.Url.AbsolutePath, context.Response);
                     else
                     {
 
@@ -140,7 +142,7 @@ namespace XIVModExplorer.RestApi
                 UInt32 type = Convert.ToUInt32(queryString.GetValues("cat")[0]);
                 Console.WriteLine(queryString["cot"]);
                 int idx_page = Convert.ToInt32(localPath.Split('=')[1]);
-                byte[] output = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(Database.Instance.FindModsAsync("","", type, 0, "").Result.ToList()));
+                byte[] output = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(Database.Instance.FindModsAsync("","", type, 0, "").Result.GetRange(idx_page * 12, 12).ToList()));
                 response.StatusCode = (int)HttpStatusCode.OK;
                 response.ContentType = "application/json";
                 response.OutputStream.Write(output, 0, output.Length);
@@ -155,6 +157,24 @@ namespace XIVModExplorer.RestApi
                 response.OutputStream.Write(output, 0, output.Length);
                 response.OutputStream.Close();
             }
+        }
+
+        private void GetModPicture(string localPath, HttpListenerResponse response)
+        {
+            string mod_id = localPath.Split('=')[1];
+
+            ModEntry mod = Database.Instance.GetModByIdAsync(mod_id);
+
+            if (mod == null)
+                response.StatusCode = (int)HttpStatusCode.NotFound;
+            else
+            {
+                byte[] output = Encoding.ASCII.GetBytes(JsonConvert.SerializeObject(Database.Instance.LoadPicture(mod.Id, mod.Filename)));
+                response.StatusCode = (int)HttpStatusCode.OK;
+                response.ContentType = "application/json";
+                response.OutputStream.Write(output, 0, output.Length);
+            }
+            response.OutputStream.Close();
         }
     }
 }

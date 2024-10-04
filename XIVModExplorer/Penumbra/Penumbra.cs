@@ -15,14 +15,6 @@ using XIVModExplorer.HelperWindows;
 
 namespace XIVModExplorer.Penumbra
 {
-    public class Entry
-    {
-        public object Length { get; set; } = null;
-        public object Unk { get; set; } = null;
-        public string Item1 { get; set; } = "";
-        public string Item2 { get; set; } = "";
-    };
-
     public class ModInstallData
     {
         public string Path { get; set; } = "";
@@ -43,7 +35,7 @@ namespace XIVModExplorer.Penumbra
     public class PenumbraApi : IDisposable
     {
         private const string Url = "http://localhost:42069/api";
-        public EventHandler<object> OnModRequestFinished;
+        public EventHandler<Dictionary<string, string> > OnModRequestFinished;
 
         public PenumbraApi()
         {
@@ -84,7 +76,7 @@ namespace XIVModExplorer.Penumbra
                 var t = (get.Parameters as List<object>)[0] as string;
                 if (t.Equals("GetMods"))
                 {
-                    var x = JsonConvert.DeserializeObject<List<Entry>>(get.ResponseBody.ReadAsStringAsync().Result);
+                    var x = JsonConvert.DeserializeObject<Dictionary<string,string>>(get.ResponseBody.ReadAsStringAsync().Result);
                     if (OnModRequestFinished != null)
                         OnModRequestFinished(this, x);
                 }
