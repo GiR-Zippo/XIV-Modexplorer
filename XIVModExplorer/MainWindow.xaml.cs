@@ -71,9 +71,6 @@ namespace XIVModExplorer
 
             logwindowThread.SetApartmentState(ApartmentState.STA); // needs to be STA or throws exception
             logwindowThread.Start();
-
-            //Check DB for updates
-            Database.Instance.UpdateDB();
         }
 
         #region Events

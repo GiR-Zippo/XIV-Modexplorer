@@ -54,18 +54,30 @@ function GetPictures()
 end
 
 function GetContent()
+    local inner = false;
     local des = false;
+
     for _, line in pairs(lines) do
 
+        if string.find(line, 'No description is available for this mod.') then
+            return
+        end
+
         if des == true then
-            if string.find(line, '</div>') then
-                des =false;
+            if string.find(line, '<div id=[,"]') then
+                return
             else
                 Content = Content .. line
             end
         end
-        if string.find(line, '.elementor%-widget%-text%-editor .elementor%-drop%-cap%-letter{display:inline%-block}</style>') then
-            des = true;
+        if string.find(line, 'elementor%-widget%-text%-editor .elementor%-drop%-cap%-letter') then
+            inner = true;
+        end
+
+        if inner == true then
+            if string.find(line, '</style>') then
+                des = true;
+            end
         end
     end
 end

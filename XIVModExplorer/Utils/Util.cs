@@ -16,6 +16,7 @@ using System.Drawing.Imaging;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography;
+using System.Threading.Tasks;
 using XIVModExplorer.Caching;
 using XIVModExplorer.HelperWindows;
 
@@ -170,6 +171,11 @@ namespace XIVModExplorer.Utils
 
     public static class Util
     {
+        /// <summary>
+        /// Compute the SHA1 from a file
+        /// </summary>
+        /// <param name="filename"></param>
+        /// <returns></returns>
         public static byte[] GetSHA1FromFile(string filename)
         {
             SHA1Managed managed = new SHA1Managed();
@@ -177,6 +183,35 @@ namespace XIVModExplorer.Utils
             {
                 return managed.ComputeHashAsync(stream).Result;
             }
+        }
+
+        /// <summary>
+        /// Compute the SHA1 from a stream
+        /// </summary>
+        /// <param name="sha1"></param>
+        /// <param name="inputStream"></param>
+        /// <returns></returns>
+        public static async Task<byte[]> ComputeHashAsync(this SHA1 sha1, Stream inputStream)
+        {
+            LogWindow.Message("[Metadata-Extentions] Calculating hash");
+            const int BufferSize = 4096;
+
+            sha1.Initialize();
+
+            var buffer = new byte[BufferSize];
+            var streamLength = inputStream.Length;
+            while (true)
+            {
+                var read = await inputStream.ReadAsync(buffer, 0, BufferSize).ConfigureAwait(false);
+                if (inputStream.Position == streamLength)
+                {
+                    sha1.TransformFinalBlock(buffer, 0, read);
+                    break;
+                }
+                sha1.TransformBlock(buffer, 0, read, default(byte[]), default(int));
+            }
+            LogWindow.Message("[Metadata-Extentions] Calculating hash done");
+            return sha1.Hash;
         }
 
         /// <summary>
@@ -195,6 +230,15 @@ namespace XIVModExplorer.Utils
             carchive.Dispose();
         }
 
+        /// <summary>
+        /// Create a minimal database entry
+        /// </summary>
+        /// <param name="current_Directory"></param>
+        /// <param name="url"></param>
+        /// <param name="Modname"></param>
+        /// <param name="Description"></param>
+        /// <param name="modflag"></param>
+        /// <param name="dtready"></param>
         public static void CreateMetaEntry(string current_Directory, string url, string Modname, string Description, UInt32 modflag = 0, bool dtready = false)
         {
             var dirName = new DirectoryInfo(current_Directory).Name;
@@ -239,6 +283,11 @@ namespace XIVModExplorer.Utils
             return foundDirs;
         }
 
+        /// <summary>
+        /// Remove invalid chars from a filename-string
+        /// </summary>
+        /// <param name="name"></param>
+        /// <returns></returns>
         public static string MakeValidFileName(string name)
         {
             string invalidChars = System.Text.RegularExpressions.Regex.Escape(new string(System.IO.Path.GetInvalidFileNameChars()));

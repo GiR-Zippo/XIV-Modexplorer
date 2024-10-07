@@ -62,9 +62,13 @@ namespace XIVModExplorer
 
             string archivePath = Configuration.GetValue("ModArchivePath");
             if (archivePath != null)
+            {
                 if (Configuration.GetBoolValue("UseDatabase"))
-                    Database.Initialize(archivePath+"Database.db");
-
+                {
+                    Database.Initialize(archivePath + "Database.db");
+                    Database.Instance.UpdateDB(); //Update DB if needed
+                }
+            }
             ExplorerRestServer.Initialize();
 
             base.OnStartup(e);

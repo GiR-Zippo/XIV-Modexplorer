@@ -501,8 +501,13 @@ namespace XIVModExplorer.Scraping
             {
                 if (data[0] == 55 && data[1] == 122)
                     extension = ".7z";
+                if (data[0] == 80 && data[1] == 75)
+                    extension = ".zip";
 
-                fileName += extension;
+                if (fileName == "") //no filename, use the mod name
+                    fileName = collectedData.Modname + extension;
+                else
+                    fileName += extension;
             }
 
             string result = "";

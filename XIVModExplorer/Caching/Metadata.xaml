@@ -144,7 +144,7 @@
                     <CheckBox Grid.Row="17" Grid.Column="1" Content="{x:Static Loc:Language.Type_Vfx}" x:Name="C_Vfx"/>
 
                     <Button Grid.Row="21" Grid.Column="0" Content="{x:Static Loc:Language.Metadata_ReadAffect}" Click="ReadAffectsFromMod_Click" MinWidth="100" HorizontalAlignment="Left"/>
-                    <Button Grid.Row="21" Grid.Column="1" Content="Set DT flag" Click="SetDTCompat_Click" MinWidth="100" HorizontalAlignment="Left"/>
+                    <Button Grid.Row="21" Grid.Column="1" Content="Set DT flag" Click="SetDTCompat_Click" MinWidth="100" HorizontalAlignment="Left" x:Name="DT_Button"/>
                 </Grid>
             </TabItem>
             <TabItem Header="{x:Static Loc:Language.Word_Pictures}">

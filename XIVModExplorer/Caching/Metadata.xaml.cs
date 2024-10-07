@@ -19,35 +19,10 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using XIVModExplorer.HelperWindows;
 using XIVModExplorer.Penumbra;
+using XIVModExplorer.Utils;
 
 namespace XIVModExplorer.Caching
 {
-    public static partial class Extentions
-    {
-        public static async Task<byte[]> ComputeHashAsync(this SHA1 sha1, Stream inputStream)
-        {
-            LogWindow.Message("[Metadata-Extentions] Calculating hash");
-            const int BufferSize = 4096;
-
-            sha1.Initialize();
-
-            var buffer = new byte[BufferSize];
-            var streamLength = inputStream.Length;
-            while (true)
-            {
-                var read = await inputStream.ReadAsync(buffer, 0, BufferSize).ConfigureAwait(false);
-                if (inputStream.Position == streamLength)
-                {
-                    sha1.TransformFinalBlock(buffer, 0, read);
-                    break;
-                }
-                sha1.TransformBlock(buffer, 0, read, default(byte[]), default(int));
-            }
-            LogWindow.Message("[Metadata-Extentions] Calculating hash done");
-            return sha1.Hash;
-        }
-    }
-
     /// <summary>
     /// Interaktionslogik für Metadata.xaml
     /// </summary>
@@ -169,12 +144,9 @@ namespace XIVModExplorer.Caching
 
                 Save_Button.IsEnabled = false; //disable the save button
                 TitleText.Text += " - Building Hash";
-                SHA1Managed managed = new SHA1Managed();
-                using (FileStream stream = File.OpenRead(filename))
-                {
-                    modentry.HashSha1 = await Task.Run(() => managed.ComputeHashAsync(stream));
-                    Hash.Text = GetHashString(modentry.HashSha1);
-                }
+                modentry.HashSha1 = await Task.Run(() => Util.GetSHA1FromFile(filename));
+                Hash.Text = GetHashString(modentry.HashSha1);
+
                 Save_Button.IsEnabled = true;
                 TitleText.Text = TitleText.Text.Replace(" - Building Hash", "");
 
@@ -293,6 +265,8 @@ namespace XIVModExplorer.Caching
             if (modentry.HashSha1 != null)
                 Hash.Text = GetHashString(modentry.HashSha1);
 
+            DT_Button.Content = modentry.IsForDT ? "Reset DT flag" : "Set DT flag";
+
             if (modentry.PenumbraName != null)
                 Pen_ModName.Text = modentry.PenumbraName;
             if (modentry.PenumbraPath != null)
@@ -380,8 +354,10 @@ namespace XIVModExplorer.Caching
         {
             if (modentry == null)
                 return;
-            modentry.IsForDT = true;
+
+            modentry.IsForDT = !modentry.IsForDT;
             Database.Instance.SaveData(modentry);
+            DT_Button.Content = modentry.IsForDT ? "Reset DT flag" : "Set DT flag";
         }
 
         /// <summary>
