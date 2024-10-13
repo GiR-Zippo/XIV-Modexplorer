@@ -122,7 +122,6 @@ namespace XIVModExplorer.Scraping
                 MaxConnectionsPerServer = 2
             };
 
-
             httpClient = new HttpClient(handler: httpClientHandler);
             disposedValue = false;
             StartWorkerThread();
@@ -199,9 +198,9 @@ namespace XIVModExplorer.Scraping
                 co.Expires = DateTime.Now.Subtract(TimeSpan.FromDays(1));
             }
 
-            httpClient.DefaultRequestHeaders.Add("User-Agent", request.UserAgent);
+            httpClient.DefaultRequestHeaders.UserAgent.ParseAdd(request.UserAgent);
             if (request.Accept != "")
-                httpClient.DefaultRequestHeaders.Add("Accept", request.Accept);
+                httpClient.DefaultRequestHeaders.Accept.ParseAdd(request.Accept);
 
             if (request.CookieJar != null)
             {

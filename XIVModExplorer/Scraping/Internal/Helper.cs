@@ -13,8 +13,11 @@ namespace XIVModExplorer.Scraping.Internal
 {
     public static class Helper
     {
-        public static string UserAgent { get; set; } = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:130.0) Gecko/20100101 Firefox/130.0";
+        public static string UserAgent { get; set; } = "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:131.0) Gecko/20100101 Firefox/131.0";
         public static string Accept { get; set; } = "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/png,image/svg+xml,*/*;q=0.8";
+
+        public static bool IsArchive(string input) { return input.EndsWith(".ttmp") || input.EndsWith(".ttmp2") || input.EndsWith(".pmp") ||
+                                                            input.EndsWith(".zip")  || input.EndsWith(".rar")   || input.EndsWith(".7z"); }
 
         #region dirty little helpers
         public static bool ArrayStartsWith(byte[] source, byte[] pattern)

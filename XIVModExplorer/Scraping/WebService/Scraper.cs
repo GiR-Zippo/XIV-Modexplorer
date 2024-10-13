@@ -365,6 +365,26 @@ namespace XIVModExplorer.Scraping
                 return;
             }
 
+            if (request.ResponseCode == HttpStatusCode.Forbidden)
+            {
+                //Patreons Sonderlocken... -.-
+                if (request.Url.ToLower().Contains("patreon.com"))
+                {
+                    LogWindow.Message($"[Scraper] Patreon: Searching for data via Selenuim");
+                    var temp = InternalScraper.ReadPatreonWeb(request.Url);
+                    collectedData = InternalScraper.ReadPatreon(temp.Key);
+                    request.Dispose();
+                    DataReady.Add(request.Url);
+                    return;
+                }
+                else
+                {
+                    MessageWindow.Show("Server is telling us: \r\n" + request.ResponseMsg + "\r\nPlz try again or give up.", "Http Error");
+                    DataReady.Add(request.Url);
+                    return;
+                }
+            }
+            
             if (request.ResponseCode != HttpStatusCode.OK)
             {
                 MessageWindow.Show("Server is telling us: \r\n" + request.ResponseMsg + "\r\nPlz try again or give up.", "Http Error");

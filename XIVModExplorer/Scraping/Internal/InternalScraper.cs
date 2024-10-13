@@ -15,11 +15,64 @@ using System.Linq;
 using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 using XIVModExplorer.HelperWindows;
+using OpenQA.Selenium.Interactions;
 
 namespace XIVModExplorer.Scraping.Internal
 {
     public static class InternalScraper
     {
+        /// <summary>
+        /// Since they are doing everything different
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        public static KeyValuePair<string, System.Collections.ObjectModel.ReadOnlyCollection<Cookie>> ReadPatreonWeb(string url)
+        {
+            LogWindow.Message($"[Scraper] Confirm Patreon Age");
+            List<string> downloadUrl = new List<string>();
+
+            var DriverService = EdgeDriverService.CreateDefaultService();
+            DriverService.HideCommandPromptWindow = true;
+
+            IWebDriver driver = new EdgeDriver(DriverService, new EdgeOptions());
+            driver.Manage().Window.Minimize();
+            driver.Navigate().GoToUrl(url);
+
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(5));
+            wait.Until(ExpectedConditions.ElementExists(By.XPath("//*[@id=\"__NEXT_DATA__\"]")));
+
+            try
+            {
+                if (driver.FindElement(By.XPath("//*[@data-tag=\"age-confirmation-button\"]")) != null)
+                {
+                    Actions builder = new Actions(driver);
+                    IAction action = builder.Click(driver.FindElement(By.XPath("//*[@data-tag=\"age-confirmation-button\"]")));
+                    action.Perform();
+                    try
+                    {
+                        wait.Until(driver => driver.Manage().Cookies.GetCookieNamed("can_see_nsfw") != null);
+                        LogWindow.Message($"[Scraper] Patreon: Age restriction found");
+                    }
+                    catch (Exception e)
+                    {
+                        Console.WriteLine($"{e.Message}");
+                    }
+                }
+            }
+            catch (NoSuchElementException e)
+            {
+                LogWindow.Message($"[Scraper] Patreon: No age restriction found");
+            }
+
+            string html = driver.PageSource;
+            var cookies = driver.Manage().Cookies.AllCookies;
+
+            driver.Quit();
+            driver.Dispose();
+            return new KeyValuePair<string, System.Collections.ObjectModel.ReadOnlyCollection<Cookie>>(html, cookies);
+        }
+
+
         /// <summary>
         /// read from Patreon
         /// </summary>
@@ -43,11 +96,35 @@ namespace XIVModExplorer.Scraping.Internal
                     if (p["type"].Value<string>().ToString() == "attachment")
                         collectedData.DownloadUrl.Add(p["attributes"]["url"].Value<string>());
                     if (p["type"].Value<string>().ToString() == "media")
-                        collectedData.Images.Add(p["attributes"]["image_urls"]["original"].Value<string>());
+                    {
+                        try
+                        {
+                            if (!Helper.IsArchive(p["attributes"]["file_name"].Value<string>()))
+                                collectedData.Images.Add(p["attributes"]["image_urls"]["original"].Value<string>());
+                            else
+                                collectedData.DownloadUrl.Add(p["attributes"]["download_url"].Value<string>());
+                        }
+                        catch
+                        {
+                            collectedData.Images.Add(p["attributes"]["image_urls"]["original"].Value<string>());
+                            LogWindow.Message($"[Scraper] Patreon adding undef piclink");
+                        }
+
+                    }
                     ix++;
                 }
             }
             dr.Close();
+            //No downloads, try to find in description
+            if (collectedData.DownloadUrl.Count == 0)
+            {
+                LogWindow.Message($"[Scraper] Patreon no download, try description");
+                if (collectedData.Description.Contains("mega.nz"))
+                {
+                    var f = collectedData.Description.Split(new string[] { "href=\"https://mega.nz" }, StringSplitOptions.RemoveEmptyEntries);
+                    collectedData.DownloadUrl.Add("https://mega.nz" + f[1].Split('"')[0]);
+                }
+            }
             return collectedData;
         }
 
