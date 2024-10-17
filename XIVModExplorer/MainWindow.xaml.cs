@@ -43,6 +43,7 @@ namespace XIVModExplorer
         private PenumbraApi penumbra {get;set;} = null;
         private LogWindow logwindow { get; set; } = null;
         private Thread logwindowThread { get; set; } = null;
+        private FileSystemWatcher watcher { get; set; } = null;
 
 
         public MainWindow()
@@ -50,7 +51,18 @@ namespace XIVModExplorer
             InitializeComponent();
 
             if (Configuration.GetValue("ModArchivePath") != null)
+            {
                 FileTree.UpdateTreeView(Configuration.GetValue("ModArchivePath"));
+                if (Configuration.GetBoolValue("UseDatabase"))
+                {
+                    watcher = new FileSystemWatcher(Configuration.GetValue("ModArchivePath"));
+                    watcher.NotifyFilter = NotifyFilters.FileName;
+                    watcher.Renamed += new RenamedEventHandler(file_changed);
+                    watcher.IncludeSubdirectories = true;
+                    watcher.EnableRaisingEvents = true;
+                }
+            }
+
 
             UseDatabase.IsChecked = Configuration.GetBoolValue("UseDatabase");
 
@@ -71,9 +83,34 @@ namespace XIVModExplorer
 
             logwindowThread.SetApartmentState(ApartmentState.STA); // needs to be STA or throws exception
             logwindowThread.Start();
+
+
+            //Util.RebuildModStructure("D:\\tmp\\Accelerate (Default) v1.0.1.pmp");
         }
 
         #region Events
+        private static void file_changed(object sender, FileSystemEventArgs e)
+        {
+            if (e.Name == "Database.db" || e.Name == "Database-log.db")
+                return;
+
+            if (e.ChangeType == WatcherChangeTypes.Renamed)
+            {
+                var rename = e as RenamedEventArgs;
+                if (rename.Name == rename.OldName)
+                    return;
+
+                string aPath = rename.OldName.Replace('\\','/');
+                var mod = Database.Instance.GetModByFilename(aPath);
+                if (mod == null)
+                    return;
+                mod.Filename = rename.Name.Replace('\\', '/');
+                mod.PreviewPicture = Database.Instance.UpdatePictureModFilename(mod);
+                Database.Instance.SaveData(mod);
+                return;
+            }
+        }
+
         private void RightSelected(object sender, string e)
         {
             this.Dispatcher.BeginInvoke(new Action(() =>
@@ -168,6 +205,9 @@ namespace XIVModExplorer
             if (me.PreviewPicture == "")
                 return;
 
+            var pic = Database.Instance.LoadPictureStream(me.PreviewPicture);
+            if (pic.Length == 0)
+                return;
             JpegBitmapDecoder jpegDecoder = new JpegBitmapDecoder(Database.Instance.LoadPictureStream(me.PreviewPicture), BitmapCreateOptions.PreservePixelFormat, BitmapCacheOption.None);
             Img.Source = jpegDecoder.Frames[0];
         }
@@ -436,6 +476,11 @@ namespace XIVModExplorer
         private void RebuildDBFullMenu_Click(object sender, RoutedEventArgs e)
         {
             Database.Instance.Optimize(true);
+        }
+
+        private void CheckPreviewPicturesInDB(object sender, RoutedEventArgs e)
+        {
+            Database.Instance.CheckPreviewPics();
         }
 
         /// <summary>
@@ -872,6 +917,7 @@ namespace XIVModExplorer
 
         private void OnCloseClick(object sender, RoutedEventArgs e)
         {
+            watcher.Dispose();
             scraper.Dispose();
             penumbra.Dispose();
             logwindow.Shutdown();
@@ -1052,5 +1098,6 @@ namespace XIVModExplorer
             }
         }
         #endregion
+
     }
 }

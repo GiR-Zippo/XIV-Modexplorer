@@ -183,6 +183,9 @@
   <data name="Menu_Settings_Cache" xml:space="preserve">
     <value>Nutze Cache</value>
   </data>
+  <data name="Menu_Settings_CheckPreviews" xml:space="preserve">
+    <value>Prüfe Previewbilder in der Datenbank</value>
+  </data>
   <data name="Menu_Settings_ModPath" xml:space="preserve">
     <value>Modarchiv-Pfad</value>
   </data>

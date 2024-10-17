@@ -339,6 +339,41 @@ namespace XIVModExplorer.Caching
             return file.OpenRead();
         }
 
+        public void CheckPreviewPics()
+        {
+            foreach (ModEntry m in dbi.GetCollection<ModEntry>().FindAll())
+            {
+                if (getPictureId(m.Id, m.Filename) == m.PreviewPicture)
+                    continue;
+                if (m.PreviewPicture == null)
+                    continue;
+                if (m.PreviewPicture == "")
+                    continue;
+
+                m.PreviewPicture = UpdatePictureModFilename(m);
+                Database.Instance.SaveData(m);
+            }
+        }
+
+        public string UpdatePictureModFilename(ModEntry me)
+        {
+            if (me == null)
+                return "";
+            if (me.PreviewPicture == "")
+                return "";
+
+            Stream stream = new MemoryStream();
+            var file = dbi.FileStorage.Download(me.PreviewPicture, stream);
+            dbi.FileStorage.Delete(me.PreviewPicture);
+            string picName = getPictureId(me.Id, me.Filename);
+            stream.Position = 0;
+            dbi.FileStorage.Upload(picName, "preview-0.jpg", stream);
+            stream.Close();
+            stream.Dispose();
+
+            return picName;
+        }
+
         public string SavePicture(Guid Guid, string filename, byte[] pictureBytes)
         {
             if (pictureBytes == null)

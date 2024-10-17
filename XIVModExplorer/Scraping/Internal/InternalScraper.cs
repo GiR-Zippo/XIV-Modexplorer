@@ -16,11 +16,14 @@ using OpenQA.Selenium.Support.UI;
 using SeleniumExtras.WaitHelpers;
 using XIVModExplorer.HelperWindows;
 using OpenQA.Selenium.Interactions;
+using System.Collections.ObjectModel;
+using System.Net.Http;
 
 namespace XIVModExplorer.Scraping.Internal
 {
     public static class InternalScraper
     {
+        #region Patreon
         /// <summary>
         /// Since they are doing everything different
         /// </summary>
@@ -28,7 +31,7 @@ namespace XIVModExplorer.Scraping.Internal
         /// <returns></returns>
         public static KeyValuePair<string, System.Collections.ObjectModel.ReadOnlyCollection<Cookie>> ReadPatreonWeb(string url)
         {
-            LogWindow.Message($"[Scraper] Confirm Patreon Age");
+            LogWindow.Message($"[Scraper] Patreon: Get html");
             List<string> downloadUrl = new List<string>();
 
             var DriverService = EdgeDriverService.CreateDefaultService();
@@ -127,6 +130,8 @@ namespace XIVModExplorer.Scraping.Internal
             }
             return collectedData;
         }
+        #endregion
+
 
         /// <summary>
         /// read from KoFi, !no download support!
@@ -166,6 +171,111 @@ namespace XIVModExplorer.Scraping.Internal
         }
 
         #region ExtDownload
+        public static KeyValuePair<string[], ReadOnlyCollection<Cookie>> GetBunkrDownload(string url)
+        {
+            LogWindow.Message($"[Scraper] Using Bunkr reader");
+            List<string> downloadUrl = new List<string>();
+
+            //get first link
+            HttpClient client = new HttpClient();
+            string page = client.GetStringAsync(url).Result;
+            client.Dispose();
+
+            string download = "";
+            ReadOnlyCollection<Cookie> cookies = null;
+            foreach (var m in page.Split('\n'))
+            {
+                if (m.Contains("<a class="))
+                {
+                    var temp = m.Split(new string[] { "href=\"" }, System.StringSplitOptions.RemoveEmptyEntries)[1];
+                    download = temp.Split('\"')[0];
+                }
+            }
+            //No download: exit
+            if (download == "")
+            {
+                LogWindow.Message($"[Scraper] Bunkr no dl found");
+                return new KeyValuePair<string[], System.Collections.ObjectModel.ReadOnlyCollection<Cookie>>(downloadUrl.ToArray(), cookies);
+            }
+
+            //get main link
+            client = new HttpClient();
+            page = client.GetStringAsync(download).Result;
+            client.Dispose();
+            download = "";
+            foreach (var m in page.Split('\n'))
+            {
+                if (m.Contains("<a class="))
+                {
+                    var temp = m.Split(new string[] { "href=\"" }, System.StringSplitOptions.RemoveEmptyEntries)[1];
+                    download = temp.Split('\"')[0];
+                }
+            }
+            LogWindow.Message($"[Scraper] Bunkr found: " + download);
+            downloadUrl.Add(download);
+            return new KeyValuePair<string[], System.Collections.ObjectModel.ReadOnlyCollection<Cookie>>(downloadUrl.ToArray(), cookies);
+        }
+
+        public static KeyValuePair<string[], ReadOnlyCollection<Cookie>> GetBunkrViaSeleniumDownload(string url)
+        {
+            LogWindow.Message($"[Scraper] Using Bunkr reader");
+            List<string> downloadUrl = new List<string>();
+
+            var DriverService = EdgeDriverService.CreateDefaultService();
+            DriverService.HideCommandPromptWindow = true;
+
+            IWebDriver driver = new EdgeDriver(DriverService, new EdgeOptions());
+            driver.Manage().Window.Minimize();
+            driver.Navigate().GoToUrl(url);
+
+            WebDriverWait wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            wait.Until(ExpectedConditions.ElementIsVisible(By.XPath(".//section")));
+
+            string download = "";
+            ReadOnlyCollection<Cookie> cookies = null;
+            foreach (var m in driver.PageSource.Split('\n'))
+            {
+                if (m.Contains("<a class=\"text-white inline-flex items-center justify-center rounded-[5px] py-2 px-4 text-center text-base font-bold hover:text-white mb-2\""))
+                {
+                    var temp = m.Split(new string[] { "href=\"" }, System.StringSplitOptions.RemoveEmptyEntries)[1];
+                    download = temp.Split('\"')[0];
+                }
+            }
+            //No download: exit
+            if (download == "")
+            {
+                LogWindow.Message($"[Scraper] Bunkr no dl found");
+                cookies = driver.Manage().Cookies.AllCookies;
+                driver.Quit();
+                driver.Dispose();
+                return new KeyValuePair<string[], System.Collections.ObjectModel.ReadOnlyCollection<Cookie>>(downloadUrl.ToArray(), cookies);
+            }
+
+            driver.Navigate().GoToUrl(download);
+            wait = new WebDriverWait(driver, TimeSpan.FromSeconds(10));
+            wait.Until(ExpectedConditions.ElementIsVisible(By.XPath(".//a")));
+            download = "";
+            foreach (var m in driver.PageSource.Split('\n'))
+            {
+                if (m.Contains("<a class="))
+                {
+                    var temp = m.Split(new string[] { "href=\"" }, System.StringSplitOptions.RemoveEmptyEntries)[1];
+                    download = temp.Split('\"')[0];
+                }
+            }
+            LogWindow.Message($"[Scraper] Bunkr found: " + download);
+            downloadUrl.Add(download);
+            cookies = driver.Manage().Cookies.AllCookies;
+            driver.Quit();
+            driver.Dispose();
+            return new KeyValuePair<string[], System.Collections.ObjectModel.ReadOnlyCollection<Cookie>>(downloadUrl.ToArray(), cookies);
+        }
+
+        /// <summary>
+        /// Pixeldrain
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public static KeyValuePair<string[], System.Collections.ObjectModel.ReadOnlyCollection<Cookie>> GetPixelDrainDownload(string url)
         {
             LogWindow.Message($"[Scraper] Using Pixeldrain reader");
@@ -192,6 +302,11 @@ namespace XIVModExplorer.Scraping.Internal
             return new KeyValuePair<string[], System.Collections.ObjectModel.ReadOnlyCollection<Cookie>>(downloadUrl.ToArray(), cookies);
         }
 
+        /// <summary>
+        /// GoFile dl link
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
         public static KeyValuePair<string[], System.Collections.ObjectModel.ReadOnlyCollection<Cookie>> GetGOFileDownloads(string url)
         {
             LogWindow.Message($"[Scraper] Using GOFile reader");

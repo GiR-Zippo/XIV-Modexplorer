@@ -205,7 +205,13 @@ namespace XIVModExplorer.Scraping
             if (request.CookieJar != null)
             {
                 foreach (var cookie in request.CookieJar)
-                    httpClientHandler.CookieContainer.Add(new Cookie(cookie.Name, cookie.Value, cookie.Path, string.IsNullOrWhiteSpace(cookie.Domain) ? new Uri(request.Url).Host : cookie.Domain));
+                {
+                    try
+                    {
+                        httpClientHandler.CookieContainer.Add(new Cookie(cookie.Name, cookie.Value, cookie.Path, string.IsNullOrWhiteSpace(cookie.Domain) ? new Uri(request.Url).Host : cookie.Domain));
+                    }
+                    catch { }
+                }
             }
 
             try

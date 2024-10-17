@@ -3,7 +3,7 @@
 * Licensed under the Mozilla Public License Version 2.0. See https://github.com/GiR-Zippo/XIV-Modexplorer/blob/main/LICENSE for full license information.
 */
 
-using ReverseMarkdown.Converters;
+using Newtonsoft.Json;
 using SharpCompress.Archives;
 using SharpCompress.Common;
 using SharpCompress.Readers;
@@ -376,6 +376,79 @@ namespace XIVModExplorer.Utils
             // until we are done
             p.WaitForExit();
             return pth + fname + "-EW" + extention;
+        }
+
+
+
+        public static void RebuildModStructure(string filename)
+        {
+            string tempPath = App.TempPath + Path.GetFileNameWithoutExtension(filename);
+            Directory.CreateDirectory(tempPath);
+            //extract
+            var archive = ArchiveFactory.Open(filename).ExtractAllEntries();
+            archive.WriteAllToDirectory(tempPath, new ExtractionOptions() { Overwrite = true, ExtractFullPath = true });
+            archive.Dispose();
+
+            foreach (var t in Directory.GetFiles(tempPath, "*.json", SearchOption.AllDirectories).ToArray())
+            {
+                if (t == "meta.json")
+                    continue;
+
+                bool innerfiles = false;
+                string name = "";
+                var x = new Dictionary<KeyValuePair<string, string>, string> ();
+                foreach (var line in File.ReadAllLines(t))
+                {
+                    if (line.Contains("}"))
+                        innerfiles = false;
+                    if (innerfiles)
+                    {
+                        string dline = line;
+                        if (dline.EndsWith(","))
+                            dline = dline.Remove(dline.Length - 1);
+                        x.Add((JsonConvert.DeserializeObject<Dictionary<string, string>>("{" + dline + "}").First(n=> n.Key != null)), name);
+                        Console.WriteLine(dline);
+                    }
+                    if (line.Contains("\"Files\": {"))
+                        innerfiles = true;
+                    if (line.Contains("\"Name\": \""))
+                        name = line.Split(':')[1].Replace("\"","").Replace(",", "").Trim(' ');
+                }
+                if (x.Count == 0)
+                    continue;
+
+                int index = x.First().Key.Key.IndexOf(Path.GetFileName(x.First().Key.Key));
+                string cleanPath = (index < 0)
+                    ? x.First().Key.Key
+                    : x.First().Key.Key.Remove(index, Path.GetFileName(x.First().Key.Key).Length);
+
+                Dictionary<string, string> newData = new Dictionary<string, string>();
+                string outdir = "";
+                foreach (var itr in x)
+                {
+                    if (tempPath + "\\" + itr.Value + "\\" + cleanPath != outdir)
+                    {
+                        outdir = tempPath + "\\" + itr.Value + "\\" + cleanPath;
+                        Directory.CreateDirectory(outdir);
+                    }
+
+                    try
+                    {
+                        if (!File.Exists(tempPath + "\\" + itr.Key.Value))
+                            continue;
+                        File.Move(tempPath + "\\" + itr.Key.Value, outdir + Path.GetFileName(itr.Key.Key));
+                        newData.Add(itr.Key.Value, itr.Value + "\\" + cleanPath+ Path.GetFileName(itr.Key.Key));
+                    }
+                    catch
+                    { }
+                    Console.WriteLine(t);
+                }
+
+                string text = File.ReadAllText(t);
+                foreach (var i in newData)
+                    text = text.Replace(i.Key, i.Value.Replace("\\", "/"));
+                File.WriteAllText(t, text);
+            }
         }
     }
 }

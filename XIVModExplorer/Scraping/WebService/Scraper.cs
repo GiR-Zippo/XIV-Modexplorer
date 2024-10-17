@@ -103,6 +103,9 @@ namespace XIVModExplorer.Scraping
                     downloadGoFileIo(collectedData.DownloadUrl[0], path);
                 else if (collectedData.DownloadUrl[0].StartsWith("https://pixeldrain.com"))
                     downloadPixeldrain(collectedData.DownloadUrl[0], path);
+                else if (collectedData.DownloadUrl[0].StartsWith("https://bunkr"))
+                    downloadBunkr(collectedData.DownloadUrl[0], path);
+                //
                 else
                     saveData(collectedData.DownloadUrl[0], path);
             else
@@ -327,6 +330,21 @@ namespace XIVModExplorer.Scraping
         private void downloadGoFileIo(string downloadUrl, string path, bool createDir = true, bool touch_dlpath = true)
         {
             var temp = InternalScraper.GetGOFileDownloads(downloadUrl);
+            foreach (var url in temp.Key)
+            {
+                WebService.Instance.AddToQueue(new WebService.GetRequest()
+                {
+                    Url = url,
+                    Requester = WebService.Requester.DOWNLOAD,
+                    CookieJar = temp.Value,
+                    Parameters = new KeyValuePair<string, KeyValuePair<bool, bool>>(path, new KeyValuePair<bool, bool>(createDir, touch_dlpath))
+                });
+            }
+        }
+
+        private void downloadBunkr(string downloadUrl, string path, bool createDir = true, bool touch_dlpath = true)
+        {
+            var temp = InternalScraper.GetBunkrDownload(downloadUrl);
             foreach (var url in temp.Key)
             {
                 WebService.Instance.AddToQueue(new WebService.GetRequest()

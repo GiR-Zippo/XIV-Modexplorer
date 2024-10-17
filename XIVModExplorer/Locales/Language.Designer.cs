@@ -259,6 +259,15 @@ namespace XIVModExplorer.Locales {
         }
         
         /// <summary>
+        ///   Sucht eine lokalisierte Zeichenfolge, die Check preview pics in DB ähnelt.
+        /// </summary>
+        public static string Menu_Settings_CheckPreviews {
+            get {
+                return ResourceManager.GetString("Menu_Settings_CheckPreviews", resourceCulture);
+            }
+        }
+        
+        /// <summary>
         ///   Sucht eine lokalisierte Zeichenfolge, die Set Mod Archive Path ähnelt.
         /// </summary>
         public static string Menu_Settings_ModPath {
